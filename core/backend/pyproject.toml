@@ -1,0 +1,19 @@
+[project]
+name = "vvwa-backend"
+version = "0.1.0"
+description = "FastAPI backend engine for Visual Vulnerable Web App (VVWA)."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "asyncpg==0.32.0",
+  "fastapi==0.165.0",
+  "pydantic==2.14.4",
+  "pydantic-settings==2.16.3",
+  "uvicorn[standard]==0.54.0",
+]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]

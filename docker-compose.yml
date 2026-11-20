@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16.11-alpine
+    container_name: vvwa-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-minishop}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_local_dev}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ./core/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./core/postgres/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - vvwa_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-minishop}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: core/backend/Dockerfile
+    container_name: vvwa-backend
+    environment:
+      VVWA_ENVIRONMENT: ${VVWA_ENVIRONMENT:-local}
+      VVWA_CORS_ORIGINS: ${VVWA_CORS_ORIGINS:-http://localhost:5173}
+      VVWA_DATABASE_URL: ${VVWA_DATABASE_URL:-postgresql://lab_app_user:lab_app_pass@postgres:5432/minishop}
+      VVWA_ADMIN_DATABASE_URL: ${VVWA_ADMIN_DATABASE_URL:-postgresql://lab_admin_user:lab_admin_pass@postgres:5432/minishop}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./core/backend/app:/app/core/backend/app
+      - ./core/postgres/seed.sql:/app/core/postgres/seed.sql:ro
+      - ./labs:/app/labs
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  frontend:
+    build:
+      context: .
+      dockerfile: core/frontend/Dockerfile
+    container_name: vvwa-frontend
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8000
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./core/frontend/src:/app/core/frontend/src
+      - ./labs:/app/labs
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  vvwa_pg_data:
