@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+:root {
+  /* Semantic Security Tokens (SSOT from docs/05-design-system.md) */
+  --color-danger: #ef4444;
+  --color-danger-soft: rgba(239, 68, 68, 0.16);
+  --color-safe: #10b981;
+  --color-safe-soft: rgba(16, 185, 129, 0.16);
+  --color-warning: #f59e0b;
+  --color-warning-soft: rgba(245, 158, 11, 0.16);
+  --color-info: #3b82f6;
+  --color-info-soft: rgba(59, 130, 246, 0.16);
+  --color-brand: #4f46e5;
+  --color-brand-soft: rgba(79, 70, 229, 0.1);
+
+  /* Dual-Surface Pedagogy Tokens */
+  --bg-sandbox: #f8fafc;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-muted: #64748b;
+  --bg-ide: #0f172a;
+  --bg-ide-header: #1e293b;
+  --border-ide: #334155;
+
+  /* Typography */
+  --font-sans: 'Be Vietnam Pro', Inter, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-sandbox);
+  color: var(--text-primary);
+}

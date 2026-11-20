@@ -1,0 +1,113 @@
+[project]
+name = "vvwa-workspace"
+version = "0.1.0"
+description = "Visual Vulnerable Web App (VVWA) monorepo workspace and quality tooling."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[tool.uv.workspace]
+members = ["core/backend"]
+
+[dependency-groups]
+dev = [
+  "vvwa-backend",
+  "httpx==0.28.1",
+  "mypy==2.4.1",
+  "pre-commit==4.7.0",
+  "pytest==9.2.0",
+  "pytest-asyncio==1.5.0",
+  "pytest-cov==7.1.0",
+  "ruff==0.17.6",
+]
+
+[tool.uv.sources]
+vvwa-backend = { workspace = true }
+
+[tool.vvwa.quality]
+max_lines_per_file = 350
+warn_lines_per_file = 280
+source_roots = ["core", "labs", "scripts"]
+source_extensions = [".py", ".ts", ".tsx", ".css", ".sql"]
+exclude_dirs = ["node_modules", ".venv", "__pycache__", "dist", ".vite", ".mypy_cache", ".ruff_cache"]
+barrel_python_roots = ["core/backend/app", "scripts/quality"]
+barrel_frontend_dirs = [
+  "core/frontend/src/components",
+  "core/frontend/src/lib",
+  "core/frontend/src/types",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["node_modules", ".venv", "dist", "docs"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "scripts"]
+
+[tool.ruff.lint]
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # pyflakes
+  "I",    # isort
+  "UP",   # pyupgrade
+  "B",    # flake8-bugbear
+  "SIM",  # flake8-simplify
+  "C90",  # mccabe complexity
+  "N",    # pep8-naming
+  "ANN",  # flake8-annotations (strict type hints)
+  "D",    # pydocstyle (mandatory docstrings)
+  "PLR",  # pylint refactor (max args/branches/statements)
+  "RUF",  # ruff-specific rules
+  "TID",  # flake8-tidy-imports (relative/barrel discipline)
+  "S",    # flake8-bandit security checks
+]
+ignore = [
+  "D104", # allow concise barrel __init__.py if documented or clean; kept explicit in modules
+  "D203", # conflicts with D211
+  "D213", # conflicts with D212
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-args = 5
+max-branches = 12
+max-statements = 50
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**/*.py" = ["S101", "PLR2004"]
+"scripts/**/*.py" = ["S603", "S607"]
+# Intentional educational vulnerabilities are ONLY permitted inside vulnerable.py
+"labs/*/backend/vulnerable.py" = ["S608", "S105", "S106", "S324", "S501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+plugins = ["pydantic.mypy"]
+mypy_path = "core/backend"
+explicit_package_bases = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pytest.ini_options]
+testpaths = ["core/backend/tests", "scripts/tests"]
+pythonpath = ["core/backend", "."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-ra --strict-markers"

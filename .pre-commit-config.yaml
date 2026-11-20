@@ -1,0 +1,64 @@
+default_install_hook_types: [pre-commit, commit-msg, pre-push]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: no-commit-to-branch
+        args: ["--branch", "main"]
+
+  - repo: local
+    hooks:
+      - id: vvwa-file-limits
+        name: Enforce <= 350 lines per source file
+        entry: uv run python scripts/gates.py --check-file-limits
+        language: system
+        pass_filenames: false
+        files: \.(py|ts|tsx|css|sql)$
+
+      - id: vvwa-barrels
+        name: Enforce Python & TypeScript barrel boundaries
+        entry: uv run python scripts/gates.py --check-barrels
+        language: system
+        pass_filenames: false
+        files: \.(py|ts|tsx)$
+
+      - id: vvwa-ruff-check
+        name: Ruff lint (type hints, docstrings, complexity, security)
+        entry: uv run ruff check
+        language: system
+        types: [python]
+
+      - id: vvwa-ruff-format
+        name: Ruff format check
+        entry: uv run ruff format --check
+        language: system
+        types: [python]
+
+      - id: vvwa-docs-gate
+        name: Docs & ADR governance gate
+        entry: uv run python scripts/gates.py --gate docs
+        language: system
+        pass_filenames: false
+        files: \.md$
+
+      - id: vvwa-commit-msg
+        name: Enforce Conventional Commits
+        entry: uv run python scripts/gates.py --check-commit-msg
+        language: system
+        stages: [commit-msg]
+
+      - id: vvwa-branch-name
+        name: Enforce task branch naming convention
+        entry: uv run python scripts/gates.py --gate hygiene
+        language: system
+        pass_filenames: false
+        stages: [pre-commit, pre-push]
