@@ -14,7 +14,9 @@ labs/<id>-<slug>/
 │   ├── vulnerable.py  # File có lỗ hổng sư phạm (sinh viên mở trực tiếp để vá)
 │   └── secure.py      # Bản chuẩn áp dụng Safety Pattern
 └── frontend/
-    └── LabView.tsx    # Giao diện MiniShop Sandbox cho bài lab
+    ├── LabView.tsx    # Giao diện MiniShop Sandbox cho bài lab (không chứa sink)
+    ├── vulnerable.tsx # (Tùy chọn, đi theo cặp) Sink frontend có lỗ hổng sinh viên vá
+    └── secure.tsx     # (Tùy chọn, đi theo cặp) Sink frontend an toàn
 ```
 
-> **Lưu ý an toàn:** Chỉ đặt mã có lỗ hổng có chủ đích bên trong `labs/<id>/backend/vulnerable.py` và component sandbox tương ứng. Không tạo lỗ hổng trong `core/` hoặc `secure.py`.
+> **Lưu ý an toàn:** Chỉ đặt mã có lỗ hổng có chủ đích bên trong `labs/<id>/backend/vulnerable.py` và `labs/<id>/frontend/vulnerable.tsx`. Không tạo lỗ hổng trong `core/`, `LabView.tsx` hoặc các file `secure.*` ([ADR-0006](../docs/adr/0006-frontend-sink-grading-and-verify-matchers.md)).
