@@ -24,3 +24,5 @@ Thư mục này lưu giữ các **Quyết định Kiến trúc (ADR)** quan tr�
 | [0002](0002-frontend-typescript-and-design-system.md) | Nâng cấp Frontend sang Strict TypeScript & Tailwind CSS v4 | Accepted | 2026-11-21 |
 | [0003](0003-quality-gates-and-modular-boundaries.md) | Thiết lập Quality Gates phân luồng, giới hạn 350 LOC & Barrel Imports | Accepted | 2026-11-21 |
 | [0004](0004-frontend-workspace-architecture-and-lab-plugin-contract.md) | Kiến trúc Frontend Workspace, Lab Plugin Contract & Shiki Syntax Highlighting | Accepted | 2026-11-21 |
+| [0005](0005-lab-session-actor-context.md) | Ngữ cảnh Phiên đăng nhập (Session Actor) cho Handler Bài Lab | Accepted | 2026-11-21 |
+| [0006](0006-frontend-sink-grading-and-verify-matchers.md) | Chấm Bản vá phía Frontend (Sink Files) & Toán tử So khớp cho Test My Fix | Accepted | 2026-11-21 |

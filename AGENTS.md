@@ -17,7 +17,8 @@ visual-vulnerable-webapp/
 ```
 
 * **`core/` vs `labs/` separation:** Infrastructure belongs in `core/`. Student-editable vulnerable/secure lab logic belongs exclusively in `labs/<id>-<slug>/`.
-* **Security isolation rule:** Intentional vulnerabilities are **strictly forbidden** anywhere outside `labs/<id>/backend/vulnerable.py` and the corresponding lab sandbox view under `labs/<id>/frontend/`.
+* **Security isolation rule:** Intentional vulnerabilities are **strictly forbidden** anywhere outside `labs/<id>/backend/vulnerable.py` and `labs/<id>/frontend/vulnerable.tsx` (the optional frontend sink file, see [ADR-0006](docs/adr/0006-frontend-sink-grading-and-verify-matchers.md)). `LabView.tsx`, `secure.*`, and all of `core/` must stay free of intentional sinks.
+* **Lab session identity:** Handlers that need the logged-in user declare a `ctx` parameter and read `ctx.actor`; never derive identity from `payload` in `secure.py` (see [ADR-0005](docs/adr/0005-lab-session-actor-context.md)).
 
 ## 2. Non-Negotiable Code Quality Rules
 
