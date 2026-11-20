@@ -61,7 +61,9 @@ def classify_changed_files(paths: list[str]) -> set[GateName]:
     """
     gates: set[GateName] = {"hygiene"}
     for raw_path in paths:
-        normalized = raw_path.replace("\\", "/").lstrip("./")
+        normalized = raw_path.strip().replace("\\", "/")
+        while normalized.startswith("./"):
+            normalized = normalized.removeprefix("./")
         if not normalized:
             continue
         gates.update(_classify_single_path(normalized))

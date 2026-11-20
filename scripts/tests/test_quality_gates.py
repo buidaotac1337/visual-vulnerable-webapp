@@ -111,6 +111,15 @@ def test_classifier_routes_logic_and_infra_changes_precisely() -> None:
     }
 
 
+def test_classifier_keeps_leading_dot_in_hidden_infra_paths() -> None:
+    """Ensure dot-prefixed paths keep their dot and only a literal './' prefix is dropped."""
+    hidden_infra = [".github/workflows/ci.yml", ".env.example", ".dockerignore"]
+    for path in [*hidden_infra, ".pre-commit-config.yaml"]:
+        assert classify_changed_files([path]) == {"hygiene", "infra"}, path
+    assert classify_changed_files(["./.github/workflows/ci.yml"]) == {"hygiene", "infra"}
+    assert classify_changed_files([".\\core\\backend\\app\\main.py"]) == {"hygiene", "backend"}
+
+
 def test_commit_and_branch_validators() -> None:
     """Verify Conventional Commits and task branch naming validation."""
     assert validate_commit_message("feat(lab-01): add sql injection trace").passed
