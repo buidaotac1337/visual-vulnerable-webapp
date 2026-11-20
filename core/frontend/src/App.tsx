@@ -1,78 +1,101 @@
-import { useEffect, useState } from 'react';
 import type { JSX } from 'react';
 
-import { HealthBanner } from '@/components';
-import { fetchHealth } from '@/lib';
-import type { HealthResponse, LabMode } from '@/types';
+import { CodeInspector, LabWorkspace, SandboxPane, TopControlBar, VerifyModal } from '@/components';
+import { useLabWorkspace } from '@/hooks';
+import { computePipelineNodes } from '@/lib';
 
 /**
- * Root VVWA Dual-Surface Pedagogy shell demonstrating sandbox and IDE surfaces.
+ * Root VVWA Dual-Surface Pedagogy application shell connecting the workspace
+ * controller to TopControlBar, SandboxPane, CodeInspector, and VerifyModal.
  *
- * @returns Rendered root application layout.
+ * @returns Rendered root VVWA application element.
  */
 export function App(): JSX.Element {
-  const [mode, setMode] = useState<LabMode>('vulnerable');
-  const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    fetchHealth()
-      .then((payload) => {
-        if (active) {
-          setHealth(payload);
-          setErrorMessage(null);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setErrorMessage('API offline (skeleton preview)');
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+  const ws = useLabWorkspace();
+  const pipelineNodes = computePipelineNodes(
+    ws.playback.trace,
+    ws.playback.activeIndex,
+    ws.playback.status === 'playing' || ws.playback.status === 'paused',
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
-      <HealthBanner mode={mode} health={health} errorMessage={errorMessage} />
-      <main className="grid flex-1 grid-cols-1 md:grid-cols-2">
-        <section className="flex flex-col gap-4 bg-slate-50 p-6">
-          <h1 className="text-lg font-semibold text-slate-900">MiniShop Sandbox</h1>
-          <p className="text-sm text-slate-600">
-            Foundation boilerplate ready. Select a lab mode to preview dual-surface semantics.
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setMode('vulnerable')}
-              className="rounded-lg border border-red-500 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700"
-            >
-              Vulnerable
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('secure')}
-              className="rounded-lg border border-emerald-500 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700"
-            >
-              Secure
-            </button>
-          </div>
-        </section>
+      <TopControlBar
+        health={ws.health}
+        apiError={ws.apiError}
+        labs={ws.labs}
+        selectedLab={ws.selectedLab}
+        mode={ws.mode}
+        isResettingDb={ws.isResettingDb}
+        isVerifying={ws.isVerifying}
+        isDownloading={ws.isDownloading}
+        onSelectLab={ws.selectLab}
+        onChangeMode={ws.changeMode}
+        onResetDb={() => {
+          void ws.handleResetDb();
+        }}
+        onVerify={() => {
+          void ws.handleVerify();
+        }}
+        onDownloadSnippet={() => {
+          void ws.handleDownloadSnippet();
+        }}
+      />
 
-        <section className="flex flex-col gap-3 bg-slate-900 p-6 text-slate-100">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-            Code &amp; Trace Inspector
-          </h2>
-          <pre
-            className="rounded-lg border border-slate-700 bg-slate-950 p-4 text-xs text-slate-200"
-            style={{ fontFamily: 'var(--font-mono)' }}
-          >
-            {`# Active mode: ${mode}\n# Labs will mount here with live # @step highlighting.`}
-          </pre>
-        </section>
-      </main>
+      <LabWorkspace
+        mode={ws.mode}
+        notice={ws.notice}
+        leftPane={
+          <SandboxPane
+            isLoadingLabs={ws.isLoadingLabs}
+            lab={ws.selectedLab}
+            mode={ws.mode}
+            payload={ws.payload}
+            inputFlashSeq={ws.inputFlashSeq}
+            dbResetSeq={ws.dbResetSeq}
+            isExecuting={ws.isExecuting}
+            lastResponse={ws.lastResponse}
+            pipelineNodes={pipelineNodes}
+            onPayloadChange={ws.updatePayload}
+            onSelectSamplePayload={ws.applySamplePayload}
+            onExecute={ws.executeAction}
+            onSelectPipelineLayer={ws.selectPipelineLayer}
+          />
+        }
+        rightPane={
+          <CodeInspector
+            lab={ws.selectedLab}
+            mode={ws.mode}
+            activeTab={ws.activeTab}
+            source={ws.source}
+            sourceError={ws.sourceError}
+            isRefreshing={ws.isRefreshingSource}
+            totalSteps={ws.playback.trace.length}
+            activeIndex={ws.playback.activeIndex}
+            activeStep={ws.playback.activeStep}
+            playbackStatus={ws.playback.status}
+            onChangeTab={ws.setActiveTab}
+            onRefreshSource={() => {
+              void ws.refreshSource();
+            }}
+            onPrevStep={ws.playback.prevStep}
+            onReplayTrace={ws.playback.replay}
+            onNextStep={ws.playback.nextStep}
+          />
+        }
+      />
+
+      <VerifyModal
+        isOpen={ws.isVerifyModalOpen}
+        labTitle={ws.selectedLab?.title ?? ''}
+        isLoading={ws.isVerifying}
+        result={ws.verifyResult}
+        error={ws.verifyError}
+        onRerun={() => {
+          void ws.handleVerify();
+        }}
+        onClose={ws.closeVerifyModal}
+      />
     </div>
   );
 }

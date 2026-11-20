@@ -1,2 +1,36 @@
 /** Public barrel exports for shared frontend TypeScript types. */
-export type { HealthResponse, LabMode } from './health';
+export type { HealthResponse } from './health';
+export type {
+  LabExecutionMeta,
+  LabExecutionResponse,
+  LabListResponse,
+  LabMetadata,
+  LabMode,
+  ParsedSourceFile,
+  ResetDatabaseResponse,
+  SamplePayload,
+  LabSourceResponse,
+  TraceLayer,
+  TraceOutcome,
+  TraceStatus,
+  TraceStep,
+  VerifyLabResponse,
+  VerifyTestCase,
+  VerifyTestResult,
+} from './api';
+export type {
+  CodeToken,
+  DiffRow,
+  DiffRowKind,
+  ExecuteActionOptions,
+  HighlightLanguage,
+  InspectorTab,
+  LabPayload,
+  LabViewProps,
+  PipelineNodeModel,
+  PipelineVisualState,
+  PlaybackStatus,
+  StepHighlightTarget,
+  TraceStepDraft,
+  WorkspaceNotice,
+} from './workspace';

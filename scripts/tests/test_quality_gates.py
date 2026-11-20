@@ -102,7 +102,13 @@ def test_classifier_routes_logic_and_infra_changes_precisely() -> None:
     assert classify_changed_files(["core/frontend/src/App.tsx"]) == {"hygiene", "frontend"}
     assert classify_changed_files(["docker-compose.yml", ".dockerignore"]) == {"hygiene", "infra"}
     assert classify_changed_files(["labs/01-sql-injection/meta.json"]) == {"hygiene", "backend"}
-    assert classify_changed_files(["scripts/gates.py"]) == {"hygiene", "docs", "backend", "infra"}
+    assert classify_changed_files(["scripts/gates.py"]) == {
+        "hygiene",
+        "docs",
+        "backend",
+        "frontend",
+        "infra",
+    }
 
 
 def test_commit_and_branch_validators() -> None:

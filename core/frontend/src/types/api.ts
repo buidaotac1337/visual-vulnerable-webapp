@@ -1,0 +1,114 @@
+/** Allowed execution mode for MiniShop security labs. */
+export type LabMode = 'vulnerable' | 'secure';
+
+/** Architectural layer attached to a live execution trace step. */
+export type TraceLayer = 'frontend' | 'backend' | 'database';
+
+/** Semantic security color status for trace steps and pipeline nodes. */
+export type TraceStatus = 'info' | 'warning' | 'danger' | 'safe';
+
+/** High-level pedagogical outcome returned by a lab action. */
+export type TraceOutcome = 'exploited' | 'blocked' | 'normal' | 'error';
+
+/** One-click pedagogical payload button defined in a lab's meta.json. */
+export interface SamplePayload {
+  label: string;
+  description: string;
+  data: Record<string, unknown>;
+}
+
+/** Single automated assertion defined in meta.json verifyTests. */
+export interface VerifyTestCase {
+  name: string;
+  action: string;
+  input: Record<string, unknown>;
+  expect: Record<string, unknown>;
+}
+
+/**
+ * Validated lab metadata returned by GET /api/labs.
+ * Uses camelCase aliases emitted by FastAPI response_model_by_alias=True.
+ */
+export interface LabMetadata {
+  id: string;
+  title: string;
+  category: string;
+  difficulty: string;
+  summary: string;
+  safetyPattern: string;
+  samplePayloads: SamplePayload[];
+  verifyTests: VerifyTestCase[];
+}
+
+/** Response envelope returned by GET /api/labs. */
+export interface LabListResponse {
+  labs: LabMetadata[];
+}
+
+/** Single sequential step driving live FlowPipeline and CodeInspector glow. */
+export interface TraceStep {
+  step: number;
+  layer: TraceLayer;
+  tag: string;
+  status: TraceStatus;
+  title: string;
+  detail: string;
+}
+
+/** Execution context metadata inside POST /api/labs/{id}/{mode}/{action}. */
+export interface LabExecutionMeta {
+  lab_id: string;
+  mode: LabMode;
+  outcome: TraceOutcome;
+}
+
+/** Unified response envelope from POST /api/labs/{id}/{mode}/{action}. */
+export interface LabExecutionResponse {
+  ok: boolean;
+  data: Record<string, unknown>;
+  meta: LabExecutionMeta;
+  trace: TraceStep[];
+}
+
+/** Cleaned source snippet and @step tag-to-line map from GET /api/labs/{id}/source. */
+export interface ParsedSourceFile {
+  code: string;
+  steps: Record<string, number>;
+  line_count: number;
+}
+
+/** Response envelope returned by GET /api/labs/{id}/source. */
+export interface LabSourceResponse {
+  lab_id: string;
+  vulnerable: ParsedSourceFile;
+  secure: ParsedSourceFile;
+  frontend: ParsedSourceFile | null;
+  diff: string;
+}
+
+/** Outcome of one automated verification test case from POST /api/labs/{id}/verify. */
+export interface VerifyTestResult {
+  name: string;
+  action: string;
+  passed: boolean;
+  expected: Record<string, unknown>;
+  actual: Record<string, unknown>;
+  error: string | null;
+}
+
+/** Aggregate verification report returned by POST /api/labs/{id}/verify. */
+export interface VerifyLabResponse {
+  ok: boolean;
+  lab_id: string;
+  passed: boolean;
+  total: number;
+  passed_count: number;
+  results: VerifyTestResult[];
+}
+
+/** Confirmation response returned by POST /api/system/reset-db. */
+export interface ResetDatabaseResponse {
+  ok: boolean;
+  message: string;
+  duration_ms: number;
+}
