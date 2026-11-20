@@ -1,5 +1,20 @@
-"""Public barrel exports for backend core configuration."""
+"""Public barrel exports for backend core configuration and domain errors."""
 
 from app.core.config import Settings, get_settings
+from app.core.errors import (
+    ActionNotFoundError,
+    DatabaseUnavailableError,
+    InvalidLabIdError,
+    LabNotFoundError,
+    VvwaError,
+)
 
-__all__ = ["Settings", "get_settings"]
+__all__ = [
+    "ActionNotFoundError",
+    "DatabaseUnavailableError",
+    "InvalidLabIdError",
+    "LabNotFoundError",
+    "Settings",
+    "VvwaError",
+    "get_settings",
+]
