@@ -21,7 +21,7 @@ const MOCK_HEALTH: HealthResponse = {
 const MOCK_LABS: LabListResponse = {
   labs: [
     {
-      id: '01-sql-injection',
+      id: '99-demo-sqli',
       title: 'SQL Injection — Đăng nhập MiniShop',
       category: 'Injection',
       difficulty: 'Cơ bản',
@@ -52,7 +52,7 @@ const MOCK_LABS: LabListResponse = {
 };
 
 const MOCK_SOURCE: LabSourceResponse = {
-  lab_id: '01-sql-injection',
+  lab_id: '99-demo-sqli',
   vulnerable: {
     code: 'async def login(payload, db):\n    sql = f"SELECT * FROM users WHERE username = \'{u}\'"\n    return sql',
     steps: { 'build-query': 2 },
@@ -78,7 +78,7 @@ const MOCK_SOURCE: LabSourceResponse = {
 const MOCK_EXEC: LabExecutionResponse = {
   ok: true,
   data: { logged_in: true, user: { username: 'admin', role: 'admin' } },
-  meta: { lab_id: '01-sql-injection', mode: 'vulnerable', outcome: 'exploited' },
+  meta: { lab_id: '99-demo-sqli', mode: 'vulnerable', outcome: 'exploited' },
   trace: [
     {
       step: 1,
@@ -93,7 +93,7 @@ const MOCK_EXEC: LabExecutionResponse = {
 
 const MOCK_VERIFY: VerifyLabResponse = {
   ok: true,
-  lab_id: '01-sql-injection',
+  lab_id: '99-demo-sqli',
   passed: true,
   total: 1,
   passed_count: 1,
@@ -156,13 +156,13 @@ describe('VVWA Frontend Workspace', () => {
       if (input === '/api/labs') {
         return makeJsonResponse(MOCK_LABS);
       }
-      if (input === '/api/labs/01-sql-injection/source') {
+      if (input === '/api/labs/99-demo-sqli/source') {
         return makeJsonResponse(MOCK_SOURCE);
       }
-      if (input === '/api/labs/01-sql-injection/vulnerable/login') {
+      if (input === '/api/labs/99-demo-sqli/vulnerable/login') {
         return makeJsonResponse(MOCK_EXEC);
       }
-      if (input === '/api/labs/01-sql-injection/verify?reset_db=true') {
+      if (input === '/api/labs/99-demo-sqli/verify?reset_db=true') {
         return makeJsonResponse(MOCK_VERIFY);
       }
       if (input === '/api/system/reset-db') {
@@ -206,7 +206,7 @@ describe('VVWA Frontend Workspace', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Test My Fix' }));
     expect(await screen.findByText(/1 \/ 1 PASS/)).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
-      '/api/labs/01-sql-injection/verify?reset_db=true',
+      '/api/labs/99-demo-sqli/verify?reset_db=true',
       expect.objectContaining({ method: 'POST' }),
     );
     fireEvent.click(screen.getByRole('button', { name: 'Đóng' }));

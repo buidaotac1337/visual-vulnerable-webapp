@@ -98,7 +98,10 @@ function renderInspectorBody(
   }
   if (!source) {
     return (
-      <div className="p-6 text-xs text-slate-400" style={{ fontFamily: 'var(--font-mono)' }}>
+      <div
+        className="whitespace-pre-line p-6 text-xs text-slate-400"
+        style={{ fontFamily: 'var(--font-mono)' }}
+      >
         {`# Code & Trace Inspector (${mode})\n# Chọn bài lab để xem mã nguồn trực tiếp với hiệu ứng sáng đèn # @step.`}
       </div>
     );

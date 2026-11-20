@@ -39,7 +39,7 @@ Quá trình đánh giá mở rộng trước triển khai chỉ ra 4 quyết đ�
    * Thêm `core/frontend/src/hooks` vào `[tool.vvwa.quality].barrel_frontend_dirs` trong `pyproject.toml`, chặn deep-import `@/hooks/*` trong `core/frontend/eslint.config.js` và cập nhật `AGENTS.md`.
 4. **Thống nhất hình học thư mục `labs/` trong Frontend Gate & Hot Reload Backend:**
    * Cập nhật Docker fallback trong `scripts/quality/runners.py` mount `/app/core/frontend` và `/app/labs` với `-w /app/core/frontend`.
-   * Mở rộng `core/frontend/tsconfig.app.json` (`include`) và scripts `lint` / `format:check` sang `../../labs/*/frontend`.
+   * Mở rộng `core/frontend/tsconfig.app.json` (`include` và `paths` fallback `@types/*` → `node_modules/*`), thêm `resolveLabDepsPlugin` trong `vite.config.ts`/`vitest.config.ts`, thêm `@source '../../../../labs';` trong `tokens.css` cho Tailwind CSS v4, và mở scripts `lint` / `format:check` sang `labs/*/frontend`.
    * Gỡ `--reload-dir /app/labs` khỏi `core/backend/Dockerfile` vì `lab_loader.py` đã nạp mới trực tiếp từ đĩa ở mỗi request, tránh Uvicorn khởi động lại worker khi sinh viên lưu bài lab.
 
 ## Consequences
