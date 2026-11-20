@@ -23,3 +23,4 @@ Thư mục này lưu giữ các **Quyết định Kiến trúc (ADR)** quan tr�
 | [0001](0001-uv-workspace-and-pinned-dependencies.md) | Sử dụng Python `uv` Workspace & Pin Exact Version toàn bộ Stack | Accepted | 2026-11-21 |
 | [0002](0002-frontend-typescript-and-design-system.md) | Nâng cấp Frontend sang Strict TypeScript & Tailwind CSS v4 | Accepted | 2026-11-21 |
 | [0003](0003-quality-gates-and-modular-boundaries.md) | Thiết lập Quality Gates phân luồng, giới hạn 350 LOC & Barrel Imports | Accepted | 2026-11-21 |
+| [0004](0004-frontend-workspace-architecture-and-lab-plugin-contract.md) | Kiến trúc Frontend Workspace, Lab Plugin Contract & Shiki Syntax Highlighting | Accepted | 2026-11-21 |

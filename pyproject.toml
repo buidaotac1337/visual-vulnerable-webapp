@@ -33,6 +33,7 @@ exclude_dirs = ["node_modules", ".venv", "__pycache__", "dist", ".vite", ".mypy_
 barrel_python_roots = ["core/backend/app", "scripts/quality"]
 barrel_frontend_dirs = [
   "core/frontend/src/components",
+  "core/frontend/src/hooks",
   "core/frontend/src/lib",
   "core/frontend/src/types",
 ]

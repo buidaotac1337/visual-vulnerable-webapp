@@ -35,8 +35,10 @@ def _classify_single_path(normalized: str) -> set[GateName]:
         or (normalized.startswith("labs/") and normalized.endswith("/meta.json"))
     ):
         gates.add("backend")
-    if normalized.startswith("core/frontend/") or (
-        normalized.startswith("labs/") and "/frontend/" in normalized
+    if (
+        normalized.startswith(("core/frontend/", "scripts/"))
+        or normalized == "pyproject.toml"
+        or (normalized.startswith("labs/") and "/frontend/" in normalized)
     ):
         gates.add("frontend")
     if (

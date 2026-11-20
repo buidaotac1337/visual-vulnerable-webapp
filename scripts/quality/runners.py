@@ -211,25 +211,31 @@ def _run_frontend_gate(repo_root: Path) -> bool:
         ]
         return all(run_command(cmd, cwd=frontend_dir) for cmd in commands)
 
+    labs_dir = repo_root / "labs"
     script = (
         f"corepack enable && corepack prepare pnpm@{PINNED_PNPM_VERSION} --activate && "
-        "pnpm install --frozen-lockfile && pnpm lint && pnpm format:check && "
-        "pnpm typecheck && pnpm test && pnpm exec vite build --outDir /tmp/vvwa-dist"
+        "pnpm install --frozen-lockfile --store-dir /pnpm/store && pnpm lint && "
+        "pnpm format:check && pnpm typecheck && pnpm test && "
+        "pnpm exec vite build --outDir /tmp/vvwa-dist"
     )
     docker_cmd = [
         "docker",
         "run",
         "--rm",
         "-e",
-        "PNPM_STORE_DIR=/pnpm/store",
+        "CI=true",
+        "-e",
+        "npm_config_store_dir=/pnpm/store",
         "-v",
-        f"{frontend_dir.as_posix()}:/workspace",
+        f"{frontend_dir.as_posix()}:/app/core/frontend",
         "-v",
-        "vvwa_frontend_node_modules:/workspace/node_modules",
+        f"{labs_dir.as_posix()}:/app/labs",
+        "-v",
+        "vvwa_frontend_node_modules:/app/core/frontend/node_modules",
         "-v",
         "vvwa_pnpm_store:/pnpm/store",
         "-w",
-        "/workspace",
+        "/app/core/frontend",
         PINNED_NODE_IMAGE,
         "sh",
         "-c",

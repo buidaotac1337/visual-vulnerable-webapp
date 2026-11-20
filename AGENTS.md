@@ -27,7 +27,7 @@ visual-vulnerable-webapp/
    * Keep routers thin, move domain logic into focused services, centralize schemas/constants in one place (SSOT), and keep McCabe complexity `<= 10`.
 3. **Mandatory Barrel Imports:**
    * **Python:** Every package under `core/backend/app/*` and `scripts/quality` MUST expose `__init__.py` with an explicit `__all__`. Never bypass a sibling package's barrel (e.g., use `from app.schemas import HealthResponse`, NOT `from app.schemas.health import HealthResponse`).
-   * **Frontend (TypeScript):** Every module folder under `core/frontend/src/{components,lib,types}` MUST expose `index.ts`. Import via barrel aliases (`@/components`, `@/lib`, `@/types`); deep imports (`@/components/foo/bar`) are blocked by ESLint.
+   * **Frontend (TypeScript):** Every module folder under `core/frontend/src/{components,hooks,lib,types}` MUST expose `index.ts`. Import via barrel aliases (`@/components`, `@/hooks`, `@/lib`, `@/types`); deep imports (`@/components/foo/bar`) are blocked by ESLint.
 4. **Full Type Hinting & Docstrings:**
    * **Python:** Must pass `mypy --strict` and Ruff `ANN` (all params/returns typed) + `D` (Google-style docstrings on modules, classes, and functions).
    * **Frontend:** Must pass `tsc --noEmit` (`strict: true`, `noUncheckedIndexedAccess: true`), ESLint `explicit-function-return-type`, and JSDoc/TSDoc on exported symbols.

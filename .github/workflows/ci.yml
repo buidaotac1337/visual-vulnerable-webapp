@@ -48,6 +48,8 @@ jobs:
             frontend:
               - 'core/frontend/**'
               - 'labs/*/frontend/**'
+              - 'scripts/**'
+              - 'pyproject.toml'
             infra:
               - 'docker-compose.yml'
               - '**/Dockerfile'

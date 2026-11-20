@@ -6,7 +6,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'coverage', '.pnpm-store'] },
+  { ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/.pnpm-store/**'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.strict],
     files: ['**/*.{ts,tsx}'],
@@ -45,11 +45,15 @@ export default tseslint.config(
             {
               group: [
                 '@/components/*',
+                '@/hooks/*',
                 '@/lib/*',
                 '@/types/*',
                 './components/*',
                 '../components/*',
                 '../../components/*',
+                './hooks/*',
+                '../hooks/*',
+                '../../hooks/*',
                 './lib/*',
                 '../lib/*',
                 '../../lib/*',
@@ -57,7 +61,8 @@ export default tseslint.config(
                 '../types/*',
                 '../../types/*',
               ],
-              message: 'Import from the module barrel (@/components, @/lib, @/types) instead.',
+              message:
+                'Import from the module barrel (@/components, @/hooks, @/lib, @/types) instead.',
             },
           ],
         },

@@ -5,6 +5,3 @@ export interface HealthResponse {
   version: string;
   environment: string;
 }
-
-/** Allowed execution mode for MiniShop security labs. */
-export type LabMode = 'vulnerable' | 'secure';
