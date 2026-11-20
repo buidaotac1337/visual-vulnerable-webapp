@@ -2,9 +2,11 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
-/** Vitest configuration using jsdom and shared @/ barrel path alias. */
+import { resolveLabDepsPlugin } from './vite.config';
+
+/** Vitest configuration using jsdom, labs/ dependency resolution, and @/ barrel alias. */
 export default defineConfig({
-  plugins: [react()],
+  plugins: [resolveLabDepsPlugin(), react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

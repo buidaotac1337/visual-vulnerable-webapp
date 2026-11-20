@@ -133,8 +133,13 @@ describe('VVWA Workspace advanced flows', () => {
 
     // Manual tab switching to Frontend (.tsx) must NOT snap back to Backend (.py)
     const feTab = screen.getByRole('tab', { name: 'Frontend (.tsx)' });
+    await waitFor(() => {
+      expect(feTab).toBeEnabled();
+    });
     fireEvent.click(feTab);
-    expect(feTab).toHaveAttribute('aria-selected', 'true');
+    await waitFor(() => {
+      expect(feTab).toHaveAttribute('aria-selected', 'true');
+    });
 
     // Switch to Diff tab, then click FastAPI pipeline node -> must escape Diff back to Backend
     fireEvent.click(screen.getByRole('tab', { name: 'Diff' }));

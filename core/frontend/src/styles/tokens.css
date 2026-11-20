@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source '../../../../labs';
 
 :root {
   /* Semantic Security Tokens (SSOT from docs/05-design-system.md) */

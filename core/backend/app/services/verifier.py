@@ -77,8 +77,9 @@ async def _run_single_test(
             error=str(exc),
         )
 
-    if not response.ok:
-        error_msg = str(response.data.get("error", "Lab handler execution failed."))
+    if not response.ok or response.meta.outcome == "error":
+        raw_error = response.data.get("error") or response.data.get("sql_error")
+        error_msg = str(raw_error) if raw_error else "Lab handler reported an execution error."
         return VerifyTestResult(
             name=test_case.name,
             action=test_case.action,

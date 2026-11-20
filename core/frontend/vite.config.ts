@@ -2,10 +2,48 @@ import path from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import type { Plugin } from 'vite';
 
-/** Vite configuration with @/ path alias and FastAPI /api proxy. */
+const FRONTEND_ENTRY = path.resolve(__dirname, 'src/main.tsx');
+const LABS_DIR_PREFIX = `${path.resolve(__dirname, '../../labs').replaceAll('\\', '/')}/`;
+const WINDOWS_DRIVE_RE = /^[a-zA-Z]:[\\/]/;
+
+function isBareSpecifier(source: string): boolean {
+  return !(
+    source.startsWith('.') ||
+    source.startsWith('/') ||
+    source.startsWith('@/') ||
+    source.startsWith('\0') ||
+    source.startsWith('node:') ||
+    source.startsWith('virtual:') ||
+    path.isAbsolute(source) ||
+    WINDOWS_DRIVE_RE.test(source)
+  );
+}
+
+/**
+ * Resolve bare npm imports inside repo-root labs/ against core/frontend/node_modules.
+ *
+ * @returns Vite plugin redirecting bare specifiers from labs/ to core/frontend dependencies.
+ */
+export function resolveLabDepsPlugin(): Plugin {
+  return {
+    name: 'vvwa-resolve-lab-deps',
+    resolveId(source, importer) {
+      if (!importer || !isBareSpecifier(source)) {
+        return null;
+      }
+      if (importer.replaceAll('\\', '/').startsWith(LABS_DIR_PREFIX)) {
+        return this.resolve(source, FRONTEND_ENTRY, { skipSelf: true });
+      }
+      return null;
+    },
+  };
+}
+
+/** Vite configuration with @/ path alias, labs/ dependency resolution, and FastAPI /api proxy. */
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [resolveLabDepsPlugin(), react(), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

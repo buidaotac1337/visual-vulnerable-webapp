@@ -1,0 +1,113 @@
+{
+  "id": "01-sql-injection",
+  "title": "SQL Injection — Đăng nhập & Tìm kiếm MiniShop",
+  "category": "Injection",
+  "difficulty": "Cơ bản",
+  "summary": "Khai thác lỗi nối chuỗi f-string vào câu lệnh SQL để vượt qua bước đăng nhập Admin và dùng UNION SELECT trích xuất mật khẩu từ bảng users.",
+  "safetyPattern": "Sử dụng Parameterized Query ($1, $2 với asyncpg) để tách biệt hoàn toàn cấu trúc câu lệnh SQL khỏi dữ liệu đầu vào của người dùng.",
+  "samplePayloads": [
+    {
+      "label": "Bypass Admin Login",
+      "description": "Biến điều kiện WHERE thành luôn đúng và comment phần kiểm tra mật khẩu bằng --.",
+      "data": {
+        "tab": "login",
+        "username": "' OR 1=1--",
+        "password": "any"
+      }
+    },
+    {
+      "label": "Đăng nhập thường (alice)",
+      "description": "Kiểm tra luồng đăng nhập hợp lệ với tài khoản khách hàng alice.",
+      "data": {
+        "tab": "login",
+        "username": "alice",
+        "password": "password123"
+      }
+    },
+    {
+      "label": "UNION Dump bảng Users",
+      "description": "Tiêm UNION SELECT vào ô tìm kiếm sản phẩm để rút toàn bộ email và password_hash từ bảng users.",
+      "data": {
+        "tab": "search",
+        "keyword": "' AND 1=0 UNION SELECT id, username, email || ':' || password_hash, balance, 0 FROM users--"
+      }
+    },
+    {
+      "label": "Tìm kiếm sản phẩm thường",
+      "description": "Tìm kiếm sản phẩm hợp lệ trên MiniShop với từ khóa 'Ban phim'.",
+      "data": {
+        "tab": "search",
+        "keyword": "Ban phim"
+      }
+    }
+  ],
+  "verifyTests": [
+    {
+      "name": "Tài khoản hợp lệ (alice) vẫn đăng nhập được",
+      "action": "login",
+      "input": {
+        "username": "alice",
+        "password": "password123"
+      },
+      "expect": {
+        "logged_in": true,
+        "user": {
+          "username": "alice",
+          "role": "customer"
+        }
+      }
+    },
+    {
+      "name": "Chặn payload SQLi vượt đăng nhập qua Username",
+      "action": "login",
+      "input": {
+        "username": "' OR 1=1--",
+        "password": "wrong"
+      },
+      "expect": {
+        "logged_in": false
+      }
+    },
+    {
+      "name": "Chặn payload SQLi vượt đăng nhập qua Password",
+      "action": "login",
+      "input": {
+        "username": "admin",
+        "password": "' OR '1'='1"
+      },
+      "expect": {
+        "logged_in": false
+      }
+    },
+    {
+      "name": "Tìm kiếm sản phẩm hợp lệ vẫn trả đúng kết quả",
+      "action": "search_products",
+      "input": {
+        "keyword": "Ban phim"
+      },
+      "expect": {
+        "count": 1
+      }
+    },
+    {
+      "name": "Xử lý an toàn dấu nháy đơn hợp lệ (O'Reilly) không gây lỗi SQL",
+      "action": "search_products",
+      "input": {
+        "keyword": "O'Reilly"
+      },
+      "expect": {
+        "count": 0
+      }
+    },
+    {
+      "name": "Chặn payload UNION SELECT trích xuất bảng users",
+      "action": "search_products",
+      "input": {
+        "keyword": "' AND 1=0 UNION SELECT id, username, email || ':' || password_hash, balance, 0 FROM users--"
+      },
+      "expect": {
+        "count": 0
+      }
+    }
+  ]
+}
