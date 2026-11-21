@@ -28,6 +28,12 @@ export interface BackendVerifyTestCase {
   expect: Record<string, unknown>;
   /** Persona whose session the backend handler receives via ctx (ADR-0005). */
   actor?: string | null;
+  /** Number of concurrent requests to fire for race-condition verification (ADR-0008). */
+  concurrency?: number;
+  /** Optional follow-up action run after the primary call(s) to inspect DB state (ADR-0008). */
+  checkAction?: string | null;
+  /** Input payload passed to checkAction (ADR-0008). */
+  checkInput?: Record<string, unknown>;
 }
 
 /** Frontend assertion rendered from frontend/vulnerable.tsx in an inert document (ADR-0006). */

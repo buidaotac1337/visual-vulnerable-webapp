@@ -4,6 +4,7 @@ import io
 import re
 import shutil
 import zipfile
+from contextlib import AbstractAsyncContextManager, nullcontext
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -71,6 +72,10 @@ class _UsersDb:
             value = args[int(index) - 1]
             user[column] = float(Decimal(str(value))) if column == "balance" else value
         return "UPDATE 1"
+
+    def transaction(self) -> AbstractAsyncContextManager[LabDatabaseProtocol]:
+        """Return a no-op async transaction context for protocol compliance."""
+        return nullcontext(self)
 
 
 class _StubDatabaseManager(DatabaseManager):

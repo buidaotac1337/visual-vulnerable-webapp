@@ -1,6 +1,7 @@
 """Tests for the ADR-0005 session actor: header parsing, ctx injection, trace, verify."""
 
 import json
+from contextlib import AbstractAsyncContextManager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -77,6 +78,10 @@ class _UsersDb:
         """Return a synthetic status tag."""
         _ = (query, args)
         return "OK"
+
+    def transaction(self) -> AbstractAsyncContextManager[LabDatabaseProtocol]:
+        """Return a no-op async transaction context for protocol compliance."""
+        return nullcontext(self)
 
 
 class _Manager(DatabaseManager):

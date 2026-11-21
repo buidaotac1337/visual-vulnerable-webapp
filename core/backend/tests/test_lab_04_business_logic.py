@@ -3,6 +3,7 @@
 import io
 import shutil
 import zipfile
+from contextlib import AbstractAsyncContextManager, nullcontext
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -81,6 +82,10 @@ class _ShopDb:
         assert query.startswith("INSERT INTO order_items")
         self.items.append(args)
         return "INSERT 0 1"
+
+    def transaction(self) -> AbstractAsyncContextManager[LabDatabaseProtocol]:
+        """Return a no-op async transaction context for protocol compliance."""
+        return nullcontext(self)
 
 
 class _StubDatabaseManager(DatabaseManager):

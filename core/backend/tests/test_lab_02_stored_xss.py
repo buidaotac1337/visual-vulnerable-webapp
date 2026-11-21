@@ -3,6 +3,7 @@
 import copy
 import io
 import zipfile
+from contextlib import AbstractAsyncContextManager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -81,6 +82,10 @@ class _ReviewsDb:
         """Unused by Lab 02."""
         _ = (query, args)
         return "OK"
+
+    def transaction(self) -> AbstractAsyncContextManager[LabDatabaseProtocol]:
+        """Return a no-op async transaction context for protocol compliance."""
+        return nullcontext(self)
 
 
 class _StubDatabaseManager(DatabaseManager):
