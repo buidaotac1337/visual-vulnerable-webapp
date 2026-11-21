@@ -1,5 +1,7 @@
 import type { JSX } from 'react';
-import { CircleCheck, CircleX, ShieldAlert } from 'lucide-react';
+import { CircleCheck, CircleX } from 'lucide-react';
+
+import { ResultNotice } from '@/components';
 
 import { abuseNote, formatMoney } from './cartData';
 import type { CheckoutResult, Product } from './cartData';
@@ -21,10 +23,12 @@ export function CheckoutSummary({ result, products }: CheckoutSummaryProps): JSX
   }
   if (!result.placed) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
-        <CircleX className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
-        <span>{result.error ?? 'Thanh toán không thành công.'}</span>
-      </div>
+      <ResultNotice
+        tone="neutral"
+        icon={<CircleX className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />}
+      >
+        {result.error ?? 'Thanh toán không thành công.'}
+      </ResultNotice>
     );
   }
   const note = abuseNote(result, products);
@@ -40,12 +44,7 @@ export function CheckoutSummary({ result, products }: CheckoutSummaryProps): JSX
           Đặt hàng thành công: đơn #{result.orderId}, tổng {formatMoney(total)}
         </span>
       </p>
-      {note && (
-        <p role="alert" className="flex items-center gap-1.5 font-semibold text-danger-700">
-          <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>{note}</span>
-        </p>
-      )}
+      {note && <ResultNotice tone="danger">{note}</ResultNotice>}
       <ul className="flex flex-col gap-1 border-t border-slate-200 pt-2 text-slate-700">
         {result.lines.map((line, index) => (
           <li

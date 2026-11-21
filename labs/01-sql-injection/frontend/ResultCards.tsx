@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { AlertTriangle, UserCheck } from 'lucide-react';
 
+import { ResultNotice } from '@/components';
 import type { LabExecutionResponse } from '@/types';
 
 interface UserRecord {
@@ -25,18 +26,11 @@ function readSqlError(response: LabExecutionResponse | null): string | null {
 
 function renderSqlErrorBanner(message: string): JSX.Element {
   return (
-    <div
-      role="alert"
-      className="rounded-lg border border-warning-300 bg-warning-50 p-3 text-xs text-warning-900"
-    >
-      <div className="flex items-center gap-1.5 font-semibold">
-        <AlertTriangle className="h-4 w-4 shrink-0 text-warning-600" aria-hidden="true" />
-        <span>Lỗi cú pháp SQL (Error-based SQLi)</span>
-      </div>
-      <p className="mt-1 break-all text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
+    <ResultNotice tone="warning" title="Lỗi cú pháp SQL (Error-based SQLi)">
+      <p className="break-all text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
         {message}
       </p>
-    </div>
+    </ResultNotice>
   );
 }
 
@@ -100,9 +94,7 @@ export function LoginResultCard({
   const user = parseUserRecord(response);
   if (!user) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-        Đăng nhập thất bại — sai tài khoản hoặc mật khẩu.
-      </div>
+      <ResultNotice tone="neutral">Đăng nhập thất bại — sai tài khoản hoặc mật khẩu.</ResultNotice>
     );
   }
   const isExploited = response.meta.outcome === 'exploited';
@@ -125,16 +117,13 @@ export function LoginResultCard({
         </p>
       </div>
       {isExploited && (
-        <p
-          role="alert"
-          className="flex items-start gap-1.5 rounded-lg border border-danger-300 bg-danger-50 p-3 text-xs font-semibold text-danger-800"
+        <ResultNotice
+          tone="danger"
+          icon={<AlertTriangle className="h-4 w-4 shrink-0 text-danger-600" aria-hidden="true" />}
         >
-          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>
-            Đăng nhập vào tài khoản {user.username} mà không cần mật khẩu đúng: payload đã thay đổi
-            điều kiện WHERE của câu truy vấn đăng nhập.
-          </span>
-        </p>
+          Đăng nhập vào tài khoản {user.username} mà không cần mật khẩu đúng: payload đã thay đổi
+          điều kiện WHERE của câu truy vấn đăng nhập.
+        </ResultNotice>
       )}
     </div>
   );
@@ -160,26 +149,19 @@ export function SearchResultList({
     return renderSqlErrorBanner(sqlError);
   }
   if (products.length === 0) {
-    return (
-      <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-        Không tìm thấy sản phẩm nào khớp từ khóa.
-      </div>
-    );
+    return <ResultNotice tone="neutral">Không tìm thấy sản phẩm nào khớp từ khóa.</ResultNotice>;
   }
   const leaked = readLeakedRows(response);
   return (
     <div className="flex flex-col gap-2">
       {leaked.size > 0 && (
-        <p
-          role="alert"
-          className="flex items-start gap-1.5 rounded-lg border border-danger-300 bg-danger-50 p-3 text-xs font-semibold text-danger-800"
+        <ResultNotice
+          tone="danger"
+          icon={<AlertTriangle className="h-4 w-4 shrink-0 text-danger-600" aria-hidden="true" />}
         >
-          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>
-            {leaked.size} dòng bên dưới không phải sản phẩm: dữ liệu từ bảng hoặc truy vấn khác bị
-            kéo ra qua UNION SELECT.
-          </span>
-        </p>
+          {leaked.size} dòng bên dưới không phải sản phẩm: dữ liệu từ bảng hoặc truy vấn khác bị kéo
+          ra qua UNION SELECT.
+        </ResultNotice>
       )}
       {products.map((item, idx) => {
         const isLeakedRow = leaked.has(idx);

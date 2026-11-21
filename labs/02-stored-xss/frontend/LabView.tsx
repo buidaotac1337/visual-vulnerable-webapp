@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, JSX } from 'react';
 import { Eye, MessageSquarePlus, ShoppingBag } from 'lucide-react';
 
+import { LabCard, PrimaryButton, SubTabBar } from '@/components';
+import type { SubTabItem } from '@/components';
 import type {
   ExecuteActionOptions,
   LabExecutionResponse,
@@ -10,7 +12,7 @@ import type {
   TraceStepDraft,
 } from '@/types';
 
-import { BUTTON_CLASS, INPUT_CLASS, WriteReviewForm } from './ReviewForm';
+import { WriteReviewForm } from './ReviewForm';
 import { ReviewList } from './ReviewList';
 import { analyzePage, buildRenderSteps, readReviewPage } from './reviewData';
 import type { ProductOption, ReviewBodyComponent, ReviewPage } from './reviewData';
@@ -20,13 +22,23 @@ import { ReviewContent as VulnerableReviewContent } from './vulnerable';
 type SubTab = 'view' | 'write';
 
 const LAB_ID = '02-stored-xss';
+const SELECT_CLASS =
+  'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none';
 const DEFAULT_PRODUCTS: readonly ProductOption[] = [1, 2, 3].map((id) => ({
   id,
   name: `Sản phẩm #${String(id)}`,
 }));
-const TAB_ITEMS: readonly { id: SubTab; label: string; Icon: typeof Eye }[] = [
-  { id: 'view', label: 'Xem sản phẩm', Icon: Eye },
-  { id: 'write', label: 'Viết đánh giá', Icon: MessageSquarePlus },
+const TAB_ITEMS: readonly SubTabItem<SubTab>[] = [
+  {
+    id: 'view',
+    label: 'Xem sản phẩm',
+    icon: <Eye className="h-3.5 w-3.5" aria-hidden="true" />,
+  },
+  {
+    id: 'write',
+    label: 'Viết đánh giá',
+    icon: <MessageSquarePlus className="h-3.5 w-3.5" aria-hidden="true" />,
+  },
 ];
 function readNumber(payload: LabPayload, key: string, fallback: number): number {
   const value = Number(payload[key]);
@@ -152,33 +164,18 @@ export function LabView(props: LabViewProps): JSX.Element {
   // @snippet:end
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-          <ShoppingBag className="h-4 w-4 text-brand-600" aria-hidden="true" />
-          <span>MiniShop · Trang sản phẩm</span>
-        </div>
-        <div role="tablist" aria-label="Tính năng MiniShop Lab 02" className="flex gap-1">
-          {TAB_ITEMS.map(({ id, label, Icon }) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === id}
-              onClick={() => update({ tab: id })}
-              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium ${
-                activeTab === id
-                  ? 'bg-brand-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
+    <LabCard
+      title="MiniShop · Trang sản phẩm"
+      icon={<ShoppingBag className="h-4 w-4" aria-hidden="true" />}
+      headerRight={
+        <SubTabBar
+          ariaLabel="Tính năng MiniShop Lab 02"
+          items={TAB_ITEMS}
+          activeId={activeTab}
+          onChange={(tab) => update({ tab })}
+        />
+      }
+    >
       <div className="flex flex-col gap-1">
         <label htmlFor="xss-product" className="text-xs font-medium text-slate-700">
           Sản phẩm
@@ -187,7 +184,7 @@ export function LabView(props: LabViewProps): JSX.Element {
           id="xss-product"
           value={productId}
           onChange={(event) => update({ product_id: Number(event.target.value) })}
-          className={INPUT_CLASS}
+          className={SELECT_CLASS}
         >
           {products.map((product) => (
             <option key={product.id} value={product.id}>
@@ -199,10 +196,15 @@ export function LabView(props: LabViewProps): JSX.Element {
 
       {activeTab === 'view' ? (
         <form onSubmit={handleView} className="flex flex-col gap-3">
-          <button type="submit" disabled={isExecuting} className={BUTTON_CLASS}>
-            <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>{isExecuting ? 'Đang tải...' : 'Mở trang sản phẩm'}</span>
-          </button>
+          <PrimaryButton
+            type="submit"
+            icon={<Eye className="h-3.5 w-3.5" aria-hidden="true" />}
+            isBusy={isExecuting}
+            busyLabel="Đang tải..."
+            className="self-start"
+          >
+            Mở trang sản phẩm
+          </PrimaryButton>
         </form>
       ) : (
         <WriteReviewForm
@@ -217,6 +219,6 @@ export function LabView(props: LabViewProps): JSX.Element {
       )}
 
       <ReviewList page={page} ReviewBody={ReviewBody} findingsById={findingsById} />
-    </div>
+    </LabCard>
   );
 }

@@ -5,6 +5,8 @@ import { FolderOpen, Play } from 'lucide-react';
 import { isBackendVerifyTest } from '@/lib';
 import type { LabViewProps } from '@/types';
 
+import { LabCard, PrimaryButton, ResultNotice, TextField } from '../ui';
+
 interface EmptyStateProps {
   kind: 'no-labs';
   isLoading: boolean;
@@ -53,62 +55,52 @@ function GenericRunnerView({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-xs"
-    >
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-900">MiniShop Generic Sandbox ({mode})</h3>
+    <LabCard
+      title={`MiniShop Generic Sandbox (${mode})`}
+      headerRight={
         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
           Chưa có LabView.tsx
         </span>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-600" htmlFor="vvwa-generic-action">
-          Tên hàm Action (trong backend/{mode}.py)
-        </label>
-        <input
+      }
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <TextField
           id="vvwa-generic-action"
-          type="text"
+          label={`Tên hàm Action (trong backend/${mode}.py)`}
           value={actionName}
-          onChange={(event) => setActionName(event.target.value)}
-          className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
-          style={{ fontFamily: 'var(--font-mono)' }}
+          onChange={setActionName}
+          mono
         />
-      </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-600" htmlFor="vvwa-generic-payload">
-          JSON Payload
-        </label>
-        <textarea
-          key={inputFlashSeq}
-          id="vvwa-generic-payload"
-          rows={5}
-          value={rawJson}
-          onChange={(event) => setRawJson(event.target.value)}
-          className={`rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-xs text-slate-900 focus:border-brand-500 focus:bg-white focus:outline-none ${
-            inputFlashSeq > 0 ? 'vvwa-input-flash' : ''
-          }`}
-          style={{ fontFamily: 'var(--font-mono)' }}
-        />
-        {parseError && (
-          <p role="alert" className="text-xs font-medium text-danger-600">
-            {parseError}
-          </p>
-        )}
-      </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-700" htmlFor="vvwa-generic-payload">
+            JSON Payload
+          </label>
+          <textarea
+            key={inputFlashSeq}
+            id="vvwa-generic-payload"
+            rows={5}
+            value={rawJson}
+            onChange={(event) => setRawJson(event.target.value)}
+            className={`rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-xs text-slate-900 focus:border-brand-500 focus:bg-white focus:outline-none ${
+              inputFlashSeq > 0 ? 'vvwa-input-flash' : ''
+            }`}
+            style={{ fontFamily: 'var(--font-mono)' }}
+          />
+          {parseError && <ResultNotice tone="danger">{parseError}</ResultNotice>}
+        </div>
 
-      <button
-        type="submit"
-        disabled={isExecuting}
-        className="inline-flex cursor-pointer items-center justify-center gap-1.5 self-start rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <Play className="h-3.5 w-3.5" aria-hidden="true" />
-        <span>{isExecuting ? 'Đang thực thi...' : 'Gửi yêu cầu'}</span>
-      </button>
-    </form>
+        <PrimaryButton
+          type="submit"
+          icon={<Play className="h-3.5 w-3.5" aria-hidden="true" />}
+          isBusy={isExecuting}
+          busyLabel="Đang thực thi..."
+          className="self-start"
+        >
+          Gửi yêu cầu
+        </PrimaryButton>
+      </form>
+    </LabCard>
   );
 }
 

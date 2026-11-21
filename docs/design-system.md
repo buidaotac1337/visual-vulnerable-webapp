@@ -108,6 +108,19 @@ Mỗi node bấm được để nhảy tới bước đầu tiên của tầng v
 
 Chip dạng pill (`rounded-full`, `border-dashed`). Bấm chip điền dữ liệu vào form và kích hoạt hiệu ứng nháy ô nhập (`450ms`). Chip vừa chọn chuyển sang viền liền (`aria-pressed`), và mô tả của nó hiện thành dòng chữ ngay dưới hàng chip, không chỉ nằm trong tooltip.
 
+### Primitive dùng chung (`core/frontend/src/components/ui/`)
+
+Import qua barrel `@/components` (hoặc `../ui` bên trong `core/frontend/src/components/`) để đồng bộ giao diện MiniShop và hành vi A11y giữa mọi lab:
+
+| Component | Vai trò | Thuộc tính chính |
+| :--- | :--- | :--- |
+| `LabCard` | Khung card MiniShop chuẩn (`rounded-xl`, header có viền dưới) | `title`, `icon` (tô màu `brand-600`), `headerRight` (sub-tab / actor / số dư), `children` |
+| `PrimaryButton` | Nút hành động chính `bg-brand-600` | `icon`, `isBusy`, `busyLabel` (tự khóa và đổi nhãn), `type` (mặc định `'button'`), `disabled`, `className` |
+| `TextField` | Cặp `<label htmlFor>` + `<input>` | `id`, `label`, `value`, `onChange`, `mono` (`--font-mono`, tắt autocomplete/spellcheck), `flashSeq` (chỉ remount khi `flashSeq` đổi để giữ focus khi gõ) |
+| `AddressBar` | Thanh địa chỉ trình duyệt giả lập (`<Globe>`, tiền tố monospace + input + submit) | `id`, `ariaLabel`, `prefix`, `value`, `onChange`, `onSubmit`, `submitLabel`, `busyLabel`, `isBusy`, `submitDisabled`, `flashSeq`, `inputClassName` |
+| `ResultNotice` | Khung thông báo kết quả theo mức ngữ nghĩa | `tone` (`danger` \| `warning` \| `safe` \| `info` \| `neutral`), `title`, `icon` (mặc định theo `tone`), `role` (mặc định `'alert'` cho `danger`/`warning`, `'status'` cho `safe`/`info`, bỏ qua cho `neutral`) |
+| `SubTabBar` | Thanh sub-tab ngang (`role="tablist"`) | `ariaLabel`, `items` (`id`, `label`, `icon`, `buttonId`, `controlsId`), `activeId`, `onChange`; hỗ trợ `ArrowLeft`/`ArrowRight`/`Home`/`End` |
+
 ## 6. Khoảng cách & bo góc
 
 | Thuộc tính | Giá trị |
