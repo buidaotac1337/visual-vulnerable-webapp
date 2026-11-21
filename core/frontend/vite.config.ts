@@ -5,7 +5,8 @@ import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 
 const FRONTEND_ENTRY = path.resolve(__dirname, 'src/main.tsx');
-const LABS_DIR_PREFIX = `${path.resolve(__dirname, '../../labs').replaceAll('\\', '/')}/`;
+const LABS_DIR = path.resolve(__dirname, '../../labs');
+const LABS_DIR_PREFIX = `${LABS_DIR.replaceAll('\\', '/')}/`;
 const WINDOWS_DRIVE_RE = /^[a-zA-Z]:[\\/]/;
 
 function isBareSpecifier(source: string): boolean {
@@ -41,9 +42,26 @@ export function resolveLabDepsPlugin(): Plugin {
   };
 }
 
+/**
+ * Watch the whole repo-root labs/ directory, which lies outside the Vite root.
+ *
+ * Without this, Vite only watches lab files that are already imported, so a new
+ * labs/<id>/frontend/LabView.tsx never reaches import.meta.glob until a restart.
+ *
+ * @returns Vite plugin adding labs/ to the dev server watcher.
+ */
+export function watchLabsPlugin(): Plugin {
+  return {
+    name: 'vvwa-watch-labs',
+    configureServer(server) {
+      server.watcher.add(LABS_DIR);
+    },
+  };
+}
+
 /** Vite configuration with @/ path alias, labs/ dependency resolution, and FastAPI /api proxy. */
 export default defineConfig({
-  plugins: [resolveLabDepsPlugin(), react(), tailwindcss()],
+  plugins: [resolveLabDepsPlugin(), watchLabsPlugin(), react(), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

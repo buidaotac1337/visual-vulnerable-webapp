@@ -6,6 +6,7 @@ Mỗi thư mục con là một bài lab độc lập, được backend tự phá
 | :--- | :--- | :--- | :--- |
 | [`01-sql-injection`](01-sql-injection/README.md) | SQL Injection — Đăng nhập & Tìm kiếm MiniShop | Injection | Cơ bản |
 | [`02-stored-xss`](02-stored-xss/README.md) | Stored XSS — Đánh giá sản phẩm MiniShop | XSS | Cơ bản |
+| [`03-idor`](03-idor/README.md) | IDOR — Xem chi tiết đơn hàng MiniShop | Access Control | Cơ bản |
 
 ## Cấu trúc một lab
 
