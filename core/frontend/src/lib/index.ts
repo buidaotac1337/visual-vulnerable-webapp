@@ -1,5 +1,6 @@
 /** Public barrel exports for frontend API clients, trace engine, and utilities. */
 export {
+  ACTOR_HEADER,
   ApiRequestError,
   downloadLabSnippet,
   executeLabAction,

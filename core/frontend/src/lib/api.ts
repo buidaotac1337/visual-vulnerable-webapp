@@ -9,6 +9,9 @@ import type {
   VerifyLabResponse,
 } from '@/types';
 
+/** Session header carrying the selected persona; mirrors backend ACTOR_HEADER (ADR-0005). */
+export const ACTOR_HEADER = 'X-VVWA-Actor';
+
 /** Structured error thrown when a VVWA FastAPI request fails. */
 export class ApiRequestError extends Error {
   public readonly status: number;
@@ -90,7 +93,8 @@ export async function fetchLabSource(labId: string): Promise<LabSourceResponse> 
  * @param labId - Kebab-case lab identifier.
  * @param mode - Active execution mode ('vulnerable' or 'secure').
  * @param action - Public snake_case async handler name.
- * @param payload - JSON request body sent from MiniShop Sandbox.
+ * @param payload - JSON request body sent from MiniShop Sandbox (untrusted channel).
+ * @param actor - Selected persona sent as the X-VVWA-Actor session header, if any.
  * @returns Unified LabExecutionResponse envelope.
  */
 export async function executeLabAction(
@@ -98,14 +102,19 @@ export async function executeLabAction(
   mode: LabMode,
   action: string,
   payload: LabPayload,
+  actor: string | null = null,
 ): Promise<LabExecutionResponse> {
   const safeId = encodeURIComponent(labId);
   const safeAction = encodeURIComponent(action);
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (actor) {
+    headers[ACTOR_HEADER] = actor;
+  }
   return requestJson<LabExecutionResponse>(
     `/api/labs/${safeId}/${mode}/${safeAction}`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload),
     },
     `Failed to execute ${action}`,

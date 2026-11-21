@@ -21,6 +21,7 @@ function makeProps(overrides: Partial<LabViewProps> = {}): LabViewProps {
   return {
     lab: LAB_01_META,
     mode: 'vulnerable',
+    actor: null,
     payload: { tab: 'login', username: "' OR 1=1--", password: 'any' },
     onPayloadChange: vi.fn(),
     inputFlashSeq: 0,

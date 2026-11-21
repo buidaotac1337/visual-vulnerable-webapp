@@ -36,6 +36,11 @@ export function PayloadChipBar({ payloads, onSelect }: PayloadChipBarProps): JSX
             className="cursor-pointer rounded-full border border-dashed border-indigo-300 bg-indigo-50/50 px-3 py-1 text-xs font-medium text-indigo-700 transition-colors hover:border-indigo-500 hover:bg-indigo-100"
           >
             {sample.label}
+            {sample.actor ? (
+              <span className="ml-1.5 rounded-full bg-indigo-100 px-1.5 text-[10px] text-indigo-600">
+                vai {sample.actor}
+              </span>
+            ) : null}
           </button>
         ))}
       </div>

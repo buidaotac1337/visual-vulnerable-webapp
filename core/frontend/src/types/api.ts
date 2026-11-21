@@ -15,6 +15,8 @@ export interface SamplePayload {
   label: string;
   description: string;
   data: Record<string, unknown>;
+  /** Persona the sandbox switches to when the chip is clicked (ADR-0005). */
+  actor?: string | null;
 }
 
 /** Single automated assertion defined in meta.json verifyTests. */
@@ -23,6 +25,8 @@ export interface VerifyTestCase {
   action: string;
   input: Record<string, unknown>;
   expect: Record<string, unknown>;
+  /** Persona whose session the backend handler receives via ctx (ADR-0005). */
+  actor?: string | null;
 }
 
 /**
@@ -38,6 +42,8 @@ export interface LabMetadata {
   safetyPattern: string;
   samplePayloads: SamplePayload[];
   verifyTests: VerifyTestCase[];
+  /** Seed usernames offered in the persona switcher; first is the default (ADR-0005). */
+  actors?: string[];
 }
 
 /** Response envelope returned by GET /api/labs. */

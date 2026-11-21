@@ -4,7 +4,7 @@ import importlib.util
 import inspect
 import re
 import sys
-from dataclasses import dataclass
+from collections.abc import Callable
 from pathlib import Path
 from types import ModuleType
 from typing import Any
@@ -12,27 +12,17 @@ from uuid import uuid4
 
 from app.core import ActionNotFoundError, InvalidLabIdError, LabNotFoundError
 from app.db import LabDatabaseProtocol
-from app.schemas import LabExecutionMeta, LabExecutionResponse, LabMode, TraceStep
+from app.schemas import LabContext, LabExecutionResponse, LabMode
+from app.services.lab_response import (
+    LabActionRequest,
+    build_execution_response,
+    error_execution_response,
+)
+from app.services.session_actor import build_session_trace_step, resolve_lab_context
 from app.services.source_reader import resolve_lab_dir
 
 _ACTION_NAME_PATTERN = re.compile(r"\A[a-z][a-z0-9_]*\Z")
-
-
-@dataclass(frozen=True)
-class LabActionRequest:
-    """Parameter bundle describing a single lab action invocation.
-
-    Attributes:
-        lab_id: Kebab-case lab identifier.
-        mode: Target implementation mode ('vulnerable' or 'secure').
-        action: Public async function name inside the lab module.
-        payload: JSON request body sent by the MiniShop Sandbox UI.
-    """
-
-    lab_id: str
-    mode: LabMode
-    action: str
-    payload: dict[str, Any]
+_CTX_PARAM_KINDS = (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
 
 
 def validate_action_name(action: str) -> str:
@@ -88,97 +78,56 @@ def _load_fresh_module(module_path: Path, lab_id: str, mode: LabMode) -> ModuleT
     return module
 
 
-def _normalize_trace(raw_trace: list[Any]) -> list[TraceStep]:
-    """Validate trace dicts and enforce sequential 1-based step numbering.
+def _accepts_ctx(handler: Callable[..., Any]) -> bool:
+    """Return True when a lab handler opts into the engine session via a `ctx` parameter.
+
+    Only parameters that accept a keyword argument count, because the engine
+    always passes `ctx=...`; positional-only, `*ctx`, and `**ctx` are ignored.
 
     Args:
-        raw_trace: Raw trace list returned by a lab handler.
+        handler: Async lab handler function.
 
     Returns:
-        List of validated TraceStep models.
+        True if the handler declares a keyword-capable parameter named `ctx`.
+    """
+    try:
+        param = inspect.signature(handler).parameters.get("ctx")
+    except (TypeError, ValueError):
+        return False
+    return param is not None and param.kind in _CTX_PARAM_KINDS
+
+
+async def _run_handler(
+    handler: Callable[..., Any],
+    request: LabActionRequest,
+    db: LabDatabaseProtocol,
+) -> LabExecutionResponse:
+    """Invoke a lab handler, injecting LabContext only when it declares `ctx`.
+
+    Args:
+        handler: Async lab handler function.
+        request: Original lab action request carrying payload and actor.
+        db: Restricted lab_app_user database adapter.
+
+    Returns:
+        Normalized LabExecutionResponse or a structured runtime-error envelope.
 
     Raises:
-        TypeError: If any trace element is not a dictionary.
+        InvalidActorError: If the session header names an unknown persona.
     """
-    normalized: list[TraceStep] = []
-    for index, item in enumerate(raw_trace, start=1):
-        if not isinstance(item, dict):
-            msg = f"Trace item at index {index - 1} must be a dict, got {type(item).__name__}."
-            raise TypeError(msg)
-        step_data = {**item, "step": index}
-        normalized.append(TraceStep.model_validate(step_data))
-    return normalized
-
-
-def _error_execution_response(
-    request: LabActionRequest,
-    exc: Exception,
-) -> LabExecutionResponse:
-    """Build a structured educational error response for student-facing failures.
-
-    Args:
-        request: Original lab action request.
-        exc: Exception raised while loading, executing, or validating handler output.
-
-    Returns:
-        LabExecutionResponse with ok=False and a single danger trace step.
-    """
-    error_type = type(exc).__name__
-    detail = f"{error_type}: {exc}"
-    return LabExecutionResponse(
-        ok=False,
-        data={"error": detail},
-        meta=LabExecutionMeta(lab_id=request.lab_id, mode=request.mode, outcome="error"),
-        trace=[
-            TraceStep(
-                step=1,
-                layer="backend",
-                tag="runtime-error",
-                status="danger",
-                title=f"Lỗi thực thi ({error_type})",
-                detail=detail,
-            ),
-        ],
-    )
-
-
-def _build_execution_response(
-    request: LabActionRequest,
-    raw_result: object,
-) -> LabExecutionResponse:
-    """Validate and wrap a raw lab handler dictionary into LabExecutionResponse.
-
-    Args:
-        request: Original lab action request.
-        raw_result: Value returned by the lab handler coroutine.
-
-    Returns:
-        Validated LabExecutionResponse (or structured error envelope if malformed).
-    """
-    if not isinstance(raw_result, dict):
-        return _error_execution_response(
-            request,
-            TypeError("Lab handler must return a dict with 'data', 'meta', and 'trace'."),
-        )
+    engine_steps: list[dict[str, Any]] = []
+    ctx: LabContext | None = None
+    if _accepts_ctx(handler):
+        ctx = await resolve_lab_context(db, request.actor)
+        engine_steps.append(build_session_trace_step(ctx))
     try:
-        raw_meta_val = raw_result.get("meta")
-        raw_trace_val = raw_result.get("trace")
-        raw_data_val = raw_result.get("data")
-        raw_meta: dict[str, Any] = raw_meta_val if isinstance(raw_meta_val, dict) else {}
-        raw_trace: list[Any] = raw_trace_val if isinstance(raw_trace_val, list) else []
-        raw_data: dict[str, Any] = raw_data_val if isinstance(raw_data_val, dict) else {}
-        return LabExecutionResponse(
-            ok=True,
-            data=raw_data,
-            meta=LabExecutionMeta(
-                lab_id=request.lab_id,
-                mode=request.mode,
-                outcome=raw_meta.get("outcome", "normal"),
-            ),
-            trace=_normalize_trace(raw_trace),
-        )
+        if ctx is None:
+            raw_result = await handler(request.payload, db)
+        else:
+            raw_result = await handler(request.payload, db, ctx=ctx)
     except Exception as exc:
-        return _error_execution_response(request, exc)
+        return error_execution_response(request, exc)
+    return build_execution_response(request, raw_result, engine_steps)
 
 
 async def execute_lab_action(
@@ -200,6 +149,7 @@ async def execute_lab_action(
         InvalidLabIdError: If lab_id or action name is invalid.
         LabNotFoundError: If lab directory or handler file does not exist.
         ActionNotFoundError: If the requested async action does not exist.
+        InvalidActorError: If a ctx-aware handler receives an unknown session actor.
     """
     lab_dir = resolve_lab_dir(labs_dir, request.lab_id)
     safe_action = validate_action_name(request.action)
@@ -210,16 +160,11 @@ async def execute_lab_action(
     except LabNotFoundError:
         raise
     except Exception as exc:
-        return _error_execution_response(request, exc)
+        return error_execution_response(request, exc)
 
     handler = getattr(module, safe_action, None)
     if handler is None or not inspect.iscoroutinefunction(handler):
         msg = f"Async action '{safe_action}' not found in '{request.lab_id}/{request.mode}.py'."
         raise ActionNotFoundError(msg)
 
-    try:
-        raw_result = await handler(request.payload, db)
-    except Exception as exc:
-        return _error_execution_response(request, exc)
-
-    return _build_execution_response(request, raw_result)
+    return await _run_handler(handler, request, db)

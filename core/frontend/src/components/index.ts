@@ -8,5 +8,5 @@ export {
 } from './inspector';
 export { LabWorkspace, ModeSwitch, TopControlBar } from './layout';
 export { FlowPipeline } from './pipeline';
-export { EmptyLabFallback, PayloadChipBar, SandboxPane } from './sandbox';
+export { ActorSwitcher, EmptyLabFallback, PayloadChipBar, SandboxPane } from './sandbox';
 export { VerifyModal } from './verify';

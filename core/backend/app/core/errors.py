@@ -17,5 +17,9 @@ class ActionNotFoundError(VvwaError):
     """Raised when a requested async handler function is absent in a lab module."""
 
 
+class InvalidActorError(VvwaError):
+    """Raised when the X-VVWA-Actor session header is malformed or names an unknown user."""
+
+
 class DatabaseUnavailableError(VvwaError):
     """Raised when PostgreSQL cannot be reached or reset execution fails."""

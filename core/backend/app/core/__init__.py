@@ -4,6 +4,7 @@ from app.core.config import Settings, get_settings
 from app.core.errors import (
     ActionNotFoundError,
     DatabaseUnavailableError,
+    InvalidActorError,
     InvalidLabIdError,
     LabNotFoundError,
     VvwaError,
@@ -12,6 +13,7 @@ from app.core.errors import (
 __all__ = [
     "ActionNotFoundError",
     "DatabaseUnavailableError",
+    "InvalidActorError",
     "InvalidLabIdError",
     "LabNotFoundError",
     "Settings",
