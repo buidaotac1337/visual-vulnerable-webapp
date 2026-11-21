@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react';
 import type { JSX } from 'react';
 import { RefreshCw } from 'lucide-react';
 
-import { resolveStepTarget } from '@/lib';
+import { resolveFrontendFile, resolveStepTarget } from '@/lib';
+import type { ResolvedFrontendFile } from '@/lib';
 import type {
   InspectorTab,
   LabMetadata,
@@ -41,49 +42,92 @@ const TAB_ITEMS: readonly { id: InspectorTab; label: string }[] = [
   { id: 'diff', label: 'Diff' },
 ];
 
-function resolveFileLabel(activeTab: InspectorTab, mode: LabMode): string {
+interface InspectorView {
+  activeTab: InspectorTab;
+  mode: LabMode;
+  frontendFile: ResolvedFrontendFile | null;
+}
+
+function resolveFileLabel(
+  { activeTab, mode, frontendFile }: InspectorView,
+  hasFeDiff: boolean,
+): string {
   if (activeTab === 'diff') {
-    return 'vulnerable.py ↔ secure.py';
+    return hasFeDiff ? 'vulnerable ↔ secure (.py + .tsx)' : 'vulnerable.py ↔ secure.py';
   }
   if (activeTab === 'frontend') {
-    return 'frontend/LabView.tsx';
+    return frontendFile?.label ?? 'frontend/LabView.tsx';
   }
   return `backend/${mode}.py`;
 }
 
+function renderDiffTab(source: LabSourceResponse): JSX.Element {
+  if (source.frontend_diff == null) {
+    return <UnifiedDiffView diff={source.diff} />;
+  }
+  return (
+    <div>
+      <h3 className="px-3 pt-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+        Backend: vulnerable.py ↔ secure.py
+      </h3>
+      <UnifiedDiffView diff={source.diff} />
+      <h3 className="border-t border-slate-700 px-3 pt-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+        Frontend: vulnerable.tsx ↔ secure.tsx
+      </h3>
+      <UnifiedDiffView diff={source.frontend_diff} fileLabels={['vulnerable.tsx', 'secure.tsx']} />
+    </div>
+  );
+}
+
+function highlightFor(
+  target: StepHighlightTarget | null,
+  tab: 'backend' | 'frontend',
+  frontendKind?: ResolvedFrontendFile['kind'],
+): number | null | undefined {
+  if (target?.tab !== tab) {
+    return undefined;
+  }
+  if (frontendKind && (target.frontendFile ?? frontendKind) !== frontendKind) {
+    return undefined;
+  }
+  return target.lineNumber;
+}
+
 function renderSnippetForTab(
-  activeTab: 'backend' | 'frontend',
-  mode: LabMode,
+  { activeTab, mode, frontendFile }: InspectorView,
   source: LabSourceResponse,
   target: StepHighlightTarget | null,
   activeStep: TraceStep | null,
 ): JSX.Element {
-  if (activeTab === 'frontend' && source.frontend) {
-    const isMatch = target?.tab === 'frontend';
-    return (
-      <CodeSnippetView
-        code={source.frontend.code}
-        language="tsx"
-        highlightedLine={isMatch ? target.lineNumber : null}
-        activeStep={isMatch ? activeStep : null}
-      />
-    );
-  }
-  const backendCode = mode === 'vulnerable' ? source.vulnerable.code : source.secure.code;
-  const isMatch = target?.tab === 'backend';
+  const isFrontend = activeTab === 'frontend' && frontendFile !== null;
+  const code = isFrontend
+    ? frontendFile.file.code
+    : (mode === 'vulnerable' ? source.vulnerable : source.secure).code;
+  const line = isFrontend
+    ? highlightFor(target, 'frontend', frontendFile.kind)
+    : highlightFor(target, 'backend');
   return (
     <CodeSnippetView
-      code={backendCode}
-      language="python"
-      highlightedLine={isMatch ? target.lineNumber : null}
-      activeStep={isMatch ? activeStep : null}
+      code={code}
+      language={isFrontend ? 'tsx' : 'python'}
+      highlightedLine={line ?? null}
+      activeStep={line === undefined ? null : activeStep}
     />
   );
 }
 
-function renderInspectorBody(
+function buildInspectorView(
   activeTab: InspectorTab,
   mode: LabMode,
+  source: LabSourceResponse | null,
+  target: StepHighlightTarget | null,
+): InspectorView {
+  const preferred = target?.tab === 'frontend' ? target.frontendFile : undefined;
+  return { activeTab, mode, frontendFile: resolveFrontendFile(source, mode, preferred) };
+}
+
+function renderInspectorBody(
+  view: InspectorView,
   source: LabSourceResponse | null,
   sourceError: string | null,
   target: StepHighlightTarget | null,
@@ -102,14 +146,14 @@ function renderInspectorBody(
         className="whitespace-pre-line p-6 text-xs text-slate-400"
         style={{ fontFamily: 'var(--font-mono)' }}
       >
-        {`# Code & Trace Inspector (${mode})\n# Chọn bài lab để xem mã nguồn trực tiếp với hiệu ứng sáng đèn # @step.`}
+        {`# Code & Trace Inspector (${view.mode})\n# Chọn bài lab để xem mã nguồn trực tiếp với hiệu ứng sáng đèn # @step.`}
       </div>
     );
   }
-  if (activeTab === 'diff') {
-    return <UnifiedDiffView diff={source.diff} />;
+  if (view.activeTab === 'diff') {
+    return renderDiffTab(source);
   }
-  return renderSnippetForTab(activeTab, mode, source, target, activeStep);
+  return renderSnippetForTab(view, source, target, activeStep);
 }
 
 /**
@@ -147,8 +191,9 @@ export function CodeInspector({
     }
   }, [targetTab, activeStep?.step, onChangeTab]);
 
-  const hasFrontendSource = Boolean(source?.frontend);
-  const activeFileLabel = resolveFileLabel(activeTab, mode);
+  const view = buildInspectorView(activeTab, mode, source, target);
+  const hasFrontendSource = view.frontendFile !== null;
+  const activeFileLabel = resolveFileLabel(view, Boolean(source?.frontend_diff));
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -201,7 +246,7 @@ export function CodeInspector({
       </div>
 
       <div className="vvwa-ide-scroll min-h-0 flex-1 overflow-auto">
-        {renderInspectorBody(activeTab, mode, source, sourceError, target, activeStep)}
+        {renderInspectorBody(view, source, sourceError, target, activeStep)}
       </div>
 
       <TraceControls

@@ -58,10 +58,15 @@ export interface PipelineNodeModel {
   hasSteps: boolean;
 }
 
+/** Which frontend file the Frontend tab shows: the sandbox LabView or the mode's sink file. */
+export type FrontendFileKind = 'labview' | 'sink';
+
 /** Resolved inspector destination for an active trace step. */
 export interface StepHighlightTarget {
   tab: 'backend' | 'frontend';
   lineNumber: number | null;
+  /** For frontend steps: the file holding the tag (defaults to the Frontend tab's default file). */
+  frontendFile?: FrontendFileKind;
 }
 
 /** Semantic row type parsed from a unified diff string. */

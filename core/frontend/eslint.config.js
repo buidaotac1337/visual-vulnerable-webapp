@@ -5,6 +5,28 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+/**
+ * ADR-0006: intentional HTML sinks may only live in labs/<id>/frontend/vulnerable.tsx.
+ * Reading innerHTML (e.g. in the DOM probe) stays allowed; only writes are banned.
+ */
+const SINK_RESTRICTIONS = [
+  {
+    selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+    message:
+      'dangerouslySetInnerHTML is only allowed in labs/<id>/frontend/vulnerable.tsx (ADR-0006).',
+  },
+  {
+    selector:
+      'AssignmentExpression > MemberExpression.left[property.name=/^(innerHTML|outerHTML)$/]',
+    message:
+      'Writing innerHTML/outerHTML is only allowed in labs/<id>/frontend/vulnerable.tsx (ADR-0006).',
+  },
+  {
+    selector: "CallExpression[callee.property.name='insertAdjacentHTML']",
+    message: 'insertAdjacentHTML is only allowed in labs/<id>/frontend/vulnerable.tsx (ADR-0006).',
+  },
+];
+
 export default tseslint.config(
   { ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/.pnpm-store/**'] },
   {
@@ -24,6 +46,7 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'max-lines': ['error', { max: 350, skipBlankLines: false, skipComments: false }],
       complexity: ['error', 10],
+      'no-restricted-syntax': ['error', ...SINK_RESTRICTIONS],
       '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
       '@typescript-eslint/explicit-module-boundary-types': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
@@ -68,5 +91,9 @@ export default tseslint.config(
         },
       ],
     },
+  },
+  {
+    files: ['**/labs/*/frontend/vulnerable.tsx'],
+    rules: { 'no-restricted-syntax': 'off' },
   },
 );

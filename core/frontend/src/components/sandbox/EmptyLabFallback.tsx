@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FormEvent, JSX } from 'react';
 import { FolderOpen, Play } from 'lucide-react';
 
+import { isBackendVerifyTest } from '@/lib';
 import type { LabViewProps } from '@/types';
 
 interface EmptyStateProps {
@@ -24,7 +25,7 @@ function GenericRunnerView({
   isExecuting,
   onExecute,
 }: GenericRunnerProps): JSX.Element {
-  const defaultAction = lab.verifyTests[0]?.action ?? 'execute';
+  const defaultAction = lab.verifyTests.find(isBackendVerifyTest)?.action ?? 'execute';
   const [actionName, setActionName] = useState<string>(defaultAction);
   const [rawJson, setRawJson] = useState<string>(() => JSON.stringify(payload, null, 2));
   const [parseError, setParseError] = useState<string | null>(null);

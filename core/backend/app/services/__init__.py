@@ -1,5 +1,6 @@
 """Public barrel exports for VVWA backend domain services."""
 
+from app.services.expect_matcher import matches_expected
 from app.services.lab_discovery import discover_labs, get_lab_metadata
 from app.services.lab_loader import execute_lab_action, validate_action_name
 from app.services.lab_response import LabActionRequest
@@ -26,6 +27,7 @@ __all__ = [
     "execute_lab_action",
     "generate_unified_diff",
     "get_lab_metadata",
+    "matches_expected",
     "normalize_actor_username",
     "parse_snippet_source",
     "read_lab_source",

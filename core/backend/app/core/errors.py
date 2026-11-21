@@ -21,5 +21,9 @@ class InvalidActorError(VvwaError):
     """Raised when the X-VVWA-Actor session header is malformed or names an unknown user."""
 
 
+class InvalidExpectationError(VvwaError):
+    """Raised when a verifyTests expect block uses an unknown or malformed operator."""
+
+
 class DatabaseUnavailableError(VvwaError):
     """Raised when PostgreSQL cannot be reached or reset execution fails."""

@@ -12,6 +12,8 @@ export {
   verifyLab,
 } from './api';
 export { parseUnifiedDiff } from './diffParser';
+export { getFrontendSinkFile, isBackendVerifyTest, resolveFrontendFile } from './sourceFiles';
+export type { ResolvedFrontendFile } from './sourceFiles';
 export { tokenizeCodeAsync, tokenizeCodeSyncFallback } from './highlighter';
 export { getLazyLabView, hasLabView } from './labRegistry';
 export {

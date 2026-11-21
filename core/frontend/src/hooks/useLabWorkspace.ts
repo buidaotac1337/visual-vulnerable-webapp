@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 
+import { resolveFrontendFile } from '@/lib';
 import type {
   ExecuteActionOptions,
   HealthResponse,
@@ -155,9 +156,10 @@ export function useLabWorkspace(): LabWorkspaceController {
   const selectPipelineLayer = useCallback(
     (layer: TraceLayer): void => {
       playback.jumpToLayer(layer);
-      setActiveTab(layer === 'frontend' && source?.frontend ? 'frontend' : 'backend');
+      const hasFrontend = resolveFrontendFile(source, mode) !== null;
+      setActiveTab(layer === 'frontend' && hasFrontend ? 'frontend' : 'backend');
     },
-    [playback, source?.frontend],
+    [playback, source, mode],
   );
 
   const updatePayload = useCallback(

@@ -6,6 +6,8 @@ import type { DiffRowKind } from '@/types';
 
 interface UnifiedDiffViewProps {
   diff: string;
+  /** (vulnerable, secure) file names used in the "no difference" message. */
+  fileLabels?: readonly [string, string];
 }
 
 const ROW_STYLES: Record<DiffRowKind, { row: string; prefix: string }> = {
@@ -16,19 +18,24 @@ const ROW_STYLES: Record<DiffRowKind, { row: string; prefix: string }> = {
 };
 
 /**
- * Render a readable unified diff between vulnerable.py and secure.py with dual line gutters.
+ * Render a readable unified diff between a vulnerable/secure file pair with dual line gutters.
  *
- * @param props - Unified diff string returned by GET /api/labs/{id}/source.
+ * @param props - Unified diff string from GET /api/labs/{id}/source and optional file labels.
  * @returns Rendered UnifiedDiffView panel.
  */
-export function UnifiedDiffView({ diff }: UnifiedDiffViewProps): JSX.Element {
+export function UnifiedDiffView({
+  diff,
+  fileLabels = ['vulnerable.py', 'secure.py'],
+}: UnifiedDiffViewProps): JSX.Element {
   const rows = parseUnifiedDiff(diff);
 
   if (rows.length === 0) {
     return (
       <div className="m-4 flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-950/50 p-4 text-xs text-emerald-200">
         <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
-        <span>Không có khác biệt — mã nguồn vulnerable.py hiện khớp với bản mẫu secure.py.</span>
+        <span>
+          Không có khác biệt — mã nguồn {fileLabels[0]} hiện khớp với bản mẫu {fileLabels[1]}.
+        </span>
       </div>
     );
   }

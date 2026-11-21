@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (chưa triển khai, là điều kiện tiên quyết của Lab 02 Stored XSS)
+Accepted — đang triển khai. Phần 1 (mục 1, 2, 3, 5 phía Python, 7) đã xong; phần 2 (mục 4, 5 phía TypeScript, 6: bộ chấm frontend) còn lại. Là điều kiện tiên quyết của Lab 02 Stored XSS.
 
 * **Date:** 2026-11-21
 * **Deciders:** Maintainers / Agents

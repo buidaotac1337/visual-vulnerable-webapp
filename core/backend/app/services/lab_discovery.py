@@ -8,9 +8,32 @@ from pydantic import ValidationError
 
 from app.core import InvalidLabIdError, LabNotFoundError
 from app.schemas import LabMetadata
+from app.services.frontend_sinks import frontend_sink_pair_status
 from app.services.source_reader import resolve_lab_dir, validate_lab_id
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _warn_on_incomplete_sink_pair(lab_dir: Path, metadata: LabMetadata) -> None:
+    """Log authoring mistakes around the frontend sink pair without hiding the lab.
+
+    Args:
+        lab_dir: Directory of the lab being discovered.
+        metadata: Validated metadata of that lab.
+    """
+    status = frontend_sink_pair_status(lab_dir)
+    if status == "partial":
+        _LOGGER.warning(
+            "Lab '%s' has only one of frontend/vulnerable.tsx and secure.tsx; "
+            "the frontend sink pair is ignored until both exist.",
+            metadata.id,
+        )
+    has_frontend_tests = any(test.layer == "frontend" for test in metadata.verify_tests)
+    if has_frontend_tests and status != "pair":
+        _LOGGER.warning(
+            "Lab '%s' declares frontend verifyTests but has no complete frontend sink pair.",
+            metadata.id,
+        )
 
 
 def _parse_lab_meta_file(meta_path: Path, expected_id: str) -> LabMetadata:
@@ -31,6 +54,7 @@ def _parse_lab_meta_file(meta_path: Path, expected_id: str) -> LabMetadata:
     if metadata.id != expected_id:
         msg = f"meta.json id '{metadata.id}' does not match directory '{expected_id}'."
         raise ValueError(msg)
+    _warn_on_incomplete_sink_pair(meta_path.parent, metadata)
     return metadata
 
 

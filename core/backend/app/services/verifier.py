@@ -2,51 +2,25 @@
 
 from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import Any
 
-from app.core import ActionNotFoundError, InvalidActorError, InvalidLabIdError
+from app.core import (
+    ActionNotFoundError,
+    InvalidActorError,
+    InvalidExpectationError,
+    InvalidLabIdError,
+)
 from app.db import LabDatabaseProtocol
-from app.schemas import VerifyLabResponse, VerifyTestCase, VerifyTestResult
+from app.schemas import BackendVerifyTest, VerifyLabResponse, VerifyTestResult
+from app.services.expect_matcher import matches_expected
 from app.services.lab_discovery import get_lab_metadata
 from app.services.lab_loader import execute_lab_action
 from app.services.lab_response import LabActionRequest
 
 
-def _matches_value(expected: Any, actual: Any) -> bool:  # noqa: ANN401
-    """Compare expected and actual values with strict bool typing and recursive dicts.
-
-    Avoids Python's `True == 1` / `False == 0` pitfall and performs subset matching
-    recursively for nested dictionaries.
-
-    Args:
-        expected: Expected value or nested subset structure from meta.json.
-        actual: Actual value returned inside response.data.
-
-    Returns:
-        True when actual strictly satisfies expected.
-    """
-    if isinstance(expected, bool) or isinstance(actual, bool):
-        return isinstance(expected, bool) and isinstance(actual, bool) and expected is actual
-    if isinstance(expected, dict):
-        if not isinstance(actual, dict):
-            return False
-        return all(
-            key in actual and _matches_value(val, actual[key]) for key, val in expected.items()
-        )
-    if isinstance(expected, list):
-        if not isinstance(actual, list) or len(expected) != len(actual):
-            return False
-        return all(
-            _matches_value(exp_item, act_item)
-            for exp_item, act_item in zip(expected, actual, strict=True)
-        )
-    return bool(actual == expected)
-
-
 async def _run_single_test(
     labs_dir: Path,
     lab_id: str,
-    test_case: VerifyTestCase,
+    test_case: BackendVerifyTest,
     db: LabDatabaseProtocol,
 ) -> VerifyTestResult:
     """Execute one verification test case against a lab's vulnerable.py handler.
@@ -91,7 +65,17 @@ async def _run_single_test(
             error=error_msg,
         )
 
-    matched = _matches_value(test_case.expect, response.data)
+    try:
+        matched = matches_expected(test_case.expect, response.data)
+    except InvalidExpectationError as exc:
+        return VerifyTestResult(
+            name=test_case.name,
+            action=test_case.action,
+            passed=False,
+            expected=test_case.expect,
+            actual=response.data,
+            error=str(exc),
+        )
     return VerifyTestResult(
         name=test_case.name,
         action=test_case.action,
@@ -107,7 +91,7 @@ async def verify_lab(
     db: LabDatabaseProtocol,
     reset_fn: Callable[[], Awaitable[float]] | None = None,
 ) -> VerifyLabResponse:
-    """Run all verifyTests defined in meta.json against vulnerable.py.
+    """Run backend verifyTests against vulnerable.py; frontend tests run in the browser.
 
     When `reset_fn` is provided, resets the database before each individual test
     case so stateful write labs remain isolated across assertions.
@@ -123,7 +107,8 @@ async def verify_lab(
     """
     metadata = get_lab_metadata(labs_dir, lab_id)
     results: list[VerifyTestResult] = []
-    for test_case in metadata.verify_tests:
+    backend_tests = [t for t in metadata.verify_tests if isinstance(t, BackendVerifyTest)]
+    for test_case in backend_tests:
         if reset_fn is not None:
             await reset_fn()
         results.append(await _run_single_test(labs_dir, lab_id, test_case, db))

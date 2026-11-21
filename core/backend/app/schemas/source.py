@@ -26,6 +26,9 @@ class LabSourceResponse(BaseModel):
         secure: Parsed snippet and step map for backend/secure.py.
         frontend: Optional parsed snippet and step map for frontend/LabView.tsx.
         diff: Unified diff comparing vulnerable.code against secure.code.
+        frontend_vulnerable: Parsed frontend/vulnerable.tsx when the lab has a sink pair.
+        frontend_secure: Parsed frontend/secure.tsx when the lab has a sink pair.
+        frontend_diff: Unified diff of the frontend sink pair, or None without a pair.
     """
 
     lab_id: str
@@ -33,3 +36,6 @@ class LabSourceResponse(BaseModel):
     secure: ParsedSourceFile
     frontend: ParsedSourceFile | None = None
     diff: str
+    frontend_vulnerable: ParsedSourceFile | None = None
+    frontend_secure: ParsedSourceFile | None = None
+    frontend_diff: str | None = None

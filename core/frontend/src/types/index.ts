@@ -1,6 +1,8 @@
 /** Public barrel exports for shared frontend TypeScript types. */
 export type { HealthResponse } from './health';
 export type {
+  BackendVerifyTestCase,
+  FrontendVerifyTestCase,
   LabExecutionMeta,
   LabExecutionResponse,
   LabListResponse,
@@ -23,6 +25,7 @@ export type {
   DiffRow,
   DiffRowKind,
   ExecuteActionOptions,
+  FrontendFileKind,
   HighlightLanguage,
   InspectorTab,
   LabPayload,
