@@ -11,6 +11,7 @@ from app.api import health_router, labs_router, system_router
 from app.core import (
     ActionNotFoundError,
     DatabaseUnavailableError,
+    InvalidActorError,
     InvalidLabIdError,
     LabNotFoundError,
     Settings,
@@ -44,6 +45,10 @@ def _register_exception_handlers(application: FastAPI) -> None:
 
     @application.exception_handler(InvalidLabIdError)
     async def _handle_invalid_id(_request: Request, exc: InvalidLabIdError) -> JSONResponse:
+        return JSONResponse(status_code=400, content={"detail": str(exc)})
+
+    @application.exception_handler(InvalidActorError)
+    async def _handle_invalid_actor(_request: Request, exc: InvalidActorError) -> JSONResponse:
         return JSONResponse(status_code=400, content={"detail": str(exc)})
 
     @application.exception_handler(LabNotFoundError)

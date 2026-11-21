@@ -1,4 +1,6 @@
 /** Public barrel exports for VVWA workspace and trace playback hooks. */
+export { useLabActor } from './useLabActor';
+export type { LabActorState } from './useLabActor';
 export { useLabCatalog } from './useLabCatalog';
 export type { LabCatalogState } from './useLabCatalog';
 export { useLabMaintenance } from './useLabMaintenance';

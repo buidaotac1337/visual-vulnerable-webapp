@@ -1,10 +1,8 @@
 """Lab discovery, source inspection, download, verify, and execution routes."""
 
-from typing import Any
+from fastapi import APIRouter, Query, Response
 
-from fastapi import APIRouter, Body, Query, Response
-
-from app.api.deps import EngineContextDep, SettingsDep
+from app.api.deps import EngineContextDep, LabInvocationDep, SettingsDep
 from app.schemas import (
     LabExecutionResponse,
     LabListResponse,
@@ -110,7 +108,7 @@ async def execute_lab_action_endpoint(
     mode: LabMode,
     action: str,
     ctx: EngineContextDep,
-    payload: dict[str, Any] = Body(default_factory=dict),  # noqa: B008
+    invocation: LabInvocationDep,
 ) -> LabExecutionResponse:
     """Execute a lab's vulnerable or secure async handler and return its trace.
 
@@ -119,7 +117,7 @@ async def execute_lab_action_endpoint(
         mode: Target execution mode ('vulnerable' or 'secure').
         action: Public async handler function name inside <mode>.py.
         ctx: Injected EngineContext with settings and database manager.
-        payload: JSON request body sent by the MiniShop Sandbox UI.
+        invocation: Untrusted JSON payload plus trusted session actor (ADR-0005).
 
     Returns:
         LabExecutionResponse containing data, meta, and live trace steps.
@@ -127,5 +125,11 @@ async def execute_lab_action_endpoint(
     resolve_lab_dir(ctx.settings.labs_dir, lab_id)
     validate_action_name(action)
     lab_db = await ctx.db_manager.get_lab_db()
-    action_req = LabActionRequest(lab_id=lab_id, mode=mode, action=action, payload=payload)
+    action_req = LabActionRequest(
+        lab_id=lab_id,
+        mode=mode,
+        action=action,
+        payload=invocation.payload,
+        actor=invocation.actor,
+    )
     return await execute_lab_action(ctx.settings.labs_dir, action_req, lab_db)

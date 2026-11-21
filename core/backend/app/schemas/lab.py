@@ -2,7 +2,9 @@
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from app.schemas.session import ACTOR_USERNAME_PATTERN
 
 LabMode = Literal["vulnerable", "secure"]
 TraceLayer = Literal["frontend", "backend", "database"]
@@ -17,11 +19,13 @@ class SamplePayload(BaseModel):
         label: Short button text displayed as a PayloadChip.
         description: Brief educational explanation of what the payload tests.
         data: JSON object pre-filled into the MiniShop sandbox form.
+        actor: Optional persona the sandbox switches to when the chip is clicked.
     """
 
     label: str
     description: str
     data: dict[str, Any]
+    actor: str | None = None
 
 
 class VerifyTestCase(BaseModel):
@@ -32,12 +36,14 @@ class VerifyTestCase(BaseModel):
         action: Async handler name inside labs/<id>/backend/vulnerable.py.
         input: Request JSON payload supplied to the handler.
         expect: Subset of key-value pairs expected in response.data.
+        actor: Optional persona whose session the handler receives via ctx.
     """
 
     name: str
     action: str
     input: dict[str, Any]
     expect: dict[str, Any]
+    actor: str | None = None
 
 
 class LabMetadata(BaseModel):
@@ -52,6 +58,7 @@ class LabMetadata(BaseModel):
         safety_pattern: Summary of the recommended secure coding pattern.
         sample_payloads: Pre-configured 1-click payloads for the sandbox UI.
         verify_tests: Automated checks run when the student clicks Test My Fix.
+        actors: Seed usernames offered in the persona switcher (first is the default).
     """
 
     model_config = ConfigDict(populate_by_name=True)
@@ -64,6 +71,48 @@ class LabMetadata(BaseModel):
     safety_pattern: str = Field(alias="safetyPattern")
     sample_payloads: list[SamplePayload] = Field(default_factory=list, alias="samplePayloads")
     verify_tests: list[VerifyTestCase] = Field(default_factory=list, alias="verifyTests")
+    actors: list[str] = Field(default_factory=list)
+
+    @field_validator("actors")
+    @classmethod
+    def _validate_actor_names(cls, value: list[str]) -> list[str]:
+        """Reject persona names that the session header could never carry.
+
+        Args:
+            value: Raw actors list from meta.json.
+
+        Returns:
+            The unchanged list when every name is a safe, unique username.
+
+        Raises:
+            ValueError: If a name is malformed or duplicated.
+        """
+        invalid = [name for name in value if not ACTOR_USERNAME_PATTERN.match(name)]
+        if invalid:
+            msg = f"Invalid actor usernames: {invalid}."
+            raise ValueError(msg)
+        if len(set(value)) != len(value):
+            msg = "Duplicate entries in actors."
+            raise ValueError(msg)
+        return value
+
+    @model_validator(mode="after")
+    def _validate_actor_references(self) -> "LabMetadata":
+        """Ensure every samplePayloads/verifyTests actor is declared in actors.
+
+        Returns:
+            Validated LabMetadata instance.
+
+        Raises:
+            ValueError: If a payload or test references an undeclared actor.
+        """
+        referenced = {item.actor for item in self.sample_payloads}
+        referenced |= {item.actor for item in self.verify_tests}
+        unknown = sorted(name for name in referenced if name and name not in self.actors)
+        if unknown:
+            msg = f"Actors {unknown} are referenced but not declared in 'actors'."
+            raise ValueError(msg)
+        return self
 
 
 class LabListResponse(BaseModel):

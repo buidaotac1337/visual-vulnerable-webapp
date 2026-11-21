@@ -4,11 +4,12 @@ from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any
 
-from app.core import ActionNotFoundError, InvalidLabIdError
+from app.core import ActionNotFoundError, InvalidActorError, InvalidLabIdError
 from app.db import LabDatabaseProtocol
 from app.schemas import VerifyLabResponse, VerifyTestCase, VerifyTestResult
 from app.services.lab_discovery import get_lab_metadata
-from app.services.lab_loader import LabActionRequest, execute_lab_action
+from app.services.lab_loader import execute_lab_action
+from app.services.lab_response import LabActionRequest
 
 
 def _matches_value(expected: Any, actual: Any) -> bool:  # noqa: ANN401
@@ -64,10 +65,11 @@ async def _run_single_test(
         mode="vulnerable",
         action=test_case.action,
         payload=test_case.input,
+        actor=test_case.actor,
     )
     try:
         response = await execute_lab_action(labs_dir, action_req, db)
-    except (ActionNotFoundError, InvalidLabIdError) as exc:
+    except (ActionNotFoundError, InvalidActorError, InvalidLabIdError) as exc:
         return VerifyTestResult(
             name=test_case.name,
             action=test_case.action,

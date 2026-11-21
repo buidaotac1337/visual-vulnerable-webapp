@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (chưa triển khai, là điều kiện tiên quyết của Lab 03, 04, 05, 07)
+Accepted — đã triển khai (`app/services/session_actor.py`, `useLabActor`, `ActorSwitcher`)
 
 * **Date:** 2026-11-21
 * **Deciders:** Maintainers / Agents

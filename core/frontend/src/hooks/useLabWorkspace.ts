@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { executeLabAction, mergeExecutionTrace } from '@/lib';
 import type {
   ExecuteActionOptions,
   HealthResponse,
@@ -16,6 +15,15 @@ import type {
   WorkspaceNotice,
 } from '@/types';
 
+import {
+  buildMergedTrace,
+  defaultPayloadForLab,
+  getErrorMessage,
+  isSameContext,
+  runExecutionRequest,
+} from './labExecution';
+import type { ActiveRequestContext, ExecutionRequest } from './labExecution';
+import { useLabActor } from './useLabActor';
 import { useLabCatalog } from './useLabCatalog';
 import { useLabMaintenance } from './useLabMaintenance';
 import { useLabSourceSync } from './useLabSourceSync';
@@ -30,6 +38,9 @@ export interface LabWorkspaceController {
   isLoadingLabs: boolean;
   selectedLab: LabMetadata | null;
   mode: LabMode;
+  /** Personas declared by the lab and the active one (ADR-0005). */
+  actors: readonly string[];
+  actor: string | null;
   activeTab: InspectorTab;
   source: LabSourceResponse | null;
   sourceError: string | null;
@@ -49,6 +60,7 @@ export interface LabWorkspaceController {
   playback: TracePlaybackController;
   selectLab: (labId: string) => void;
   changeMode: (nextMode: LabMode) => void;
+  changeActor: (name: string) => void;
   setActiveTab: (tab: InspectorTab) => void;
   selectPipelineLayer: (layer: TraceLayer) => void;
   updatePayload: (next: LabPayload) => void;
@@ -63,48 +75,6 @@ export interface LabWorkspaceController {
   handleVerify: () => Promise<void>;
   closeVerifyModal: () => void;
   handleDownloadSnippet: () => Promise<void>;
-}
-
-function defaultPayloadForLab(lab: LabMetadata | null): LabPayload {
-  const firstSample = lab?.samplePayloads[0];
-  return firstSample ? { ...firstSample.data } : {};
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error && error.message.length > 0 ? error.message : fallback;
-}
-
-function isSameContext(
-  ctx: { labId: string | null; mode: LabMode },
-  labId: string,
-  mode: LabMode,
-): boolean {
-  return ctx.labId === labId && ctx.mode === mode;
-}
-
-async function runExecutionRequest(
-  labId: string,
-  mode: LabMode,
-  action: string,
-  body: LabPayload,
-  silent: boolean,
-  refreshSource: () => Promise<void>,
-): Promise<LabExecutionResponse> {
-  const execPromise = executeLabAction(labId, mode, action, body);
-  if (silent) {
-    return execPromise;
-  }
-  const [execResp] = await Promise.all([execPromise, refreshSource()]);
-  return execResp;
-}
-
-function buildMergedTrace(
-  execResp: LabExecutionResponse,
-  options?: ExecuteActionOptions,
-): ReturnType<typeof mergeExecutionTrace> {
-  const before = options?.frontendStepsBefore ?? [];
-  const after = options?.frontendStepsAfter ? options.frontendStepsAfter(execResp) : [];
-  return mergeExecutionTrace(before, execResp.trace, after);
 }
 
 /**
@@ -125,11 +95,10 @@ export function useLabWorkspace(): LabWorkspaceController {
   const [lastResponse, setLastResponse] = useState<LabExecutionResponse | null>(null);
   const [notice, setNotice] = useState<WorkspaceNotice | null>(null);
 
-  const activeCtxRef = useRef<{ labId: string | null; mode: LabMode }>({
-    labId: selectedLabId,
-    mode,
-  });
-  activeCtxRef.current = { labId: selectedLabId, mode };
+  const selectedLab = labs.find((item) => item.id === selectedLabId) ?? null;
+  const { actors, actor, setActor } = useLabActor(selectedLab);
+  const activeCtxRef = useRef<ActiveRequestContext>({ labId: selectedLabId, mode, actor });
+  activeCtxRef.current = { labId: selectedLabId, mode, actor };
   const inFlightRef = useRef<number>(0);
 
   const playback = useTracePlayback();
@@ -143,7 +112,6 @@ export function useLabWorkspace(): LabWorkspaceController {
     setNotice,
   });
 
-  const selectedLab = labs.find((item) => item.id === selectedLabId) ?? null;
   const payload = useMemo<LabPayload>(
     () => (selectedLab ? (payloadsByLab[selectedLab.id] ?? defaultPayloadForLab(selectedLab)) : {}),
     [selectedLab, payloadsByLab],
@@ -171,6 +139,15 @@ export function useLabWorkspace(): LabWorkspaceController {
     [playback],
   );
 
+  const changeActor = useCallback(
+    (name: string): void => {
+      setActor(name);
+      setLastResponse(null);
+      playback.clearTrace();
+    },
+    [setActor, playback],
+  );
+
   const selectPipelineLayer = useCallback(
     (layer: TraceLayer): void => {
       playback.jumpToLayer(layer);
@@ -194,9 +171,12 @@ export function useLabWorkspace(): LabWorkspaceController {
         return;
       }
       setPayloadsByLab((prev) => ({ ...prev, [selectedLabId]: { ...sample.data } }));
+      if (sample.actor) {
+        setActor(sample.actor);
+      }
       setInputFlashSeq((seq) => seq + 1);
     },
-    [selectedLabId],
+    [selectedLabId, setActor],
   );
 
   const executeAction = useCallback(
@@ -208,8 +188,13 @@ export function useLabWorkspace(): LabWorkspaceController {
       if (!selectedLabId) {
         return null;
       }
-      const reqLabId = selectedLabId;
-      const reqMode = mode;
+      const req: ExecutionRequest = {
+        labId: selectedLabId,
+        mode,
+        actor,
+        action,
+        body: overridePayload ?? payload,
+      };
       const silent = options?.silent === true;
       inFlightRef.current += 1;
       setIsExecuting(true);
@@ -217,21 +202,14 @@ export function useLabWorkspace(): LabWorkspaceController {
         setNotice(null);
       }
       try {
-        const execResp = await runExecutionRequest(
-          reqLabId,
-          reqMode,
-          action,
-          overridePayload ?? payload,
-          silent,
-          refreshSource,
-        );
-        if (!silent && isSameContext(activeCtxRef.current, reqLabId, reqMode)) {
+        const execResp = await runExecutionRequest(req, silent, refreshSource);
+        if (!silent && isSameContext(activeCtxRef.current, req)) {
           setLastResponse(execResp);
           playback.startTrace(buildMergedTrace(execResp, options));
         }
         return execResp;
       } catch (error: unknown) {
-        if (!silent && isSameContext(activeCtxRef.current, reqLabId, reqMode)) {
+        if (!silent && isSameContext(activeCtxRef.current, req)) {
           setNotice({ tone: 'danger', message: getErrorMessage(error, 'Lỗi thực thi bài lab.') });
         }
         return null;
@@ -240,7 +218,7 @@ export function useLabWorkspace(): LabWorkspaceController {
         setIsExecuting(inFlightRef.current > 0);
       }
     },
-    [selectedLabId, payload, mode, refreshSource, playback],
+    [selectedLabId, payload, mode, actor, refreshSource, playback],
   );
 
   return {
@@ -250,6 +228,8 @@ export function useLabWorkspace(): LabWorkspaceController {
     isLoadingLabs,
     selectedLab,
     mode,
+    actors,
+    actor,
     activeTab,
     source,
     sourceError,
@@ -269,6 +249,7 @@ export function useLabWorkspace(): LabWorkspaceController {
     playback,
     selectLab,
     changeMode,
+    changeActor,
     setActiveTab,
     selectPipelineLayer,
     updatePayload,

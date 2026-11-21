@@ -50,6 +50,8 @@ export function App(): JSX.Element {
             isLoadingLabs={ws.isLoadingLabs}
             lab={ws.selectedLab}
             mode={ws.mode}
+            actors={ws.actors}
+            actor={ws.actor}
             payload={ws.payload}
             inputFlashSeq={ws.inputFlashSeq}
             dbResetSeq={ws.dbResetSeq}
@@ -57,6 +59,7 @@ export function App(): JSX.Element {
             lastResponse={ws.lastResponse}
             pipelineNodes={pipelineNodes}
             onPayloadChange={ws.updatePayload}
+            onChangeActor={ws.changeActor}
             onSelectSamplePayload={ws.applySamplePayload}
             onExecute={ws.executeAction}
             onSelectPipelineLayer={ws.selectPipelineLayer}

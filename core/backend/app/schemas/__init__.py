@@ -14,12 +14,16 @@ from app.schemas.lab import (
     TraceStep,
     VerifyTestCase,
 )
+from app.schemas.session import ACTOR_USERNAME_PATTERN, LabActor, LabContext
 from app.schemas.source import LabSourceResponse, ParsedSourceFile
 from app.schemas.system import ResetDatabaseResponse
 from app.schemas.verify import VerifyLabResponse, VerifyTestResult
 
 __all__ = [
+    "ACTOR_USERNAME_PATTERN",
     "HealthResponse",
+    "LabActor",
+    "LabContext",
     "LabExecutionMeta",
     "LabExecutionResponse",
     "LabListResponse",

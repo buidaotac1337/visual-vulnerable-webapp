@@ -15,6 +15,7 @@ import type {
 } from '@/types';
 
 import { FlowPipeline } from '../pipeline';
+import { ActorSwitcher } from './ActorSwitcher';
 import { EmptyLabFallback } from './EmptyLabFallback';
 import { PayloadChipBar } from './PayloadChipBar';
 
@@ -22,6 +23,8 @@ interface SandboxPaneProps {
   isLoadingLabs: boolean;
   lab: LabMetadata | null;
   mode: LabMode;
+  actors: readonly string[];
+  actor: string | null;
   payload: LabPayload;
   inputFlashSeq: number;
   dbResetSeq: number;
@@ -29,6 +32,7 @@ interface SandboxPaneProps {
   lastResponse: LabExecutionResponse | null;
   pipelineNodes: readonly PipelineNodeModel[];
   onPayloadChange: (next: LabPayload) => void;
+  onChangeActor: (name: string) => void;
   onSelectSamplePayload: (sample: SamplePayload) => void;
   onExecute: (
     action: string,
@@ -86,6 +90,8 @@ export function SandboxPane({
   isLoadingLabs,
   lab,
   mode,
+  actors,
+  actor,
   payload,
   inputFlashSeq,
   dbResetSeq,
@@ -93,6 +99,7 @@ export function SandboxPane({
   lastResponse,
   pipelineNodes,
   onPayloadChange,
+  onChangeActor,
   onSelectSamplePayload,
   onExecute,
   onSelectPipelineLayer,
@@ -119,6 +126,15 @@ export function SandboxPane({
         </div>
       )}
 
+      {lab && (
+        <ActorSwitcher
+          actors={actors}
+          actor={actor}
+          disabled={isExecuting}
+          onChange={onChangeActor}
+        />
+      )}
+
       {!lab ? (
         <EmptyLabFallback kind="no-labs" isLoading={isLoadingLabs} />
       ) : LazyLabView ? (
@@ -134,6 +150,7 @@ export function SandboxPane({
               key={lab.id}
               lab={lab}
               mode={mode}
+              actor={actor}
               payload={payload}
               onPayloadChange={onPayloadChange}
               inputFlashSeq={inputFlashSeq}
@@ -150,6 +167,7 @@ export function SandboxPane({
           kind="generic-runner"
           lab={lab}
           mode={mode}
+          actor={actor}
           payload={payload}
           onPayloadChange={onPayloadChange}
           inputFlashSeq={inputFlashSeq}

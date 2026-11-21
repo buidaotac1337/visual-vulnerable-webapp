@@ -30,6 +30,8 @@ export interface ExecuteActionOptions {
 export interface LabViewProps {
   lab: LabMetadata;
   mode: LabMode;
+  /** Logged-in persona sent as the X-VVWA-Actor session header (display only). */
+  actor: string | null;
   payload: LabPayload;
   onPayloadChange: (next: LabPayload) => void;
   inputFlashSeq: number;

@@ -92,7 +92,7 @@ Ví dụ test frontend cho Lab 02 Stored XSS, dùng toán tử `$contains` ([đ�
 * [x] Tính năng **Test My Fix** cho backend (`verifier.py`).
 
 ### Giai đoạn 2 — Bộ Bài Lab Cốt lõi (Tuần 3–4)
-* [ ] Triển khai [ADR-0005](adr/0005-lab-session-actor-context.md): header `X-VVWA-Actor`, `LabContext`/`ctx`, bộ chọn persona.
+* [x] Triển khai [ADR-0005](adr/0005-lab-session-actor-context.md): header `X-VVWA-Actor`, `LabContext`/`ctx`, bộ chọn persona.
 * [ ] Triển khai [ADR-0006](adr/0006-frontend-sink-grading-and-verify-matchers.md): cặp sink `frontend/vulnerable.tsx`/`secure.tsx`, bộ chấm frontend trong document trơ, toán tử `$contains`/`$notContains`, ESLint chặn sink.
 * [ ] **Lab 02: Stored XSS (Đánh giá sản phẩm)** — Render `dangerouslySetInnerHTML` trên React vs render dạng chữ (React tự escape); CSP chỉ minh họa, không chấm. *Cần ADR-0006.*
 * [ ] **Lab 03: IDOR / Broken Access Control (Xem chi tiết đơn hàng)** — `GET /orders/{order_id}` không kiểm tra chủ sở hữu vs kiểm tra `order.user_id == ctx.actor.id`. *Cần ADR-0005.*
