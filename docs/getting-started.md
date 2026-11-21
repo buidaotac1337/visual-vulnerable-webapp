@@ -20,13 +20,14 @@ cd visual-vulnerable-webapp
 docker compose up --build
 ```
 
-Compose khởi động theo thứ tự `postgres` → `backend` → `frontend`, mỗi service chờ service trước báo healthy. Lần chạy đầu cần build image nên lâu hơn.
+Compose khởi động song song `postgres` và `internal-metadata` → `backend` (chờ cả hai báo healthy) → `frontend` (chờ `backend` báo healthy). Lần chạy đầu cần build image nên lâu hơn.
 
 | Service | Container | Địa chỉ | Health check |
 | :--- | :--- | :--- | :--- |
 | `frontend` | `vvwa-frontend` | <http://localhost:5173> | — |
 | `backend` | `vvwa-backend` | <http://localhost:8000> | `GET /api/health` |
 | `postgres` | `vvwa-postgres` | `localhost:5432` | `pg_isready` |
+| `internal-metadata` | `vvwa-internal-metadata` | Chỉ mạng nội bộ `:8090`, không mở cổng ra host (alias `minishop-cdn`) | `GET /health` |
 
 OpenAPI (Swagger UI) của backend có tại <http://localhost:8000/docs>.
 
@@ -73,6 +74,9 @@ cp .env.example .env
 | `VVWA_ADMIN_DATABASE_URL` | `postgresql://lab_admin_user:…@postgres:5432/minishop` | DSN quản trị, chỉ dùng cho Reset DB |
 | `VVWA_LABS_DIR` | `<repo>/labs` | Thư mục chứa các lab |
 | `VVWA_SEED_SQL_PATH` | `<repo>/core/postgres/seed.sql` | Script seed chạy khi Reset DB |
+| `VVWA_UPLOAD_SANDBOX_DIR` | `<tempdir>/vvwa-uploads` (`/tmp/vvwa-uploads` trong container) | Thư mục sandbox cô lập cho bài lab upload file (Lab 07, nằm ngoài `labs/` và repo) |
+| `VVWA_SSRF_ALLOWED_HOSTS` | `minishop-cdn` | Danh sách hostname cho phép khi chạy bản vá Lab 09 SSRF, phân tách bằng dấu phẩy |
+| `VVWA_SSRF_DEMO_CDN_HOST` | `minishop-cdn` | Hostname demo CDN nội bộ trên mạng bridge Docker cho Lab 09 |
 | `VVWA_DB_POOL_MIN_SIZE` / `VVWA_DB_POOL_MAX_SIZE` | `1` / `10` | Kích thước pool `asyncpg` |
 | `VVWA_DB_CONNECT_TIMEOUT` | `5.0` | Timeout kết nối PostgreSQL (giây) |
 
