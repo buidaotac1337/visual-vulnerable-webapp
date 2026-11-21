@@ -11,7 +11,7 @@ Accepted — đã triển khai (`app/services/session_actor.py`, `useLabActor`, 
 
 Handler của bài lab hiện có chữ ký `async def action(payload, db)` ([lab_loader.py](../../core/backend/app/services/lab_loader.py)). Engine không có khái niệm "ai đang đăng nhập", và trong `core/backend/app` không có auth hay session nào.
 
-Các bài lab Giai đoạn 2–3 trong [roadmap](../04-lab-authoring-and-roadmap.md) đều cần danh tính đó:
+Các bài lab Giai đoạn 2–3 trong [roadmap](../roadmap.md) đều cần danh tính đó:
 
 * **Lab 03 IDOR:** bản an toàn phải so sánh `order.user_id == current_user.id`.
 * **Lab 04 Business Logic:** cần biết ai đặt hàng và trừ số dư của ai.

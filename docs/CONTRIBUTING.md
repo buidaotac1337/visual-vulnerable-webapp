@@ -1,53 +1,106 @@
-# Contributing Guide — Visual Vulnerable Web App (VVWA)
+# Đóng góp
 
-Tài liệu hướng dẫn quy trình phát triển chuẩn cho cả thành viên dự án lẫn AI coding agents. Xem thêm bản tóm tắt kỹ thuật tại [AGENTS.md](../AGENTS.md).
+Quy trình phát triển VVWA: môi trường dev, quy ước nhánh và commit, Quality Gates, chuẩn code và ADR. Bản tóm tắt dành cho AI coding agents: [AGENTS.md](../AGENTS.md).
 
-## 1. Cài đặt môi trường Local
+## 1. Môi trường phát triển
 
-### Yêu cầu tối thiểu
-* **Python package manager:** `uv` (đã pin Python `3.12.14` trong `.python-version`).
-* **Containers:** Docker Desktop (chạy toàn bộ stack qua `docker compose up` và tự động làm fallback cho Frontend gate nếu máy chưa cài Node).
-* *(Khuyến nghị để chạy hook Frontend nhanh hơn)*: Node.js `22.21.1` + `pnpm` `10.12.1`.
+| Công cụ | Phiên bản | Bắt buộc |
+| :--- | :--- | :---: |
+| `uv` | Python `3.12.14` (pin trong `.python-version`) | ✓ |
+| Docker Desktop | Compose v2 | ✓ (chạy stack, gate `infra`, fallback cho gate `frontend`) |
+| Node.js + `pnpm` | `22.21.1` (`core/frontend/.nvmrc`) + `10.12.1` | Khuyến nghị (gate `frontend` chạy nhanh hơn khi có sẵn) |
 
-### Khởi tạo lần đầu
 ```bash
-# 1. Cài môi trường Python + dev tooling từ uv.lock
+# Cài môi trường Python và dev tooling từ uv.lock
 uv sync --frozen
 
-# 2. Cài git hooks tự động (pre-commit, commit-msg, pre-push)
+# Cài git hooks (pre-commit, commit-msg, pre-push)
 uv run pre-commit install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
 
-# 3. Tạo file biến môi trường local
+# (Tùy chọn) biến môi trường local
 cp .env.example .env
 ```
 
-## 2. Quy chuẩn Tạo Nhánh & Commit
+Chạy stack: xem [Cài đặt & Vận hành](getting-started.md).
 
-1. **Luôn tách nhánh từ `main`** theo mẫu `<type>/<short-kebab-slug>`:
-   * `feat/` — Tính năng nền tảng mới (`feat/source-reader`)
-   * `lab/` — Thêm hoặc nâng cấp bài lab (`lab/01-sql-injection`)
-   * `fix/` — Sửa lỗi (`fix/cors-headers`)
-   * `docs/` — Chỉ cập nhật tài liệu (`docs/improve-setup-guide`)
-   * `adr/` — Thêm hoặc cập nhật Architecture Decision Record (`adr/0004-trace-format`)
-   * `refactor/`, `chore/`, `ci/` — Tái cấu trúc, bảo trì, CI/CD.
-2. **Tuân thủ Conventional Commits:**
-   * `<type>(<scope>): <mô tả ngắn gọn <= 72 ký tự>`
-   * Ví dụ: `feat(lab-01): implement vulnerable and secure login handlers`
+## 2. Nhánh & commit
 
-## 3. Chạy Quality Gates trước khi mở PR
+* Không commit trực tiếp lên `main`; hook `no-commit-to-branch` chặn việc này.
+* Tên nhánh: `<type>/<kebab-slug>` với `type` thuộc `feat`, `fix`, `lab`, `docs`, `refactor`, `chore`, `ci`, `adr`.
 
-Hệ thống tự động phân luồng theo file bạn thay đổi:
+  | Type | Dùng cho | Ví dụ |
+  | :--- | :--- | :--- |
+  | `feat` | Tính năng nền tảng | `feat/source-reader` |
+  | `lab` | Thêm hoặc nâng cấp bài lab | `lab/02-stored-xss` |
+  | `fix` | Sửa lỗi | `fix/cors-headers` |
+  | `docs` | Chỉ tài liệu | `docs/improve-setup-guide` |
+  | `adr` | Thêm hoặc cập nhật ADR | `adr/0007-race-condition-tests` |
+  | `refactor`, `chore`, `ci` | Tái cấu trúc, bảo trì, CI/CD | `ci/cache-pnpm` |
+
+* Commit theo Conventional Commits, tiêu đề tối đa 72 ký tự:
+
+  ```text
+  <type>(<scope>): <mô tả ngắn>
+  ```
+
+  `type` cho commit còn chấp nhận thêm `test`, `style`, `perf`, `build`. Ví dụ: `feat(lab-01): implement vulnerable and secure login handlers`.
+
+## 3. Quality Gates
+
+Chạy trước mỗi commit và PR. Gate được chọn tự động theo file thay đổi:
+
 ```bash
-# Tự động chọn đúng gate dựa trên git status
 uv run python scripts/gates.py --auto
-
-# Hoặc chạy đích danh từng gate
-uv run python scripts/gates.py --gate docs
-uv run python scripts/gates.py --gate backend
-uv run python scripts/gates.py --gate frontend
-uv run python scripts/gates.py --gate infra
 ```
 
-## 4. Khi nào cần viết ADR?
+| Gate | Kích hoạt khi đổi | Nội dung kiểm tra |
+| :--- | :--- | :--- |
+| `hygiene` | Luôn chạy | Tên nhánh (và tiêu đề PR trên CI) |
+| `docs` | `docs/**`, `*.md`, `LICENSE`, `scripts/**`, `pyproject.toml` | Link tương đối trong Markdown, đặt tên và đăng ký ADR |
+| `backend` | `core/backend/**`, `labs/*/backend/**`, `labs/*/meta.json`, `scripts/**`, `pyproject.toml`, `uv.lock`, `.python-version` | Giới hạn dòng, barrel, `ruff check`, `ruff format --check`, `mypy --strict`, `pytest` |
+| `frontend` | `core/frontend/**`, `labs/*/frontend/**`, `scripts/**`, `pyproject.toml` | Giới hạn dòng, barrel, `pnpm lint`, `format:check`, `typecheck`, `test`, `build` (dùng Docker `node:22.21.1-alpine` nếu máy không có `pnpm`) |
+| `infra` | `docker-compose.yml`, `**/Dockerfile`, `.dockerignore`, `core/postgres/**`, `.github/**`, `.pre-commit-config.yaml`, `.env.example`, `scripts/**` | `init.sql`/`seed.sql` không rỗng, `docker compose config` |
 
-Mọi thay đổi kiến trúc quan trọng đều phải được ghi nhận tại [docs/adr/README.md](adr/README.md) theo mẫu [docs/adr/0000-template.md](adr/0000-template.md). Gate `docs` sẽ tự động kiểm tra tính đồng bộ của thư mục ADR.
+Chạy đích danh:
+
+```bash
+uv run python scripts/gates.py --gate docs      # hoặc backend | frontend | infra | all
+```
+
+Bộ phân loại ở [`scripts/quality/classifier.py`](../scripts/quality/classifier.py) và bộ lọc đường dẫn ở [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) phải luôn khớp nhau. CI tổng hợp kết quả qua job `ci-summary`.
+
+## 4. Chuẩn code
+
+| Quy tắc | Chi tiết |
+| :--- | :--- |
+| Kích thước file | Mọi `.py`, `.ts`, `.tsx`, `.css`, `.sql` trong `core/`, `labs/`, `scripts/` tối đa **350 dòng**, cảnh báo từ 281 dòng |
+| Độ phức tạp | McCabe ≤ 10 (Ruff `C90`, ESLint `complexity`) |
+| Barrel import | Python: `__init__.py` có `__all__`, import qua package (`from app.schemas import HealthResponse`). Frontend: `index.ts`, import qua `@/components`, `@/hooks`, `@/lib`, `@/types` |
+| Type & tài liệu | Python: `mypy --strict`, Ruff `ANN` + `D` (docstring Google). Frontend: `tsc --noEmit` strict, `noUncheckedIndexedAccess`, `explicit-function-return-type`, JSDoc cho symbol export |
+| Pin version | Python `==` trong `pyproject.toml` + `uv lock`; `pnpm` không dùng `^`/`~`; Docker và GitHub Actions dùng tag cụ thể, không `:latest` |
+| Ranh giới bảo mật | Lỗ hổng có chủ đích chỉ trong `labs/<id>/backend/vulnerable.py` và `labs/<id>/frontend/vulnerable.tsx` ([Kiến trúc](architecture.md#8-ranh-giới-bảo-mật)) |
+
+Cấu hình ngưỡng là SSOT trong `[tool.vvwa.quality]` của [`pyproject.toml`](../pyproject.toml).
+
+## 5. ADR
+
+Tạo ADR mới khi thay đổi:
+
+* Framework, database, package manager hoặc thư viện lõi (thêm, thay, gỡ).
+* Hợp đồng API, cấu trúc `trace`, schema `meta.json`, cú pháp `@step` / `@snippet`.
+* Cấu trúc thư mục, ranh giới `core/` – `labs/`, quy chuẩn barrel, ngưỡng Quality Gate.
+* Cơ chế sandbox hoặc phân quyền PostgreSQL.
+
+Các bước:
+
+1. Sao chép [`docs/adr/0000-template.md`](adr/0000-template.md) thành `NNNN-short-kebab-title.md`.
+2. Điền đủ `## Status`, `## Context`, `## Decision`, `## Consequences`.
+3. Thêm một dòng vào bảng trong [`docs/adr/README.md`](adr/README.md).
+4. Chạy `uv run python scripts/gates.py --gate docs`.
+
+## 6. Pull request
+
+* Tiêu đề PR theo Conventional Commits (CI kiểm tra).
+* Điền checklist trong [`.github/pull_request_template.md`](../.github/pull_request_template.md).
+* Thêm bài lab mới: làm theo [Tạo bài lab](lab-authoring.md#9-checklist-trước-khi-mở-pr).
+* Cập nhật tài liệu liên quan trong cùng PR khi thay đổi hành vi, API hoặc schema.

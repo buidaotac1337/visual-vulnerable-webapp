@@ -2,7 +2,7 @@
 @source '../../../../labs';
 
 :root {
-  /* Semantic Security Tokens (SSOT from docs/05-design-system.md) */
+  /* Semantic Security Tokens (documented in docs/design-system.md) */
   --color-danger: #ef4444;
   --color-danger-soft: rgba(239, 68, 68, 0.16);
   --color-safe: #10b981;

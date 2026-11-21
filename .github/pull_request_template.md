@@ -18,4 +18,5 @@
 - [ ] Đầy đủ Type Hinting & Docstrings / JSDoc.
 - [ ] Mọi package mới (nếu có) đều pin exact version và cập nhật lockfile (`uv.lock` / `pnpm-lock.yaml`).
 - [ ] Nếu có thay đổi kiến trúc: đã tạo & đăng ký ADR trong `docs/adr/README.md`.
-- [ ] Không đưa mã lỗ hổng có chủ đích ra ngoài `labs/<id>/backend/vulnerable.py` hoặc lab sandbox UI.
+- [ ] Không đưa mã lỗ hổng có chủ đích ra ngoài `labs/<id>/backend/vulnerable.py` và `labs/<id>/frontend/vulnerable.tsx` (`LabView.tsx`, `secure.*` và `core/` không chứa sink).
+- [ ] Đã cập nhật tài liệu trong `docs/` nếu thay đổi hành vi, API hoặc schema.

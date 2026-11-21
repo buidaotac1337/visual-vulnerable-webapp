@@ -1,22 +1,33 @@
-# MiniShop Security Labs (`labs/`)
+# Labs
 
-Thư mục này chứa toàn bộ bài thực hành lỗ hổng bảo mật & *Safety Pattern* mà sinh viên mở trực tiếp để đọc, thử nghiệm và tự sửa code với Hot Reload.
+Mỗi thư mục con là một bài lab độc lập, được backend tự phát hiện qua `meta.json`.
 
-## Quy chuẩn cấu trúc mỗi bài Lab
+| ID | Lab | Nhóm | Mức độ |
+| :--- | :--- | :--- | :--- |
+| [`01-sql-injection`](01-sql-injection/README.md) | SQL Injection — Đăng nhập & Tìm kiếm MiniShop | Injection | Cơ bản |
 
-Xem đặc tả đầy đủ tại [docs/04-lab-authoring-and-roadmap.md](../docs/04-lab-authoring-and-roadmap.md):
+## Cấu trúc một lab
 
 ```text
 labs/<id>-<slug>/
-├── meta.json          # Metadata, payload mẫu và bộ verifyTests
-├── README.md          # Giải thích lý thuyết ngắn gọn
+├── meta.json          # Metadata, payload mẫu, verifyTests
+├── README.md          # Lý thuyết lỗ hổng và safety pattern
 ├── backend/
-│   ├── vulnerable.py  # File có lỗ hổng sư phạm (sinh viên mở trực tiếp để vá)
-│   └── secure.py      # Bản chuẩn áp dụng Safety Pattern
+│   ├── vulnerable.py  # Bản có lỗ hổng (file cần vá)
+│   └── secure.py      # Bản áp dụng safety pattern
 └── frontend/
-    ├── LabView.tsx    # Giao diện MiniShop Sandbox cho bài lab (không chứa sink)
-    ├── vulnerable.tsx # (Tùy chọn, đi theo cặp) Sink frontend có lỗ hổng sinh viên vá
-    └── secure.tsx     # (Tùy chọn, đi theo cặp) Sink frontend an toàn
+    ├── LabView.tsx    # Giao diện MiniShop của lab (không chứa sink)
+    ├── vulnerable.tsx # Tùy chọn, đi theo cặp: sink frontend có lỗ hổng
+    └── secure.tsx     # Tùy chọn, đi theo cặp: sink frontend an toàn
 ```
 
-> **Lưu ý an toàn:** Chỉ đặt mã có lỗ hổng có chủ đích bên trong `labs/<id>/backend/vulnerable.py` và `labs/<id>/frontend/vulnerable.tsx`. Không tạo lỗ hổng trong `core/`, `LabView.tsx` hoặc các file `secure.*` ([ADR-0006](../docs/adr/0006-frontend-sink-grading-and-verify-matchers.md)).
+Đặc tả đầy đủ: [Tạo bài lab](../docs/lab-authoring.md).
+
+> [!IMPORTANT]
+> Mã lỗ hổng có chủ đích chỉ được đặt trong `backend/vulnerable.py` và `frontend/vulnerable.tsx`. `LabView.tsx`, `secure.*` và toàn bộ `core/` không chứa sink.
+
+Muốn khôi phục file đã sửa về bản gốc:
+
+```bash
+git checkout -- labs/<id>/backend/vulnerable.py
+```
