@@ -36,7 +36,8 @@ Nếu để lab tự đọc `user_id` từ `payload` thì chính cách làm đó
    * Kiểm tra định dạng `\A[a-z0-9_]{1,32}\Z`, sau đó tra bằng câu lệnh tham số hóa `SELECT id, username, role FROM users WHERE username = $1` qua `lab_app_user`.
    * Username sai định dạng hoặc không tồn tại sẽ trả lỗi miền mới `InvalidActorError`, ánh xạ sang **HTTP 400**.
    * `role` được đọc **trực tiếp từ DB ở mỗi request**, nên quyền bị leo thang ở Lab 05 có hiệu lực ngay. Reset DB khôi phục persona gốc.
-   * Engine chỉ truy vấn DB khi handler có khai báo `ctx`. Nếu handler không cần `ctx` thì header bị bỏ qua.
+   * **Định dạng** header được kiểm tra ở tầng dependency cho mọi request thực thi lab, trước khi chạm DB: header sai định dạng luôn trả 400, kể cả với handler không khai báo `ctx` (defense-in-depth).
+   * Engine chỉ **tra DB** khi handler có khai báo `ctx` (tham số nhận được keyword, tức không phải positional-only, `*ctx` hay `**ctx`). Nếu handler không cần `ctx` thì header đúng định dạng bị bỏ qua, kể cả khi username không tồn tại.
 3. **Hợp đồng handler:**
    * `LabActor(id: int, username: str, role: str)` và `LabContext(actor: LabActor | None)` là các Pydantic model `frozen`, export qua barrel `app.schemas`.
    * Engine dùng `inspect.signature` để kiểm tra. Handler nào có tham số tên `ctx` thì được gọi với `ctx=LabContext(...)`:

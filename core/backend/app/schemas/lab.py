@@ -108,7 +108,9 @@ class LabMetadata(BaseModel):
         """
         referenced = {item.actor for item in self.sample_payloads}
         referenced |= {item.actor for item in self.verify_tests}
-        unknown = sorted(name for name in referenced if name and name not in self.actors)
+        unknown = sorted(
+            name for name in referenced if name is not None and name not in self.actors
+        )
         if unknown:
             msg = f"Actors {unknown} are referenced but not declared in 'actors'."
             raise ValueError(msg)

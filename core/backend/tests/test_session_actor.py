@@ -31,6 +31,15 @@ async def plain(payload, db):
     return {"data": {"ok": True}, "meta": {"outcome": "normal"}, "trace": []}
 
 
+async def kw_only(payload, db, *, ctx):
+    return {"data": {"actor": ctx.actor.username if ctx.actor else None},
+            "meta": {"outcome": "normal"}, "trace": []}
+
+
+async def var_kw(payload, db, **ctx):
+    return {"data": {"extra": sorted(ctx)}, "meta": {"outcome": "normal"}, "trace": []}
+
+
 async def spoof_engine(payload, db):
     return {"data": {}, "meta": {"outcome": "normal"},
             "trace": [{"layer": "backend", "tag": "engine-session", "status": "safe",
@@ -200,12 +209,47 @@ def test_verify_runs_tests_under_declared_actor(tmp_path: Path) -> None:
     assert report["passed_count"] == 2
 
 
+def test_verify_reports_deleted_actor_as_failed_test(tmp_path: Path) -> None:
+    """A persona removed from the DB fails its verify test with an error instead of a 400."""
+    client, db = _client(tmp_path)
+    del db.users["bob"]
+    resp = client.post(f"/api/labs/{_LAB_ID}/verify")
+    assert resp.status_code == 200
+    report = resp.json()
+    assert report["passed"] is False
+    bob_result = report["results"][0]
+    assert bob_result["passed"] is False
+    assert "bob" in bob_result["error"]
+    assert report["results"][1]["passed"] is True
+
+
+def test_ctx_injection_respects_parameter_kind(tmp_path: Path) -> None:
+    """Keyword-only ctx is injected; **ctx is not treated as an opt-in and skips the lookup."""
+    client, db = _client(tmp_path)
+    headers = {"X-VVWA-Actor": "alice"}
+    kw_only = client.post(f"/api/labs/{_LAB_ID}/vulnerable/kw_only", json={}, headers=headers)
+    assert kw_only.json()["data"] == {"actor": "alice"}
+    assert db.lookups == 1
+
+    var_kw = client.post(f"/api/labs/{_LAB_ID}/vulnerable/var_kw", json={}, headers=headers)
+    body = var_kw.json()
+    assert body["ok"] is True
+    assert body["data"] == {"extra": []}
+    assert body["trace"] == []
+    assert db.lookups == 1
+
+
 @pytest.mark.parametrize(
     "overrides",
     [
         {"actors": ["Alice"]},
         {"actors": ["alice", "alice"]},
         {"actors": ["alice"]},
+        {
+            "verifyTests": [
+                {"name": "t", "action": "whoami", "input": {}, "expect": {}, "actor": ""}
+            ]
+        },
         {"samplePayloads": [{"label": "x", "description": "y", "data": {}, "actor": "eve"}]},
     ],
 )

@@ -1,7 +1,10 @@
 import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
+import { useState } from 'react';
+import type { JSX } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from '@/App';
+import { ActorSwitcher } from '@/components';
 import { useLabActor } from '@/hooks';
 import { ACTOR_HEADER, executeLabAction } from '@/lib';
 import type {
@@ -64,6 +67,41 @@ function sourceFor(labId: string): LabSourceResponse {
 }
 
 type FetchFn = (url: string, init?: RequestInit) => Promise<Response>;
+
+const RESPONSE_PANEL = 'Phản hồi từ hệ thống';
+
+function errJson(status: number, detail: string): Response {
+  return { ok: false, status, json: async () => ({ detail }) } as unknown as Response;
+}
+
+function stubWorkspaceFetch(exec: FetchFn): void {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn<FetchFn>(async (url, init) => {
+      if (url === '/api/health') return okJson(HEALTH);
+      if (url === '/api/labs') return okJson(LABS);
+      if (url.endsWith('/source')) return okJson(sourceFor(url.split('/')[3] ?? ''));
+      if (url.includes('/vulnerable/')) return exec(url, init);
+      return okJson({});
+    }),
+  );
+}
+
+function sendButton(): HTMLElement {
+  return screen.getByRole('button', { name: 'Gửi yêu cầu' });
+}
+
+function StatefulSwitcher(): JSX.Element | null {
+  const [actor, setActor] = useState<string>('alice');
+  return (
+    <ActorSwitcher
+      actors={['alice', 'bob', 'admin']}
+      actor={actor}
+      disabled={false}
+      onChange={setActor}
+    />
+  );
+}
 
 function okJson(body: unknown): Response {
   return { ok: true, status: 200, json: async () => body } as unknown as Response;
@@ -150,5 +188,76 @@ describe('ADR-0005 session actor', () => {
     expect(result.current.actor).toBeNull();
     rerender({ lab: IDOR_LAB });
     expect(result.current.actor).toBe('alice');
+  });
+
+  it('keeps the response when re-clicking the active persona and clears response and notice on a real persona change', async () => {
+    let failNext = false;
+    stubWorkspaceFetch(async () =>
+      failNext ? errJson(400, 'Unknown actor bob') : okJson(EXEC_OK),
+    );
+    render(<App />);
+    expect(await screen.findByRole('heading', { name: 'Lab 03 IDOR' })).toBeInTheDocument();
+
+    fireEvent.click(sendButton());
+    expect(await screen.findByText(RESPONSE_PANEL)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: 'alice' }));
+    expect(screen.getByText(RESPONSE_PANEL)).toBeInTheDocument();
+
+    // A sample chip that switches persona must not leave alice's result on screen.
+    fireEvent.click(screen.getByRole('button', { name: /Xem đơn người khác/ }));
+    expect(screen.getByRole('radio', { name: 'bob' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.queryByText(RESPONSE_PANEL)).toBeNull();
+
+    failNext = true;
+    fireEvent.click(sendButton());
+    expect(await screen.findByText('Unknown actor bob')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: 'alice' }));
+    expect(screen.queryByText('Unknown actor bob')).toBeNull();
+  });
+
+  it('drops a response that arrives after the persona changed mid-flight', async () => {
+    let release: (resp: Response) => void = () => undefined;
+    stubWorkspaceFetch(
+      () =>
+        new Promise<Response>((resolve) => {
+          release = resolve;
+        }),
+    );
+    render(<App />);
+    expect(await screen.findByRole('heading', { name: 'Lab 03 IDOR' })).toBeInTheDocument();
+
+    fireEvent.click(sendButton());
+    await waitFor(() => {
+      expect(screen.getByRole('radio', { name: 'alice' })).toBeDisabled();
+    });
+    // The switcher is disabled while executing, but a persona chip can still change it.
+    fireEvent.click(screen.getByRole('button', { name: /Xem đơn người khác/ }));
+    await act(async () => {
+      release(okJson(EXEC_OK));
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('radio', { name: 'bob' })).toBeEnabled();
+    });
+    expect(screen.queryByText(RESPONSE_PANEL)).toBeNull();
+  });
+
+  it('follows the WAI-ARIA radio group keyboard pattern with a single tab stop', () => {
+    render(<StatefulSwitcher />);
+    const radio = (name: string): HTMLElement => screen.getByRole('radio', { name });
+    expect(radio('alice')).toHaveAttribute('tabindex', '0');
+    expect(radio('bob')).toHaveAttribute('tabindex', '-1');
+
+    fireEvent.keyDown(radio('alice'), { key: 'ArrowRight' });
+    expect(radio('bob')).toHaveAttribute('aria-checked', 'true');
+    expect(radio('bob')).toHaveFocus();
+    expect(radio('bob')).toHaveAttribute('tabindex', '0');
+
+    fireEvent.keyDown(radio('bob'), { key: 'End' });
+    expect(radio('admin')).toHaveAttribute('aria-checked', 'true');
+    fireEvent.keyDown(radio('admin'), { key: 'ArrowDown' });
+    expect(radio('alice')).toHaveAttribute('aria-checked', 'true');
+    fireEvent.keyDown(radio('alice'), { key: 'ArrowLeft' });
+    expect(radio('admin')).toHaveFocus();
   });
 });

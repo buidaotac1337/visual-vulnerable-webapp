@@ -38,7 +38,7 @@ export function PayloadChipBar({ payloads, onSelect }: PayloadChipBarProps): JSX
             {sample.label}
             {sample.actor ? (
               <span className="ml-1.5 rounded-full bg-indigo-100 px-1.5 text-[10px] text-indigo-600">
-                as {sample.actor}
+                vai {sample.actor}
               </span>
             ) : null}
           </button>

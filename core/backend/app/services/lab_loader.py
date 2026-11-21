@@ -22,6 +22,7 @@ from app.services.session_actor import build_session_trace_step, resolve_lab_con
 from app.services.source_reader import resolve_lab_dir
 
 _ACTION_NAME_PATTERN = re.compile(r"\A[a-z][a-z0-9_]*\Z")
+_CTX_PARAM_KINDS = (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
 
 
 def validate_action_name(action: str) -> str:
@@ -80,16 +81,20 @@ def _load_fresh_module(module_path: Path, lab_id: str, mode: LabMode) -> ModuleT
 def _accepts_ctx(handler: Callable[..., Any]) -> bool:
     """Return True when a lab handler opts into the engine session via a `ctx` parameter.
 
+    Only parameters that accept a keyword argument count, because the engine
+    always passes `ctx=...`; positional-only, `*ctx`, and `**ctx` are ignored.
+
     Args:
         handler: Async lab handler function.
 
     Returns:
-        True if the handler signature declares a parameter named `ctx`.
+        True if the handler declares a keyword-capable parameter named `ctx`.
     """
     try:
-        return "ctx" in inspect.signature(handler).parameters
+        param = inspect.signature(handler).parameters.get("ctx")
     except (TypeError, ValueError):
         return False
+    return param is not None and param.kind in _CTX_PARAM_KINDS
 
 
 async def _run_handler(

@@ -141,11 +141,15 @@ export function useLabWorkspace(): LabWorkspaceController {
 
   const changeActor = useCallback(
     (name: string): void => {
+      if (name === actor || !actors.includes(name)) {
+        return;
+      }
       setActor(name);
       setLastResponse(null);
+      setNotice(null);
       playback.clearTrace();
     },
-    [setActor, playback],
+    [actor, actors, setActor, playback],
   );
 
   const selectPipelineLayer = useCallback(
@@ -172,11 +176,11 @@ export function useLabWorkspace(): LabWorkspaceController {
       }
       setPayloadsByLab((prev) => ({ ...prev, [selectedLabId]: { ...sample.data } }));
       if (sample.actor) {
-        setActor(sample.actor);
+        changeActor(sample.actor);
       }
       setInputFlashSeq((seq) => seq + 1);
     },
-    [selectedLabId, setActor],
+    [selectedLabId, changeActor],
   );
 
   const executeAction = useCallback(
