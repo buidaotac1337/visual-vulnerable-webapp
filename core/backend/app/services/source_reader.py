@@ -8,10 +8,16 @@ from pathlib import Path
 
 from app.core import InvalidLabIdError, LabNotFoundError
 from app.schemas import LabSourceResponse, ParsedSourceFile
+from app.services.frontend_sinks import (
+    FRONTEND_SECURE_FILE,
+    FRONTEND_VULNERABLE_FILE,
+    find_frontend_sink_pair,
+)
 
 _LAB_ID_PATTERN = re.compile(r"\A[a-z0-9][a-z0-9-]*\Z")
 _SNIPPET_START_RE = re.compile(r"\A\s*(?:#|//)\s*@snippet:start\s*\Z")
 _SNIPPET_END_RE = re.compile(r"\A\s*(?:#|//)\s*@snippet:end\s*\Z")
+_FRONTEND_LABELS = (FRONTEND_VULNERABLE_FILE, FRONTEND_SECURE_FILE)
 _STEP_TAG_RE = re.compile(r"\A\s*(?:#|//)\s*@step:([a-zA-Z0-9_-]+)\s*\Z")
 
 
@@ -127,12 +133,17 @@ def parse_snippet_source(raw_text: str) -> ParsedSourceFile:
     return ParsedSourceFile(code=code, steps=steps, line_count=len(cleaned_lines))
 
 
-def generate_unified_diff(vulnerable_code: str, secure_code: str) -> str:
+def generate_unified_diff(
+    vulnerable_code: str,
+    secure_code: str,
+    labels: tuple[str, str] = ("vulnerable.py", "secure.py"),
+) -> str:
     """Produce a normalized LF unified diff comparing vulnerable vs secure code.
 
     Args:
         vulnerable_code: Vulnerable source text.
         secure_code: Secure source text.
+        labels: (fromfile, tofile) header names shown in the diff.
 
     Returns:
         Unified diff string ending with LF when non-empty, or empty string if identical.
@@ -141,8 +152,8 @@ def generate_unified_diff(vulnerable_code: str, secure_code: str) -> str:
         difflib.unified_diff(
             vulnerable_code.splitlines(),
             secure_code.splitlines(),
-            fromfile="vulnerable.py",
-            tofile="secure.py",
+            fromfile=labels[0],
+            tofile=labels[1],
             lineterm="",
         ),
     )
@@ -178,7 +189,7 @@ def read_lab_source(labs_dir: Path, lab_id: str) -> LabSourceResponse:
         lab_id: Lab identifier to inspect.
 
     Returns:
-        LabSourceResponse with parsed vulnerable, secure, optional frontend, and diff.
+        LabSourceResponse with backend pair, diff, LabView, and optional frontend sink pair.
     """
     lab_dir = resolve_lab_dir(labs_dir, lab_id)
     vuln_raw = _read_required_file(lab_dir / "backend" / "vulnerable.py", lab_id)
@@ -194,17 +205,49 @@ def read_lab_source(labs_dir: Path, lab_id: str) -> LabSourceResponse:
         else None
     )
 
-    return LabSourceResponse(
+    response = LabSourceResponse(
         lab_id=lab_id,
         vulnerable=vulnerable,
         secure=secure,
         frontend=frontend,
         diff=generate_unified_diff(vulnerable.code, secure.code),
     )
+    sink_pair = find_frontend_sink_pair(lab_dir)
+    if sink_pair is None:
+        return response
+    fe_vuln = parse_snippet_source(sink_pair.vulnerable.read_text(encoding="utf-8"))
+    fe_sec = parse_snippet_source(sink_pair.secure.read_text(encoding="utf-8"))
+    return response.model_copy(
+        update={
+            "frontend_vulnerable": fe_vuln,
+            "frontend_secure": fe_sec,
+            "frontend_diff": generate_unified_diff(fe_vuln.code, fe_sec.code, _FRONTEND_LABELS),
+        },
+    )
+
+
+def _write_frontend_sink_pair(archive: zipfile.ZipFile, lab_dir: Path) -> None:
+    """Add vulnerable.tsx, secure.tsx, and frontend.diff.patch when the lab has a sink pair.
+
+    Args:
+        archive: Open ZIP archive being written.
+        lab_dir: Resolved labs/<id> directory.
+    """
+    sink_pair = find_frontend_sink_pair(lab_dir)
+    if sink_pair is None:
+        return
+    fe_vuln_raw = sink_pair.vulnerable.read_text(encoding="utf-8")
+    fe_sec_raw = sink_pair.secure.read_text(encoding="utf-8")
+    archive.writestr(FRONTEND_VULNERABLE_FILE, fe_vuln_raw)
+    archive.writestr(FRONTEND_SECURE_FILE, fe_sec_raw)
+    archive.writestr(
+        "frontend.diff.patch",
+        generate_unified_diff(fe_vuln_raw, fe_sec_raw, _FRONTEND_LABELS),
+    )
 
 
 def build_snippet_zip(labs_dir: Path, lab_id: str) -> bytes:
-    """Bundle vulnerable.py, secure.py, matching diff.patch, and README.md as ZIP.
+    """Bundle the backend pair, diff.patch, README.md, and any frontend sink pair as ZIP.
 
     Args:
         labs_dir: Root labs directory.
@@ -230,4 +273,5 @@ def build_snippet_zip(labs_dir: Path, lab_id: str) -> bytes:
         archive.writestr("secure.py", sec_raw)
         archive.writestr("diff.patch", diff_text)
         archive.writestr("README.md", readme_text)
+        _write_frontend_sink_pair(archive, lab_dir)
     return buffer.getvalue()

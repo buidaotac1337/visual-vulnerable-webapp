@@ -10,6 +10,8 @@ import type {
   TraceStepDraft,
 } from '@/types';
 
+import { getFrontendSinkFile, resolveFrontendFile } from './sourceFiles';
+
 const STATUS_SEVERITY: Record<TraceStatus, number> = {
   info: 1,
   safe: 2,
@@ -124,8 +126,26 @@ export function findFirstStepIndexForLayer(trace: readonly TraceStep[], layer: T
   return trace.findIndex((step) => step.layer === layer);
 }
 
+function resolveFrontendStepTarget(
+  tag: string,
+  source: LabSourceResponse,
+  mode: LabMode,
+): StepHighlightTarget | null {
+  const sinkLine = getFrontendSinkFile(source, mode)?.steps[tag];
+  if (sinkLine !== undefined) {
+    return { tab: 'frontend', lineNumber: sinkLine, frontendFile: 'sink' };
+  }
+  const labViewLine = source.frontend?.steps[tag];
+  if (labViewLine !== undefined) {
+    return { tab: 'frontend', lineNumber: labViewLine, frontendFile: 'labview' };
+  }
+  const fallback = resolveFrontendFile(source, mode);
+  return fallback ? { tab: 'frontend', lineNumber: null, frontendFile: fallback.kind } : null;
+}
+
 /**
  * Resolve which CodeInspector tab and 1-based line number correspond to a trace step.
+ * Frontend steps look in the mode's sink file first, then LabView.tsx (ADR-0006).
  *
  * @param step - Active trace step, or null when idle.
  * @param source - Live LabSourceResponse loaded from FastAPI.
@@ -140,11 +160,11 @@ export function resolveStepTarget(
   if (!step || !source) {
     return null;
   }
-  if (step.layer === 'frontend' && source.frontend) {
-    return {
-      tab: 'frontend',
-      lineNumber: source.frontend.steps[step.tag] ?? null,
-    };
+  if (step.layer === 'frontend') {
+    const frontendTarget = resolveFrontendStepTarget(step.tag, source, mode);
+    if (frontendTarget) {
+      return frontendTarget;
+    }
   }
   const backendFile = mode === 'vulnerable' ? source.vulnerable : source.secure;
   return {

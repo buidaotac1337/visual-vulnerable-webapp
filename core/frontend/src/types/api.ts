@@ -19,8 +19,9 @@ export interface SamplePayload {
   actor?: string | null;
 }
 
-/** Single automated assertion defined in meta.json verifyTests. */
-export interface VerifyTestCase {
+/** Backend assertion graded by POST /api/labs/{id}/verify (layer defaults to 'backend'). */
+export interface BackendVerifyTestCase {
+  layer?: 'backend';
   name: string;
   action: string;
   input: Record<string, unknown>;
@@ -28,6 +29,19 @@ export interface VerifyTestCase {
   /** Persona whose session the backend handler receives via ctx (ADR-0005). */
   actor?: string | null;
 }
+
+/** Frontend assertion rendered from frontend/vulnerable.tsx in an inert document (ADR-0006). */
+export interface FrontendVerifyTestCase {
+  layer: 'frontend';
+  name: string;
+  /** Named export of frontend/vulnerable.tsx to render. */
+  component: string;
+  props: Record<string, unknown>;
+  expect: Record<string, unknown>;
+}
+
+/** Single automated assertion defined in meta.json verifyTests. */
+export type VerifyTestCase = BackendVerifyTestCase | FrontendVerifyTestCase;
 
 /**
  * Validated lab metadata returned by GET /api/labs.
@@ -90,12 +104,24 @@ export interface LabSourceResponse {
   secure: ParsedSourceFile;
   frontend: ParsedSourceFile | null;
   diff: string;
+  /** frontend/vulnerable.tsx when the lab has a sink pair (ADR-0006). */
+  frontend_vulnerable?: ParsedSourceFile | null;
+  /** frontend/secure.tsx when the lab has a sink pair (ADR-0006). */
+  frontend_secure?: ParsedSourceFile | null;
+  /** Unified diff of the frontend sink pair, or null without a pair. */
+  frontend_diff?: string | null;
 }
 
-/** Outcome of one automated verification test case from POST /api/labs/{id}/verify. */
+/** Layer a verify test belongs to: graded by FastAPI or in the browser (ADR-0006). */
+export type VerifyLayer = 'backend' | 'frontend';
+
+/** Outcome of one automated verification test case (backend API or frontend runner). */
 export interface VerifyTestResult {
   name: string;
+  /** Backend action name, or the frontend component export name. */
   action: string;
+  /** Defaults to 'backend' when absent. */
+  layer?: VerifyLayer;
   passed: boolean;
   expected: Record<string, unknown>;
   actual: Record<string, unknown>;

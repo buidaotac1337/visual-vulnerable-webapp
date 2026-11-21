@@ -1,8 +1,17 @@
 """Pydantic schemas for lab metadata discovery and execution trace responses."""
 
-from typing import Any, Literal
+import re
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Discriminator,
+    Field,
+    Tag,
+    field_validator,
+    model_validator,
+)
 
 from app.schemas.session import ACTOR_USERNAME_PATTERN
 
@@ -10,6 +19,9 @@ LabMode = Literal["vulnerable", "secure"]
 TraceLayer = Literal["frontend", "backend", "database"]
 TraceStatus = Literal["info", "warning", "danger", "safe"]
 TraceOutcome = Literal["exploited", "blocked", "normal", "error"]
+VerifyLayer = Literal["backend", "frontend"]
+
+_COMPONENT_NAME_PATTERN = re.compile(r"\A[A-Z][A-Za-z0-9]*\Z")
 
 
 class SamplePayload(BaseModel):
@@ -28,10 +40,11 @@ class SamplePayload(BaseModel):
     actor: str | None = None
 
 
-class VerifyTestCase(BaseModel):
-    """Single automated assertion executed by the Test My Fix verifier.
+class BackendVerifyTest(BaseModel):
+    """Backend assertion run by POST /api/labs/{id}/verify against backend/vulnerable.py.
 
     Attributes:
+        layer: Always 'backend' (the default when meta.json omits `layer`).
         name: Human-readable test case title displayed in VerifyModal.
         action: Async handler name inside labs/<id>/backend/vulnerable.py.
         input: Request JSON payload supplied to the handler.
@@ -39,11 +52,69 @@ class VerifyTestCase(BaseModel):
         actor: Optional persona whose session the handler receives via ctx.
     """
 
+    layer: Literal["backend"] = "backend"
     name: str
     action: str
     input: dict[str, Any]
     expect: dict[str, Any]
     actor: str | None = None
+
+
+class FrontendVerifyTest(BaseModel):
+    """Frontend assertion run in the browser against frontend/vulnerable.tsx (ADR-0006).
+
+    Attributes:
+        layer: Always 'frontend'.
+        name: Human-readable test case title displayed in VerifyModal.
+        component: Named export of frontend/vulnerable.tsx to render.
+        props: Props passed to the component inside the inert document.
+        expect: Expectation matched against the DOM probe observation.
+    """
+
+    layer: Literal["frontend"]
+    name: str
+    component: str
+    props: dict[str, Any] = Field(default_factory=dict)
+    expect: dict[str, Any]
+
+    @field_validator("component")
+    @classmethod
+    def _validate_component_name(cls, value: str) -> str:
+        """Require a PascalCase export name so it can only address a React component.
+
+        Args:
+            value: Raw component name from meta.json.
+
+        Returns:
+            The unchanged component name.
+
+        Raises:
+            ValueError: If the name is not a PascalCase identifier.
+        """
+        if not _COMPONENT_NAME_PATTERN.match(value):
+            msg = f"Invalid component name '{value}'; expected a PascalCase export."
+            raise ValueError(msg)
+        return value
+
+
+def _verify_layer(value: Any) -> str:  # noqa: ANN401
+    """Pick the verifyTests union member, defaulting to 'backend' when `layer` is absent.
+
+    Args:
+        value: Raw dict from meta.json or an already-built model.
+
+    Returns:
+        Discriminator tag ('backend', 'frontend', or the unknown raw value).
+    """
+    if isinstance(value, dict):
+        return str(value.get("layer", "backend"))
+    return str(getattr(value, "layer", "backend"))
+
+
+VerifyTestCase = Annotated[
+    Annotated[BackendVerifyTest, Tag("backend")] | Annotated[FrontendVerifyTest, Tag("frontend")],
+    Discriminator(_verify_layer),
+]
 
 
 class LabMetadata(BaseModel):
@@ -107,7 +178,9 @@ class LabMetadata(BaseModel):
             ValueError: If a payload or test references an undeclared actor.
         """
         referenced = {item.actor for item in self.sample_payloads}
-        referenced |= {item.actor for item in self.verify_tests}
+        referenced |= {
+            item.actor for item in self.verify_tests if isinstance(item, BackendVerifyTest)
+        }
         unknown = sorted(
             name for name in referenced if name is not None and name not in self.actors
         )

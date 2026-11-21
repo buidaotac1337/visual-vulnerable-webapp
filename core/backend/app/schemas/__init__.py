@@ -2,6 +2,8 @@
 
 from app.schemas.health import HealthResponse
 from app.schemas.lab import (
+    BackendVerifyTest,
+    FrontendVerifyTest,
     LabExecutionMeta,
     LabExecutionResponse,
     LabListResponse,
@@ -12,6 +14,7 @@ from app.schemas.lab import (
     TraceOutcome,
     TraceStatus,
     TraceStep,
+    VerifyLayer,
     VerifyTestCase,
 )
 from app.schemas.session import ACTOR_USERNAME_PATTERN, LabActor, LabContext
@@ -21,6 +24,8 @@ from app.schemas.verify import VerifyLabResponse, VerifyTestResult
 
 __all__ = [
     "ACTOR_USERNAME_PATTERN",
+    "BackendVerifyTest",
+    "FrontendVerifyTest",
     "HealthResponse",
     "LabActor",
     "LabContext",
@@ -38,6 +43,7 @@ __all__ = [
     "TraceStatus",
     "TraceStep",
     "VerifyLabResponse",
+    "VerifyLayer",
     "VerifyTestCase",
     "VerifyTestResult",
 ]

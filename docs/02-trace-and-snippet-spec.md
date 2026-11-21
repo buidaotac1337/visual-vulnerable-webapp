@@ -141,7 +141,8 @@ Chi tiết và lý do: [ADR-0006](adr/0006-frontend-sink-grading-and-verify-matc
 
 * **Quy tắc so khớp `expect`** (Python và TypeScript cùng ngữ nghĩa):
   * Dict so subset đệ quy; list phải cùng độ dài; bool so nghiêm ngặt (`true` không bằng `1`).
-  * Object mà **mọi key bắt đầu bằng `$`** là object toán tử: `{"$contains": "..."}`, `{"$notContains": "..."}`. Toán tử lạ → test fail.
+  * Object mà **mọi key bắt đầu bằng `$`** là object toán tử: `{"$contains": "..."}`, `{"$notContains": "..."}`. Toán tử lạ, toán hạng không phải chuỗi, hoặc object **trộn** key `$` với key thường → test fail kèm lỗi.
+  * Mọi nhánh đều được đánh giá hết (không dừng sớm), nên toán tử gõ sai ở bất kỳ đâu trong `expect` luôn báo lỗi, kể cả khi assertion khác trong cùng khối đang fail.
 * Lab chỉ **pass** khi mọi test backend và frontend đều pass.
 
 ---

@@ -93,7 +93,8 @@ Ví dụ test frontend cho Lab 02 Stored XSS, dùng toán tử `$contains` ([đ�
 
 ### Giai đoạn 2 — Bộ Bài Lab Cốt lõi (Tuần 3–4)
 * [x] Triển khai [ADR-0005](adr/0005-lab-session-actor-context.md): header `X-VVWA-Actor`, `LabContext`/`ctx`, bộ chọn persona.
-* [ ] Triển khai [ADR-0006](adr/0006-frontend-sink-grading-and-verify-matchers.md): cặp sink `frontend/vulnerable.tsx`/`secure.tsx`, bộ chấm frontend trong document trơ, toán tử `$contains`/`$notContains`, ESLint chặn sink.
+* [x] Triển khai [ADR-0006](adr/0006-frontend-sink-grading-and-verify-matchers.md) phần 1: cặp sink `frontend/vulnerable.tsx`/`secure.tsx` (source, Diff, `.zip`), `verifyTests` theo `layer`, toán tử `$contains`/`$notContains` phía backend, ESLint chặn sink.
+* [x] Triển khai [ADR-0006](adr/0006-frontend-sink-grading-and-verify-matchers.md) phần 2: bộ chấm frontend trong document trơ, DOM probe, matcher TypeScript, `VerifyModal` gộp kết quả.
 * [ ] **Lab 02: Stored XSS (Đánh giá sản phẩm)** — Render `dangerouslySetInnerHTML` trên React vs render dạng chữ (React tự escape); CSP chỉ minh họa, không chấm. *Cần ADR-0006.*
 * [ ] **Lab 03: IDOR / Broken Access Control (Xem chi tiết đơn hàng)** — `GET /orders/{order_id}` không kiểm tra chủ sở hữu vs kiểm tra `order.user_id == ctx.actor.id`. *Cần ADR-0005.*
 * [ ] **Lab 04: Business Logic & Client-side Trust (Giỏ hàng / Thanh toán)** — Tin tưởng `price` và `quantity` (số âm) gửi từ Frontend vs tính lại giá từ DB + validate bằng Pydantic (`gt=0`). *Cần ADR-0005.*

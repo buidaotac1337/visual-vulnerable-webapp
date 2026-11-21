@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import {
   computePipelineNodes,
   findFirstStepIndexForLayer,
+  isBackendVerifyTest,
   mergeExecutionTrace,
+  resolveFrontendFile,
   resolveStepTarget,
 } from '@/lib';
 import type { LabSourceResponse, TraceStep } from '@/types';
@@ -105,10 +107,57 @@ describe('traceEngine', () => {
     expect(resolveStepTarget(feStep, SAMPLE_SOURCE, 'vulnerable')).toEqual({
       tab: 'frontend',
       lineNumber: 2,
+      frontendFile: 'labview',
     });
     expect(resolveStepTarget(errStep, SAMPLE_SOURCE, 'vulnerable')).toEqual({
       tab: 'backend',
       lineNumber: null,
     });
+  });
+
+  it('prefers the mode sink file for frontend steps and falls back to LabView.tsx (ADR-0006)', () => {
+    const withSinks: LabSourceResponse = {
+      ...SAMPLE_SOURCE,
+      frontend_vulnerable: { code: 'a\nb\nc', steps: { 'render-review': 3 }, line_count: 3 },
+      frontend_secure: { code: 'a\nb', steps: { 'render-review': 2 }, line_count: 2 },
+      frontend_diff: '--- vulnerable.tsx\n+++ secure.tsx\n',
+    };
+    const step = (tag: string): TraceStep => ({
+      step: 1,
+      layer: 'frontend',
+      tag,
+      status: 'danger',
+      title: 't',
+      detail: 'd',
+    });
+
+    expect(resolveStepTarget(step('render-review'), withSinks, 'vulnerable')).toEqual({
+      tab: 'frontend',
+      lineNumber: 3,
+      frontendFile: 'sink',
+    });
+    expect(resolveStepTarget(step('render-review'), withSinks, 'secure')?.lineNumber).toBe(2);
+    expect(resolveStepTarget(step('fe-submit'), withSinks, 'vulnerable')).toEqual({
+      tab: 'frontend',
+      lineNumber: 2,
+      frontendFile: 'labview',
+    });
+    expect(resolveStepTarget(step('unknown'), withSinks, 'vulnerable')).toEqual({
+      tab: 'frontend',
+      lineNumber: null,
+      frontendFile: 'sink',
+    });
+
+    expect(resolveFrontendFile(withSinks, 'secure')?.label).toBe('frontend/secure.tsx');
+    expect(resolveFrontendFile(withSinks, 'secure', 'labview')?.label).toBe('frontend/LabView.tsx');
+    expect(resolveFrontendFile(SAMPLE_SOURCE, 'vulnerable')?.kind).toBe('labview');
+    expect(resolveFrontendFile({ ...SAMPLE_SOURCE, frontend: null }, 'vulnerable')).toBeNull();
+  });
+
+  it('treats verifyTests without layer as backend tests', () => {
+    expect(isBackendVerifyTest({ name: 'b', action: 'x', input: {}, expect: {} })).toBe(true);
+    expect(
+      isBackendVerifyTest({ name: 'f', layer: 'frontend', component: 'C', props: {}, expect: {} }),
+    ).toBe(false);
   });
 });

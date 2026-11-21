@@ -2,11 +2,13 @@ import { useEffect, useRef } from 'react';
 import type { JSX } from 'react';
 import { CheckCircle2, RefreshCw, X, XCircle } from 'lucide-react';
 
-import type { VerifyLabResponse } from '@/types';
+import type { VerifyLabResponse, VerifyTestResult } from '@/types';
 
 interface VerifyModalProps {
   isOpen: boolean;
   labTitle: string;
+  /** True when the lab declares frontend verifyTests, so the subtitle mentions vulnerable.tsx. */
+  hasFrontendTests?: boolean;
   isLoading: boolean;
   result: VerifyLabResponse | null;
   error: string | null;
@@ -14,9 +16,59 @@ interface VerifyModalProps {
   onClose: () => void;
 }
 
+const LAYER_BADGE: Record<'backend' | 'frontend', { label: string; className: string }> = {
+  backend: { label: 'Backend', className: 'bg-sky-100 text-sky-800' },
+  frontend: { label: 'Frontend', className: 'bg-violet-100 text-violet-800' },
+};
+
+const MONO = { fontFamily: 'var(--font-mono)' } as const;
+
+function VerifySubtitle({ hasFrontendTests }: { hasFrontendTests: boolean }): JSX.Element {
+  return (
+    <p className="text-xs text-slate-500">
+      Kiểm thử tự động trên <code style={MONO}>vulnerable.py</code> (Reset DB sạch trước mỗi test)
+      {hasFrontendTests ? (
+        <>
+          {' '}
+          và <code style={MONO}>vulnerable.tsx</code> (render trong document trơ, payload không
+          chạy)
+        </>
+      ) : null}
+    </p>
+  );
+}
+
+function summaryMessage(result: VerifyLabResponse): string {
+  if (result.total === 0) {
+    return 'Bài lab này chưa khai báo verifyTests nào trong meta.json.';
+  }
+  return result.passed
+    ? 'Tuyệt vời! Bản vá của bạn đã vượt qua toàn bộ kiểm thử.'
+    : 'Bản vá chưa đạt yêu cầu — hãy xem chi tiết bên dưới.';
+}
+
+function ResultTarget({ item }: { item: VerifyTestResult }): JSX.Element {
+  const layer = item.layer ?? 'backend';
+  const badge = LAYER_BADGE[layer];
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${badge.className}`}>
+        {badge.label}
+      </span>
+      <span
+        className="rounded bg-white px-1.5 py-0.5 text-[11px] text-slate-600"
+        style={{ fontFamily: 'var(--font-mono)' }}
+      >
+        {layer === 'frontend' ? `<${item.action} />` : `${item.action}()`}
+      </span>
+    </span>
+  );
+}
+
 /**
- * Render the native <dialog> Test My Fix modal presenting automated verification results
- * executed against labs/<id>/backend/vulnerable.py with clean DB resets.
+ * Render the native <dialog> Test My Fix modal presenting automated verification results:
+ * backend tests on backend/vulnerable.py (clean DB per test) and frontend tests on
+ * frontend/vulnerable.tsx rendered in an inert document (ADR-0006).
  *
  * @param props - Open state, verification report, error state, and modal callbacks.
  * @returns Rendered VerifyModal dialog element, or null when closed.
@@ -24,6 +76,7 @@ interface VerifyModalProps {
 export function VerifyModal({
   isOpen,
   labTitle,
+  hasFrontendTests = false,
   isLoading,
   result,
   error,
@@ -69,11 +122,7 @@ export function VerifyModal({
           <h2 id="vvwa-verify-title" className="text-base font-semibold text-slate-900">
             Test My Fix — {labTitle}
           </h2>
-          <p className="text-xs text-slate-500">
-            Kiểm thử tự động trên{' '}
-            <code style={{ fontFamily: 'var(--font-mono)' }}>vulnerable.py</code> (kèm Reset DB sạch
-            trước mỗi test case)
-          </p>
+          <VerifySubtitle hasFrontendTests={hasFrontendTests} />
         </div>
 
         <button
@@ -92,12 +141,17 @@ export function VerifyModal({
             <RefreshCw className="h-4 w-4 animate-spin text-indigo-600" aria-hidden="true" />
             <span>Đang chạy bộ kiểm thử verifyTests...</span>
           </div>
-        ) : error ? (
+        ) : error && !result ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs text-red-700">
             {error}
           </div>
         ) : result ? (
           <div className="flex flex-col gap-3">
+            {error && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs text-red-700">
+                Không chạy được kiểm thử backend: {error}
+              </div>
+            )}
             <div
               className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm font-semibold ${
                 result.passed
@@ -105,11 +159,7 @@ export function VerifyModal({
                   : 'border-red-200 bg-red-50 text-red-800'
               }`}
             >
-              <span>
-                {result.passed
-                  ? 'Tuyệt vời! Bản vá của bạn đã vượt qua toàn bộ kiểm thử.'
-                  : 'Bản vá chưa đạt yêu cầu — hãy xem chi tiết bên dưới.'}
-              </span>
+              <span>{summaryMessage(result)}</span>
               <span>
                 {result.passed_count} / {result.total} PASS
               </span>
@@ -117,7 +167,7 @@ export function VerifyModal({
 
             {result.results.map((item) => (
               <div
-                key={`${item.action}-${item.name}`}
+                key={`${item.layer ?? 'backend'}-${item.action}-${item.name}`}
                 className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs"
               >
                 <div className="flex items-center justify-between gap-2">
@@ -129,12 +179,7 @@ export function VerifyModal({
                     )}
                     <span>{item.name}</span>
                   </div>
-                  <span
-                    className="rounded bg-white px-1.5 py-0.5 text-[11px] text-slate-600"
-                    style={{ fontFamily: 'var(--font-mono)' }}
-                  >
-                    {item.action}()
-                  </span>
+                  <ResultTarget item={item} />
                 </div>
 
                 {item.error && (
