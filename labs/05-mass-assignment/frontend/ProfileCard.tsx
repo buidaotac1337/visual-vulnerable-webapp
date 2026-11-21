@@ -33,7 +33,7 @@ export function ProfileCard({ profile }: ProfileCardProps): JSX.Element {
       <dt className="text-slate-500">Vai trò</dt>
       <dd>
         <span
-          className={`rounded px-1.5 py-0.5 font-semibold ${admin ? 'bg-red-100 text-red-700' : 'bg-slate-200 text-slate-700'}`}
+          className={`rounded px-1.5 py-0.5 font-semibold ${admin ? 'bg-danger-100 text-danger-700' : 'bg-slate-200 text-slate-700'}`}
         >
           {profile.role}
         </span>
@@ -65,7 +65,7 @@ export function UpdateNotice({ result, before }: UpdateNoticeProps): JSX.Element
   const changed = escalations(before, result.profile);
   if (changed.length === 0) {
     return (
-      <p className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+      <p className="flex items-center gap-1.5 text-xs font-semibold text-safe-700">
         <CircleCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span>Đã lưu hồ sơ.</span>
       </p>
@@ -74,7 +74,7 @@ export function UpdateNotice({ result, before }: UpdateNoticeProps): JSX.Element
   return (
     <p
       role="alert"
-      className="flex items-start gap-1.5 rounded-lg border border-red-300 bg-red-50/60 p-3 text-xs font-semibold text-red-700"
+      className="flex items-start gap-1.5 rounded-lg border border-danger-300 bg-danger-50/60 p-3 text-xs font-semibold text-danger-700"
     >
       <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
       <span>Server đã ghi cả trường ngoài form: {changed.join('; ')}.</span>

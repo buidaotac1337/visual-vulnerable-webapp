@@ -155,7 +155,7 @@ export function LabView(props: LabViewProps): JSX.Element {
     <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-          <ShoppingBag className="h-4 w-4 text-indigo-600" aria-hidden="true" />
+          <ShoppingBag className="h-4 w-4 text-brand-600" aria-hidden="true" />
           <span>MiniShop · Trang sản phẩm</span>
         </div>
         <div role="tablist" aria-label="Tính năng MiniShop Lab 02" className="flex gap-1">
@@ -168,7 +168,7 @@ export function LabView(props: LabViewProps): JSX.Element {
               onClick={() => update({ tab: id })}
               className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium ${
                 activeTab === id
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-brand-600 text-white'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >

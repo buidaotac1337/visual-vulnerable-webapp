@@ -32,16 +32,16 @@ export function CheckoutSummary({ result, products }: CheckoutSummaryProps): JSX
   return (
     <article
       aria-label="Kết quả thanh toán"
-      className={`flex flex-col gap-2 rounded-lg border p-3 text-xs ${note ? 'border-red-300 bg-red-50/40' : 'border-emerald-200 bg-emerald-50/40'}`}
+      className={`flex flex-col gap-2 rounded-lg border p-3 text-xs ${note ? 'border-danger-300 bg-danger-50/40' : 'border-safe-200 bg-safe-50/40'}`}
     >
       <p className="flex items-center gap-1.5 font-semibold text-slate-900">
-        <CircleCheck className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+        <CircleCheck className="h-4 w-4 shrink-0 text-safe-600" aria-hidden="true" />
         <span>
           Đặt hàng thành công: đơn #{result.orderId}, tổng {formatMoney(total)}
         </span>
       </p>
       {note && (
-        <p role="alert" className="flex items-center gap-1.5 font-semibold text-red-700">
+        <p role="alert" className="flex items-center gap-1.5 font-semibold text-danger-700">
           <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>{note}</span>
         </p>

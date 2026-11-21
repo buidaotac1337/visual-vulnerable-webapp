@@ -16,17 +16,17 @@ const LAYER_ICONS: Record<TraceLayer, JSX.Element> = {
 };
 
 const ACTIVE_NODE_STYLES: Record<TraceStatus, string> = {
-  info: 'border-blue-500 bg-blue-50 text-blue-700 ring-4 ring-blue-500/20',
-  warning: 'border-amber-500 bg-amber-50 text-amber-800 ring-4 ring-amber-500/20',
-  danger: 'border-red-500 bg-red-50 text-red-700 ring-4 ring-red-500/25',
-  safe: 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-4 ring-emerald-500/25',
+  info: 'border-info-500 bg-info-50 text-info-700 ring-4 ring-info-500/20',
+  warning: 'border-warning-500 bg-warning-50 text-warning-800 ring-4 ring-warning-500/20',
+  danger: 'border-danger-500 bg-danger-50 text-danger-700 ring-4 ring-danger-500/25',
+  safe: 'border-safe-500 bg-safe-50 text-safe-700 ring-4 ring-safe-500/25',
 };
 
 const COMPLETED_NODE_STYLES: Record<TraceStatus, string> = {
-  info: 'border-blue-400 bg-blue-50/70 text-blue-700',
-  warning: 'border-amber-400 bg-amber-50/70 text-amber-800',
-  danger: 'border-red-400 bg-red-50/80 text-red-700',
-  safe: 'border-emerald-400 bg-emerald-50/80 text-emerald-700',
+  info: 'border-info-400 bg-info-50/70 text-info-700',
+  warning: 'border-warning-400 bg-warning-50/70 text-warning-800',
+  danger: 'border-danger-400 bg-danger-50/80 text-danger-700',
+  safe: 'border-safe-400 bg-safe-50/80 text-safe-700',
 };
 
 function getNodeClassName(node: PipelineNodeModel): string {

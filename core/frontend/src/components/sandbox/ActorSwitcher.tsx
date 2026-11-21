@@ -72,7 +72,7 @@ export function ActorSwitcher({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
       <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-        <UserRound className="h-3.5 w-3.5 text-indigo-600" aria-hidden="true" />
+        <UserRound className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
         <span id={labelId}>Đang đăng nhập với tư cách</span>
       </div>
       <div
@@ -97,8 +97,8 @@ export function ActorSwitcher({
               onClick={() => onChange(name)}
               className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                 isActive
-                  ? 'border-indigo-600 bg-indigo-600 text-white'
-                  : 'border-slate-300 bg-white text-slate-700 hover:border-indigo-400'
+                  ? 'border-brand-600 bg-brand-600 text-white'
+                  : 'border-slate-300 bg-white text-slate-700 hover:border-brand-400'
               }`}
             >
               {name}

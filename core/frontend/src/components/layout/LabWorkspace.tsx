@@ -10,9 +10,9 @@ interface LabWorkspaceProps {
 }
 
 const NOTICE_STYLES: Record<WorkspaceNotice['tone'], string> = {
-  info: 'border-blue-200 bg-blue-50 text-blue-800',
-  safe: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-  danger: 'border-red-200 bg-red-50 text-red-800',
+  info: 'border-info-200 bg-info-50 text-info-800',
+  safe: 'border-safe-200 bg-safe-50 text-safe-800',
+  danger: 'border-danger-200 bg-danger-50 text-danger-800',
 };
 
 /**
@@ -28,7 +28,7 @@ export function LabWorkspace({
   leftPane,
   rightPane,
 }: LabWorkspaceProps): JSX.Element {
-  const modeBorder = mode === 'secure' ? 'border-t-emerald-500' : 'border-t-red-500';
+  const modeBorder = mode === 'secure' ? 'border-t-safe-500' : 'border-t-danger-500';
 
   // Height comes from flex-1 inside the lg:h-screen root (App.tsx), so a taller top bar
   // (e.g. browser zoom) never pushes it past the screen. lg:grid-rows-[minmax(0,1fr)]

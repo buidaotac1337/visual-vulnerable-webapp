@@ -40,10 +40,10 @@ export function OrderDetail({ lookup, actor }: OrderDetailProps): JSX.Element {
   return (
     <article
       aria-label={`Đơn hàng #${String(order.id)}`}
-      className={`flex flex-col gap-3 rounded-lg border p-3 ${foreign ? 'border-red-300 bg-red-50/40' : 'border-slate-200 bg-slate-50'}`}
+      className={`flex flex-col gap-3 rounded-lg border p-3 ${foreign ? 'border-danger-300 bg-danger-50/40' : 'border-slate-200 bg-slate-50'}`}
     >
       {foreign && (
-        <p role="alert" className="flex items-center gap-1.5 text-xs font-semibold text-red-700">
+        <p role="alert" className="flex items-center gap-1.5 text-xs font-semibold text-danger-700">
           <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>
             Đây là đơn của {order.owner}. {actor ?? 'Người dùng ẩn danh'} đang xem dữ liệu của khách

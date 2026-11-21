@@ -83,7 +83,7 @@ export function LabView({
     <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-          <ShoppingBag className="h-4 w-4 text-indigo-600" aria-hidden="true" />
+          <ShoppingBag className="h-4 w-4 text-brand-600" aria-hidden="true" />
           <span>MiniShop Storefront</span>
         </div>
 
@@ -97,7 +97,7 @@ export function LabView({
             onClick={() => onPayloadChange({ ...payload, tab: 'login' })}
             className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium ${
               activeTab === 'login'
-                ? 'bg-indigo-600 text-white'
+                ? 'bg-brand-600 text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -113,7 +113,7 @@ export function LabView({
             onClick={() => onPayloadChange({ ...payload, tab: 'search' })}
             className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium ${
               activeTab === 'search'
-                ? 'bg-indigo-600 text-white'
+                ? 'bg-brand-600 text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -146,7 +146,7 @@ export function LabView({
                 onPayloadChange({ ...payload, tab: 'login', username: event.target.value })
               }
               placeholder="Ví dụ: alice hoặc ' OR 1=1--"
-              className={`rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none ${flashClass}`}
+              className={`rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none ${flashClass}`}
               style={{ fontFamily: 'var(--font-mono)' }}
             />
           </div>
@@ -166,7 +166,7 @@ export function LabView({
                 onPayloadChange({ ...payload, tab: 'login', password: event.target.value })
               }
               placeholder="Ví dụ: password123"
-              className={`rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none ${flashClass}`}
+              className={`rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none ${flashClass}`}
               style={{ fontFamily: 'var(--font-mono)' }}
             />
           </div>
@@ -174,7 +174,7 @@ export function LabView({
           <button
             type="submit"
             disabled={isExecuting}
-            className="inline-flex cursor-pointer items-center justify-center gap-1.5 self-start rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center justify-center gap-1.5 self-start rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <LogIn className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{isExecuting ? 'Đang đăng nhập...' : 'Đăng nhập MiniShop'}</span>
@@ -204,7 +204,7 @@ export function LabView({
                 onPayloadChange({ ...payload, tab: 'search', keyword: event.target.value })
               }
               placeholder="Ví dụ: Ban phim hoặc ' AND 1=0 UNION SELECT ..."
-              className={`rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none ${flashClass}`}
+              className={`rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none ${flashClass}`}
               style={{ fontFamily: 'var(--font-mono)' }}
             />
           </div>
@@ -212,7 +212,7 @@ export function LabView({
           <button
             type="submit"
             disabled={isExecuting}
-            className="inline-flex cursor-pointer items-center justify-center gap-1.5 self-start rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center justify-center gap-1.5 self-start rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Search className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{isExecuting ? 'Đang tìm kiếm...' : 'Tìm kiếm sản phẩm'}</span>

@@ -33,6 +33,25 @@ const SINK_RESTRICTIONS = [
   },
 ];
 
+/**
+ * Design system SSOT: colours come from the semantic roles in src/styles/tokens.css
+ * (danger, safe, warning, info, brand). The raw palettes behind those roles are banned in
+ * class strings so a role can be recoloured in one place.
+ */
+const RAW_PALETTE = '/-(red|emerald|amber|blue|indigo)-(50|[1-9]00|950)\\b/';
+const PALETTE_RESTRICTIONS = [
+  {
+    selector: `Literal[value=${RAW_PALETTE}]`,
+    message:
+      'Use semantic colour tokens (danger/safe/warning/info/brand) instead of raw red/emerald/amber/blue/indigo (docs/design-system.md).',
+  },
+  {
+    selector: `TemplateElement[value.raw=${RAW_PALETTE}]`,
+    message:
+      'Use semantic colour tokens (danger/safe/warning/info/brand) instead of raw red/emerald/amber/blue/indigo (docs/design-system.md).',
+  },
+];
+
 export default tseslint.config(
   { ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/.pnpm-store/**'] },
   {
@@ -52,7 +71,7 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'max-lines': ['error', { max: 350, skipBlankLines: false, skipComments: false }],
       complexity: ['error', 10],
-      'no-restricted-syntax': ['error', ...SINK_RESTRICTIONS],
+      'no-restricted-syntax': ['error', ...SINK_RESTRICTIONS, ...PALETTE_RESTRICTIONS],
       '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
       '@typescript-eslint/explicit-module-boundary-types': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
@@ -100,6 +119,7 @@ export default tseslint.config(
   },
   {
     files: ['**/labs/*/frontend/vulnerable.tsx'],
-    rules: { 'no-restricted-syntax': 'off' },
+    // Sinks are allowed here; the colour rule still applies.
+    rules: { 'no-restricted-syntax': ['error', ...PALETTE_RESTRICTIONS] },
   },
 );

@@ -43,10 +43,10 @@ interface SandboxPaneProps {
 }
 
 const OUTCOME_BADGE: Record<TraceOutcome, { label: string; className: string }> = {
-  exploited: { label: 'BỊ KHAI THÁC (EXPLOITED)', className: 'bg-red-100 text-red-700' },
-  blocked: { label: 'ĐÃ CHẶN (BLOCKED)', className: 'bg-emerald-100 text-emerald-700' },
+  exploited: { label: 'BỊ KHAI THÁC (EXPLOITED)', className: 'bg-danger-100 text-danger-700' },
+  blocked: { label: 'ĐÃ CHẶN (BLOCKED)', className: 'bg-safe-100 text-safe-700' },
   normal: { label: 'BÌNH THƯỜNG (NORMAL)', className: 'bg-slate-100 text-slate-700' },
-  error: { label: 'LỖI THỰC THI (ERROR)', className: 'bg-amber-100 text-amber-800' },
+  error: { label: 'LỖI THỰC THI (ERROR)', className: 'bg-warning-100 text-warning-800' },
 };
 
 interface BoundaryState {
@@ -67,7 +67,7 @@ class LabViewErrorBoundary extends Component<{ children: ReactNode }, BoundarySt
   public override render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs text-red-700">
+        <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-xs text-danger-700">
           <p className="font-semibold">Lỗi hiển thị LabView.tsx:</p>
           <p className="mt-1" style={{ fontFamily: 'var(--font-mono)' }}>
             {this.state.message}
@@ -115,7 +115,7 @@ export function SandboxPane({
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-base font-semibold text-slate-900">{lab.title}</h1>
-            <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+            <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700">
               {lab.category}
             </span>
             <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">

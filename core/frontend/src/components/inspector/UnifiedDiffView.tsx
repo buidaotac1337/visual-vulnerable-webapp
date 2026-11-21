@@ -11,10 +11,10 @@ interface UnifiedDiffViewProps {
 }
 
 const ROW_STYLES: Record<DiffRowKind, { row: string; prefix: string }> = {
-  hunk: { row: 'bg-slate-800/80 text-indigo-300 font-semibold', prefix: '' },
+  hunk: { row: 'bg-slate-800/80 text-brand-300 font-semibold', prefix: '' },
   context: { row: 'text-slate-300', prefix: ' ' },
-  add: { row: 'bg-emerald-500/15 text-emerald-200', prefix: '+' },
-  remove: { row: 'bg-red-500/15 text-red-200', prefix: '-' },
+  add: { row: 'bg-safe-500/15 text-safe-200', prefix: '+' },
+  remove: { row: 'bg-danger-500/15 text-danger-200', prefix: '-' },
 };
 
 /**
@@ -31,8 +31,8 @@ export function UnifiedDiffView({
 
   if (rows.length === 0) {
     return (
-      <div className="m-4 flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-950/50 p-4 text-xs text-emerald-200">
-        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
+      <div className="m-4 flex items-center gap-2 rounded-lg border border-safe-500/40 bg-safe-950/50 p-4 text-xs text-safe-200">
+        <CheckCircle2 className="h-4 w-4 shrink-0 text-safe-400" aria-hidden="true" />
         <span>
           Không có khác biệt — mã nguồn {fileLabels[0]} hiện khớp với bản mẫu {fileLabels[1]}.
         </span>

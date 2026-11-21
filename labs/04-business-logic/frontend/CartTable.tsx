@@ -1,5 +1,7 @@
 import type { JSX } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Info, Trash2 } from 'lucide-react';
+
+import { Tooltip } from '@/components';
 
 import { formatMoney } from './cartData';
 import type { Product } from './cartData';
@@ -14,7 +16,7 @@ interface CartTableProps {
 }
 
 const INPUT_CLASS =
-  'w-16 rounded border bg-white px-1.5 py-1 text-right text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-200';
+  'w-16 rounded border bg-white px-1.5 py-1 text-right text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-200';
 
 /**
  * Editable cart of the MiniShop checkout page.
@@ -43,8 +45,19 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
       <thead>
         <tr className="text-left text-slate-500">
           <th className="py-1 font-medium">Sản phẩm</th>
-          <th className="py-1 text-right font-medium" title="Gửi kèm đơn hàng như một input ẩn">
-            Đơn giá gửi lên
+          <th className="py-1 text-right font-medium">
+            <span className="inline-flex items-center justify-end gap-1">
+              <span>Đơn giá gửi lên</span>
+              <Tooltip tip="Gửi kèm đơn hàng như một input ẩn">
+                <button
+                  type="button"
+                  aria-label="Giải thích đơn giá gửi lên"
+                  className="inline-flex cursor-pointer items-center rounded text-slate-400 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                >
+                  <Info className="h-3 w-3" aria-hidden="true" />
+                </button>
+              </Tooltip>
+            </span>
           </th>
           <th className="py-1 text-right font-medium">SL</th>
           <th className="py-1 text-right font-medium">Thành tiền</th>
@@ -65,7 +78,7 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
               <td className="py-1.5 pr-2">
                 <span className="block text-slate-900">{name}</span>
                 {flags.listedPrice !== null && (
-                  <span className="text-xs text-red-600">
+                  <span className="text-xs text-danger-600">
                     Niêm yết {formatMoney(flags.listedPrice)}
                   </span>
                 )}
@@ -78,7 +91,7 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
                   value={line.price}
                   disabled={disabled}
                   onChange={(event) => update(index, { price: event.target.value })}
-                  className={`${INPUT_CLASS} ${flags.priceBad ? 'border-red-400' : 'border-slate-300'}`}
+                  className={`${INPUT_CLASS} ${flags.priceBad ? 'border-danger-400' : 'border-slate-300'}`}
                 />
               </td>
               <td className="py-1.5 text-right">
@@ -88,7 +101,7 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
                   value={line.quantity}
                   disabled={disabled}
                   onChange={(event) => update(index, { quantity: event.target.value })}
-                  className={`${INPUT_CLASS} ${flags.quantityBad ? 'border-red-400' : 'border-slate-300'}`}
+                  className={`${INPUT_CLASS} ${flags.quantityBad ? 'border-danger-400' : 'border-slate-300'}`}
                 />
               </td>
               <td className="py-1.5 text-right font-semibold text-slate-900">
@@ -100,7 +113,7 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
                   aria-label={`Xóa ${name}`}
                   disabled={disabled}
                   onClick={() => remove(index)}
-                  className="cursor-pointer text-slate-400 hover:text-red-600 disabled:cursor-not-allowed"
+                  className="cursor-pointer text-slate-400 hover:text-danger-600 disabled:cursor-not-allowed"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
