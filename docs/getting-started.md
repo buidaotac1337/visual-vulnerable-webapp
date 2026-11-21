@@ -100,6 +100,7 @@ Mật khẩu và các dữ liệu khác (sản phẩm, đơn hàng, đánh giá,
 | :--- | :--- | :--- |
 | `labs/*/backend/*.py` | Engine nạp lại module từ đĩa ở **mỗi request** | Không cần làm gì |
 | `labs/*/frontend/*.tsx` | Vite HMR (polling trong Docker) | Không cần làm gì; Test My Fix chấm đúng bản vừa lưu |
+| Thư mục lab mới `labs/<id>/` | Backend quét `meta.json` ở mỗi lần tải danh sách; Vite theo dõi cả `labs/` nên `LabView.tsx` mới được nhận ngay | Tải lại trang để danh sách lab cập nhật |
 | `core/frontend/src/**` | Vite HMR | Không cần làm gì |
 | `core/backend/app/**` | `uvicorn --reload` khởi động lại worker | Không cần làm gì |
 | `core/postgres/init.sql` | Chỉ chạy khi volume trống | `docker compose down -v` |

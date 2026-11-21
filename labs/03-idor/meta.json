@@ -1,0 +1,85 @@
+{
+  "id": "03-idor",
+  "title": "IDOR — Xem chi tiết đơn hàng MiniShop",
+  "category": "Access Control",
+  "difficulty": "Cơ bản",
+  "summary": "Trang chi tiết đơn hàng lấy order_id từ request và trả về đơn tương ứng mà không kiểm tra ai là chủ. Chỉ cần đổi số trên URL là xem được địa chỉ giao hàng và sản phẩm của khách hàng khác.",
+  "safetyPattern": "Kiểm tra quyền sở hữu ở mọi truy cập đối tượng: ràng buộc truy vấn theo danh tính từ phiên (user_id = ctx.actor.id), không theo dữ liệu client gửi lên. Trả 'không tìm thấy' như nhau cho đơn không tồn tại và đơn của người khác.",
+  "actors": ["alice", "bob"],
+  "samplePayloads": [
+    {
+      "label": "Alice xem đơn của mình",
+      "description": "Luồng hợp lệ: alice mở đơn #1 do chính mình đặt.",
+      "actor": "alice",
+      "data": { "order_id": 1 }
+    },
+    {
+      "label": "Alice đổi URL sang đơn #2",
+      "description": "Đơn #2 là của bob. Alice chỉ sửa số trên URL.",
+      "actor": "alice",
+      "data": { "order_id": 2 }
+    },
+    {
+      "label": "Bob dò đơn #1",
+      "description": "Bob thử lần lượt các mã đơn để đọc đơn của người khác.",
+      "actor": "bob",
+      "data": { "order_id": 1 }
+    },
+    {
+      "label": "Mã đơn không tồn tại",
+      "description": "Đơn #999 không tồn tại: phản hồi phải giống hệt khi truy cập đơn của người khác.",
+      "actor": "alice",
+      "data": { "order_id": 999 }
+    }
+  ],
+  "verifyTests": [
+    {
+      "name": "Alice xem được đơn của chính mình",
+      "action": "view_order",
+      "actor": "alice",
+      "input": { "order_id": 1 },
+      "expect": { "found": true, "order": { "id": 1, "owner": "alice" } }
+    },
+    {
+      "name": "Bob xem được đơn của chính mình",
+      "action": "view_order",
+      "actor": "bob",
+      "input": { "order_id": 2 },
+      "expect": { "found": true, "order": { "id": 2, "owner": "bob" } }
+    },
+    {
+      "name": "Alice không xem được đơn #2 của bob",
+      "action": "view_order",
+      "actor": "alice",
+      "input": { "order_id": 2 },
+      "expect": { "found": false, "order": null }
+    },
+    {
+      "name": "Bob không xem được đơn #1 của alice",
+      "action": "view_order",
+      "actor": "bob",
+      "input": { "order_id": 1 },
+      "expect": { "found": false, "order": null }
+    },
+    {
+      "name": "Đơn không tồn tại trả về không tìm thấy",
+      "action": "view_order",
+      "actor": "alice",
+      "input": { "order_id": 999 },
+      "expect": { "found": false, "order": null }
+    },
+    {
+      "name": "Chưa đăng nhập thì không xem được đơn nào",
+      "action": "view_order",
+      "input": { "order_id": 1 },
+      "expect": { "found": false, "order": null }
+    },
+    {
+      "name": "Danh sách 'Đơn hàng của tôi' chỉ chứa đơn của mình",
+      "action": "list_orders",
+      "actor": "alice",
+      "input": {},
+      "expect": { "count": 1, "orders": [{ "id": 1 }] }
+    }
+  ]
+}

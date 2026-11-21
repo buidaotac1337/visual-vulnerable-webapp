@@ -22,8 +22,9 @@ const HEALTH: HealthResponse = {
   environment: 'test',
 };
 
+// Fixture rendered by the generic runner: its id must not match a real labs/<id>/frontend/LabView.tsx.
 const IDOR_LAB: LabMetadata = {
-  id: '03-idor',
+  id: '90-actor-demo',
   title: 'Lab 03 IDOR',
   category: 'Access Control',
   difficulty: 'Cơ bản',
@@ -53,7 +54,7 @@ const LABS: LabListResponse = { labs: [IDOR_LAB, PLAIN_LAB] };
 const EXEC_OK: LabExecutionResponse = {
   ok: true,
   data: {},
-  meta: { lab_id: '03-idor', mode: 'vulnerable', outcome: 'normal' },
+  meta: { lab_id: '90-actor-demo', mode: 'vulnerable', outcome: 'normal' },
   trace: [],
 };
 

@@ -1,5 +1,6 @@
 @import 'tailwindcss';
-@source '../../../../labs';
+/* Only lab UI files: other files under labs/ (e.g. backend/*.py) would make Tailwind full-reload the page on save. */
+@source '../../../../labs/*/frontend/**/*.{ts,tsx}';
 
 :root {
   /* Semantic Security Tokens (documented in docs/design-system.md) */
