@@ -79,7 +79,7 @@ def _build_search_result(
     """
     blocked = len(rows) == 0 and _looks_like_sqli(keyword)
     return {
-        "data": {"products": rows, "count": len(rows)},
+        "data": {"products": rows, "count": len(rows), "leaked_rows": []},
         "meta": {"outcome": "blocked" if blocked else "normal"},
         "trace": [
             {

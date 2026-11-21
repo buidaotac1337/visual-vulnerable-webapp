@@ -80,6 +80,8 @@ class _SqlInjectionStubDb:
         if args:
             needle = str(args[0]).strip("%").lower()
             return [p for p in _PRODUCTS if needle in str(p["name"]).lower()]
+        if query == "SELECT id, name FROM products ORDER BY id":
+            return [{"id": p["id"], "name": p["name"]} for p in _PRODUCTS]
         if "UNION SELECT" in query.upper():
             return [
                 {
@@ -207,6 +209,14 @@ def test_lab_01_search_union_dump_apostrophe_error_and_secure() -> None:
     ).json()
     assert vuln_search["meta"]["outcome"] == "exploited"
     assert vuln_search["data"]["count"] == 2
+    assert vuln_search["data"]["leaked_rows"] == [0, 1]
+
+    normal = client.post(
+        "/api/labs/01-sql-injection/vulnerable/search_products",
+        json={"keyword": "Ban phim"},
+    ).json()
+    assert normal["meta"]["outcome"] == "normal"
+    assert normal["data"]["leaked_rows"] == []
 
     sec_search = client.post(
         "/api/labs/01-sql-injection/secure/search_products",

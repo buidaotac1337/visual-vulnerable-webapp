@@ -2,13 +2,15 @@ import { useEffect, useRef } from 'react';
 import type { JSX } from 'react';
 import { CheckCircle2, RefreshCw, X, XCircle } from 'lucide-react';
 
-import type { VerifyLabResponse, VerifyTestResult } from '@/types';
+import type { LabMode, VerifyLabResponse, VerifyTestResult } from '@/types';
 
 interface VerifyModalProps {
   isOpen: boolean;
   labTitle: string;
   /** True when the lab declares frontend verifyTests, so the subtitle mentions vulnerable.tsx. */
   hasFrontendTests?: boolean;
+  /** Workspace mode; in Secure mode the modal reminds that vulnerable.py is what gets graded. */
+  mode?: LabMode;
   isLoading: boolean;
   result: VerifyLabResponse | null;
   error: string | null;
@@ -23,10 +25,28 @@ const LAYER_BADGE: Record<'backend' | 'frontend', { label: string; className: st
 
 const MONO = { fontFamily: 'var(--font-mono)' } as const;
 
+/** Reminder shown in Secure mode: grading always targets the student's vulnerable.py. */
+function SecureModeNote({ mode }: { mode: LabMode }): JSX.Element | null {
+  if (mode !== 'secure') {
+    return null;
+  }
+  return (
+    <p
+      role="note"
+      className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs text-amber-900"
+    >
+      Bạn đang xem chế độ Secure, nhưng Test My Fix luôn chấm{' '}
+      <code style={MONO}>vulnerable.py</code> (bài làm của bạn), không chấm{' '}
+      <code style={MONO}>secure.py</code>.
+    </p>
+  );
+}
+
 function VerifySubtitle({ hasFrontendTests }: { hasFrontendTests: boolean }): JSX.Element {
   return (
-    <p className="text-xs text-slate-500">
-      Kiểm thử tự động trên <code style={MONO}>vulnerable.py</code> (Reset DB sạch trước mỗi test)
+    <p className="text-xs text-slate-600">
+      Chấm bài làm của bạn trong <code style={MONO}>backend/vulnerable.py</code> (Reset DB sạch
+      trước mỗi test)
       {hasFrontendTests ? (
         <>
           {' '}
@@ -52,11 +72,11 @@ function ResultTarget({ item }: { item: VerifyTestResult }): JSX.Element {
   const badge = LAYER_BADGE[layer];
   return (
     <span className="flex items-center gap-1.5">
-      <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${badge.className}`}>
+      <span className={`rounded px-1.5 py-0.5 text-xs font-semibold ${badge.className}`}>
         {badge.label}
       </span>
       <span
-        className="rounded bg-white px-1.5 py-0.5 text-[11px] text-slate-600"
+        className="rounded bg-white px-1.5 py-0.5 text-xs text-slate-600"
         style={{ fontFamily: 'var(--font-mono)' }}
       >
         {layer === 'frontend' ? `<${item.action} />` : `${item.action}()`}
@@ -77,6 +97,7 @@ export function VerifyModal({
   isOpen,
   labTitle,
   hasFrontendTests = false,
+  mode = 'vulnerable',
   isLoading,
   result,
   error,
@@ -123,6 +144,7 @@ export function VerifyModal({
             Test My Fix — {labTitle}
           </h2>
           <VerifySubtitle hasFrontendTests={hasFrontendTests} />
+          <SecureModeNote mode={mode} />
         </div>
 
         <button
@@ -196,10 +218,10 @@ export function VerifyModal({
                     className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2"
                     style={{ fontFamily: 'var(--font-mono)' }}
                   >
-                    <pre className="overflow-x-auto rounded bg-white p-2 text-[11px] text-emerald-700">
+                    <pre className="overflow-x-auto rounded bg-white p-2 text-xs text-emerald-700">
                       {`Expected:\n${JSON.stringify(item.expected, null, 2)}`}
                     </pre>
-                    <pre className="overflow-x-auto rounded bg-white p-2 text-[11px] text-red-700">
+                    <pre className="overflow-x-auto rounded bg-white p-2 text-xs text-red-700">
                       {`Actual:\n${JSON.stringify(item.actual, null, 2)}`}
                     </pre>
                   </div>

@@ -88,7 +88,7 @@ Ba node `1. MiniShop UI` → `2. FastAPI` → `3. PostgreSQL`:
 
 | Trạng thái | Hiển thị |
 | :--- | :--- |
-| `idle` | Viền xám, độ mờ 65% |
+| `idle` | Viền xám nét đứt, chữ `slate-600`; không dùng `opacity` để chữ vẫn đạt tương phản WCAG AA |
 | `active` | Viền theo `status` + vòng sáng `ring-4` khi trace đang chạy tới tầng này |
 | `completed` | Giữ màu trạng thái nghiêm trọng nhất đã gặp |
 
@@ -96,7 +96,7 @@ Mỗi node bấm được để nhảy tới bước đầu tiên của tầng v
 
 ### `PayloadChipBar`
 
-Chip dạng pill (`rounded-full`, `border-dashed`). Bấm chip điền dữ liệu vào form và kích hoạt hiệu ứng nháy ô nhập (`450ms`).
+Chip dạng pill (`rounded-full`, `border-dashed`). Bấm chip điền dữ liệu vào form và kích hoạt hiệu ứng nháy ô nhập (`450ms`). Chip vừa chọn chuyển sang viền liền (`aria-pressed`), và mô tả của nó hiện thành dòng chữ ngay dưới hàng chip, không chỉ nằm trong tooltip.
 
 ## 6. Khoảng cách & bo góc
 

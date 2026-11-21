@@ -106,7 +106,7 @@ export function ActorSwitcher({
           );
         })}
       </div>
-      <p className="mt-2 text-[11px] text-slate-500">
+      <p className="mt-2 text-xs text-slate-500">
         Phiên đăng nhập do engine cấp qua header{' '}
         <code style={{ fontFamily: 'var(--font-mono)' }}>X-VVWA-Actor</code>, tách khỏi payload bạn
         chỉnh sửa.

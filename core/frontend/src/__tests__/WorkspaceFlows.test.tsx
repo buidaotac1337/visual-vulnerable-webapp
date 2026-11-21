@@ -127,9 +127,13 @@ describe('VVWA Workspace advanced flows', () => {
     render(<App />);
     expect(await screen.findByRole('heading', { name: 'Lab 01 SQLi' })).toBeInTheDocument();
 
-    // Execute action that returns unmapped runtime-error tag -> top alert renders
+    // Execute action that returns unmapped runtime-error tag -> top callout renders. It is a
+    // polite status, not an alert, so screen readers are not interrupted on every step.
     fireEvent.click(screen.getByRole('button', { name: 'Gửi yêu cầu' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('SyntaxError: invalid syntax');
+    await waitFor(() => {
+      const texts = screen.getAllByRole('status').map((el) => el.textContent ?? '');
+      expect(texts.some((text) => text.includes('SyntaxError: invalid syntax'))).toBe(true);
+    });
 
     // Manual tab switching to Frontend (.tsx) must NOT snap back to Backend (.py)
     const feTab = screen.getByRole('tab', { name: 'Frontend (.tsx)' });

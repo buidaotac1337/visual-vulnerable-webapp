@@ -115,7 +115,8 @@ export function TopControlBar({
           type="button"
           onClick={onResetDb}
           disabled={isResettingDb}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          title="Khôi phục database MiniShop về dữ liệu mẫu ban đầu"
+          className="inline-flex min-w-[104px] cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
           <span>{isResettingDb ? 'Đang reset...' : 'Reset DB'}</span>
@@ -125,7 +126,8 @@ export function TopControlBar({
           type="button"
           onClick={onVerify}
           disabled={!hasLab || isVerifying}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          title="Chấm bài làm của bạn trong backend/vulnerable.py (ở chế độ nào cũng vậy)"
+          className="inline-flex min-w-[124px] cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
           <span>{isVerifying ? 'Đang kiểm thử...' : 'Test My Fix'}</span>
@@ -135,6 +137,8 @@ export function TopControlBar({
           type="button"
           onClick={onDownloadSnippet}
           disabled={!hasLab || isDownloading}
+          aria-label="Tải Snippet"
+          title="Tải vulnerable.py, secure.py, diff và README dạng .zip"
           className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download className="h-3.5 w-3.5" aria-hidden="true" />

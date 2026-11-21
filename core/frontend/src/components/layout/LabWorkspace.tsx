@@ -30,9 +30,11 @@ export function LabWorkspace({
 }: LabWorkspaceProps): JSX.Element {
   const modeBorder = mode === 'secure' ? 'border-t-emerald-500' : 'border-t-red-500';
 
+  // lg:grid-rows-[minmax(0,1fr)]: without it the single grid row grows to its content,
+  // so the page scrolls instead of each column scrolling on its own.
   return (
     <main
-      className={`grid min-h-0 flex-1 grid-cols-1 border-t-2 lg:h-[calc(100vh-56px)] lg:grid-cols-2 lg:overflow-hidden ${modeBorder}`}
+      className={`grid min-h-0 flex-1 grid-cols-1 border-t-2 lg:h-[calc(100vh-56px)] lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden ${modeBorder}`}
     >
       <section
         aria-label="MiniShop Sandbox"

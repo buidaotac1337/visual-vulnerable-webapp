@@ -10,6 +10,8 @@ import asyncpg
 
 from app.db import LabDatabaseProtocol
 
+_PRODUCTS_SQL = "SELECT id, name FROM products ORDER BY id"
+
 
 async def _is_login_bypass(
     db: LabDatabaseProtocol,
@@ -145,7 +147,22 @@ def _build_login_result(
     }
 
 
-def _build_search_result(
+async def _leaked_rows(db: LabDatabaseProtocol, rows: list[dict[str, Any]]) -> list[int]:
+    """Return the indexes of returned rows that are not real products (pulled in by SQLi).
+
+    Args:
+        db: Restricted lab database adapter.
+        rows: Rows returned by the search query.
+
+    Returns:
+        Row indexes the UI should flag as leaked data.
+    """
+    real = {(p["id"], p["name"]) for p in await db.fetch_all(_PRODUCTS_SQL)}
+    return [i for i, row in enumerate(rows) if (row.get("id"), row.get("name")) not in real]
+
+
+async def _build_search_result(
+    db: LabDatabaseProtocol,
     sql: str,
     keyword: str,
     rows: list[dict[str, Any]],
@@ -153,6 +170,7 @@ def _build_search_result(
     """Build the unified product search response and live trace steps.
 
     Args:
+        db: Restricted lab database adapter (used to tell real products from leaked rows).
         sql: Executed SQL query text.
         keyword: Raw search keyword input.
         rows: Returned database rows.
@@ -160,9 +178,10 @@ def _build_search_result(
     Returns:
         Lab execution dictionary with data, meta, and trace.
     """
-    exploited = _is_search_exploited(keyword, rows)
+    leaked = await _leaked_rows(db, rows)
+    exploited = bool(leaked) or _is_search_exploited(keyword, rows)
     return {
-        "data": {"products": rows, "count": len(rows)},
+        "data": {"products": rows, "count": len(rows), "leaked_rows": leaked},
         "meta": {"outcome": "exploited" if exploited else "normal"},
         "trace": [
             {
@@ -222,7 +241,7 @@ async def search_products(payload: dict[str, Any], db: LabDatabaseProtocol) -> d
     except asyncpg.PostgresError as exc:
         return _sql_error_response("exec-search-query", sql, exc, {"products": [], "count": 0})
 
-    return _build_search_result(sql, keyword, rows)
+    return await _build_search_result(db, sql, keyword, rows)
 
 
 # @snippet:end

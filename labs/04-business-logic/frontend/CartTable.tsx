@@ -65,7 +65,7 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
               <td className="py-1.5 pr-2">
                 <span className="block text-slate-900">{name}</span>
                 {flags.listedPrice !== null && (
-                  <span className="text-[11px] text-red-600">
+                  <span className="text-xs text-red-600">
                     Niêm yết {formatMoney(flags.listedPrice)}
                   </span>
                 )}

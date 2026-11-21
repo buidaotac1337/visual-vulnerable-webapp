@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import type { JSX } from 'react';
 import { RefreshCw } from 'lucide-react';
 
@@ -17,6 +16,7 @@ import type {
 import { CodeSnippetView } from './CodeSnippetView';
 import { TraceControls } from './TraceControls';
 import { UnifiedDiffView } from './UnifiedDiffView';
+import { useStepTabSwitch } from './useStepTabSwitch';
 
 interface CodeInspectorProps {
   lab: LabMetadata | null;
@@ -67,11 +67,11 @@ function renderDiffTab(source: LabSourceResponse): JSX.Element {
   }
   return (
     <div>
-      <h3 className="px-3 pt-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+      <h3 className="px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
         Backend: vulnerable.py ↔ secure.py
       </h3>
       <UnifiedDiffView diff={source.diff} />
-      <h3 className="border-t border-slate-700 px-3 pt-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+      <h3 className="border-t border-slate-700 px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
         Frontend: vulnerable.tsx ↔ secure.tsx
       </h3>
       <UnifiedDiffView diff={source.frontend_diff} fileLabels={['vulnerable.tsx', 'secure.tsx']} />
@@ -142,12 +142,10 @@ function renderInspectorBody(
   }
   if (!source) {
     return (
-      <div
-        className="whitespace-pre-line p-6 text-xs text-slate-400"
-        style={{ fontFamily: 'var(--font-mono)' }}
-      >
-        {`# Code & Trace Inspector (${view.mode})\n# Chọn bài lab để xem mã nguồn trực tiếp với hiệu ứng sáng đèn # @step.`}
-      </div>
+      <p className="p-6 text-sm text-slate-300">
+        Chọn một bài lab để xem mã nguồn. Khi bạn gửi request, dòng code của từng bước trace sẽ sáng
+        lên tại đây.
+      </p>
     );
   }
   if (view.activeTab === 'diff') {
@@ -181,15 +179,12 @@ export function CodeInspector({
   onNextStep,
 }: CodeInspectorProps): JSX.Element {
   const target = resolveStepTarget(activeStep, source, mode);
-  const targetTab = target?.tab ?? null;
-  const activeTabRef = useRef<InspectorTab>(activeTab);
-  activeTabRef.current = activeTab;
-
-  useEffect(() => {
-    if (targetTab && activeTabRef.current !== 'diff') {
-      onChangeTab(targetTab);
-    }
-  }, [targetTab, activeStep?.step, onChangeTab]);
+  const { note: tabNote, pickTab } = useStepTabSwitch(
+    target?.tab ?? null,
+    activeStep?.step,
+    activeTab,
+    onChangeTab,
+  );
 
   const view = buildInspectorView(activeTab, mode, source, target);
   const hasFrontendSource = view.frontendFile !== null;
@@ -209,8 +204,8 @@ export function CodeInspector({
                 role="tab"
                 aria-selected={isSelected}
                 disabled={isDisabled}
-                onClick={() => onChangeTab(item.id)}
-                className={`cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                onClick={() => pickTab(item.id)}
+                className={`cursor-pointer whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                   isSelected
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
@@ -224,7 +219,7 @@ export function CodeInspector({
 
         <div className="flex items-center gap-2">
           <span
-            className="hidden text-[11px] text-slate-400 sm:inline"
+            className="hidden text-xs text-slate-400 sm:inline"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             {activeFileLabel}
@@ -244,6 +239,15 @@ export function CodeInspector({
           </button>
         </div>
       </div>
+
+      {tabNote && (
+        <p
+          role="status"
+          className="shrink-0 border-b border-slate-700 bg-indigo-950/60 px-3 py-1 text-xs text-indigo-200"
+        >
+          {tabNote}
+        </p>
+      )}
 
       <div className="vvwa-ide-scroll min-h-0 flex-1 overflow-auto">
         {renderInspectorBody(view, source, sourceError, target, activeStep)}

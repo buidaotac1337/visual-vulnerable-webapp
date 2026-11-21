@@ -19,7 +19,9 @@ export function App(): JSX.Element {
   );
 
   return (
-    <div className="flex min-h-screen flex-col">
+    // lg:h-screen: a fixed-height root (not just min-h-screen) is what lets the two
+    // workspace columns scroll on their own instead of the whole page growing.
+    <div className="flex min-h-screen flex-col lg:h-screen">
       <TopControlBar
         health={ws.health}
         apiError={ws.apiError}
@@ -92,6 +94,7 @@ export function App(): JSX.Element {
         isOpen={ws.isVerifyModalOpen}
         labTitle={ws.selectedLab?.title ?? ''}
         hasFrontendTests={ws.selectedLab?.verifyTests.some(isFrontendVerifyTest) ?? false}
+        mode={ws.mode}
         isLoading={ws.isVerifying}
         result={ws.verifyResult}
         error={ws.verifyError}
