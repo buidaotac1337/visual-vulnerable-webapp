@@ -9,7 +9,7 @@ Accepted
 
 ## Context
 
-Sau khi hoàn thiện Backend Core Engine (lab discovery, dynamic hot-reload loader, `# @snippet`/`# @step` source reader, verifier và 1-click Reset DB), dự án bước sang Giai đoạn 1 xây dựng **Frontend Workspace** theo triết lý **Dual-Surface Pedagogy** ([docs/05-design-system.md](../05-design-system.md)).
+Sau khi hoàn thiện Backend Core Engine (lab discovery, dynamic hot-reload loader, `# @snippet`/`# @step` source reader, verifier và 1-click Reset DB), dự án bước sang Giai đoạn 1 xây dựng **Frontend Workspace** theo triết lý **Dual-Surface Pedagogy** ([docs/design-system.md](../design-system.md)).
 
 Quá trình đánh giá mở rộng trước triển khai chỉ ra 4 quyết định kiến trúc cốt lõi cần chốt một lần trước khi viết các bài lab MiniShop:
 

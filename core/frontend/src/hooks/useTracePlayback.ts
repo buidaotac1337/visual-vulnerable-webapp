@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { findFirstStepIndexForLayer } from '@/lib';
 import type { PlaybackStatus, TraceLayer, TraceStep } from '@/types';
 
-/** Default step-by-step live trace animation cadence (ms) per docs/02-trace-and-snippet-spec.md. */
+/** Default step-by-step live trace animation cadence (ms) per docs/user-guide.md. */
 const TRACE_STEP_INTERVAL_MS = 600;
 
 /** Public state and controls returned by useTracePlayback. */
