@@ -1,5 +1,7 @@
 import type { JSX } from 'react';
-import { CircleCheck, CircleX, ShieldAlert } from 'lucide-react';
+import { CircleX } from 'lucide-react';
+
+import { ResultNotice } from '@/components';
 
 import { escalations, formatField } from './profileData';
 import type { Profile, UpdateResult } from './profileData';
@@ -56,28 +58,21 @@ export function UpdateNotice({ result, before }: UpdateNoticeProps): JSX.Element
   }
   if (!result.updated) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
-        <CircleX className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
-        <span>{result.error ?? 'Hồ sơ không thay đổi.'}</span>
-      </div>
+      <ResultNotice
+        tone="neutral"
+        icon={<CircleX className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />}
+      >
+        {result.error ?? 'Hồ sơ không thay đổi.'}
+      </ResultNotice>
     );
   }
   const changed = escalations(before, result.profile);
   if (changed.length === 0) {
-    return (
-      <p className="flex items-center gap-1.5 text-xs font-semibold text-safe-700">
-        <CircleCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
-        <span>Đã lưu hồ sơ.</span>
-      </p>
-    );
+    return <ResultNotice tone="safe">Đã lưu hồ sơ.</ResultNotice>;
   }
   return (
-    <p
-      role="alert"
-      className="flex items-start gap-1.5 rounded-lg border border-danger-300 bg-danger-50/60 p-3 text-xs font-semibold text-danger-700"
-    >
-      <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
-      <span>Server đã ghi cả trường ngoài form: {changed.join('; ')}.</span>
-    </p>
+    <ResultNotice tone="danger">
+      Server đã ghi cả trường ngoài form: {changed.join('; ')}.
+    </ResultNotice>
   );
 }

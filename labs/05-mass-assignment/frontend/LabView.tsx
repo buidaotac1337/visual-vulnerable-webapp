@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, JSX } from 'react';
 import { UserRound } from 'lucide-react';
 
+import { LabCard, PrimaryButton, TextField } from '@/components';
 import type { LabExecutionResponse, LabPayload, LabViewProps } from '@/types';
 
 import { ExtraFields } from './ExtraFields';
@@ -91,15 +92,11 @@ export function LabView(props: LabViewProps): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-          <UserRound className="h-4 w-4 text-brand-600" aria-hidden="true" />
-          <span>MiniShop · Hồ sơ của tôi</span>
-        </div>
-        <span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>
-      </div>
-
+    <LabCard
+      title="MiniShop · Hồ sơ của tôi"
+      icon={<UserRound className="h-4 w-4" aria-hidden="true" />}
+      headerRight={<span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
+    >
       <ProfileCard profile={profile} />
 
       <form
@@ -107,28 +104,25 @@ export function LabView(props: LabViewProps): JSX.Element {
         onSubmit={handleSubmit}
         className={`flex flex-col gap-2 rounded-lg ${flashClass}`}
       >
-        <label htmlFor="ma-email" className="text-xs font-medium text-slate-700">
-          Email
-        </label>
-        <input
+        <TextField
           id="ma-email"
-          type="text"
+          label="Email"
           value={readEmail(payload)}
           disabled={isExecuting}
-          onChange={(event) => onPayloadChange({ ...payload, [FORM_FIELD]: event.target.value })}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-200"
+          onChange={(value) => onPayloadChange({ ...payload, [FORM_FIELD]: value })}
         />
         <ExtraFields payload={payload} disabled={isExecuting} onChange={onPayloadChange} />
-        <button
+        <PrimaryButton
           type="submit"
-          disabled={isExecuting}
-          className="cursor-pointer self-end rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+          isBusy={isExecuting}
+          busyLabel="Đang lưu..."
+          className="self-end"
         >
-          {isExecuting ? 'Đang lưu...' : extras.length > 0 ? 'Lưu (kèm trường ẩn)' : 'Lưu hồ sơ'}
-        </button>
+          {extras.length > 0 ? 'Lưu (kèm trường ẩn)' : 'Lưu hồ sơ'}
+        </PrimaryButton>
       </form>
 
       <UpdateNotice result={result} before={before} />
-    </div>
+    </LabCard>
   );
 }

@@ -225,7 +225,21 @@ export function LabView({ mode, payload, onPayloadChange, onExecute }: LabViewPr
 | `frontendStepsAfter` | Hàm nhận response, trả về bước trace chèn sau trace backend |
 | `silent` | Không phát trace, không ghi đè `lastResponse`; dùng cho các lần đọc dữ liệu ban đầu |
 
-`LabView` được mount theo `lab.id`, không theo `mode`, nên state cục bộ không mất khi đổi mode. Màu trong giao diện lab dùng vai trò ngữ nghĩa của design system (`danger`, `safe`, `warning`, `info`, `brand`, ví dụ `text-danger-700`, `bg-safe-50`); ESLint chặn `red-*`, `emerald-*`, `amber-*`, `blue-*`, `indigo-*` (xem [Design System §3](design-system.md#3-màu-sắc)). Import qua barrel (`@/types`, `@/lib`…); package npm được resolve từ `core/frontend/node_modules`.
+`LabView` được mount theo `lab.id`, không theo `mode`, nên state cục bộ không mất khi đổi mode. Màu trong giao diện lab dùng vai trò ngữ nghĩa của design system (`danger`, `safe`, `warning`, `info`, `brand`, ví dụ `text-danger-700`, `bg-safe-50`); ESLint chặn `red-*`, `emerald-*`, `amber-*`, `blue-*`, `indigo-*` (xem [Design System §3](design-system.md#3-màu-sắc)). Import qua barrel (`@/types`, `@/lib`, `@/components`…); package npm được resolve từ `core/frontend/node_modules`.
+
+#### Primitive tái sử dụng từ `@/components`
+
+Khi viết `LabView.tsx` và các component phụ của lab mới, ưu tiên dùng bộ primitive dùng chung trong `@/components` thay vì lặp lại markup khung card, input, thanh URL, sub-tab hay banner kết quả (xem chi tiết tại [Design System §5](design-system.md#5-component-đặc-thù)):
+
+| Primitive | Dùng khi |
+| :--- | :--- |
+| `LabCard` | Bọc toàn bộ giao diện MiniShop của lab (`title`, `icon`, `headerRight`) |
+| `SubTabBar` | Lab có nhiều chế độ/tab trong header card (`role="tablist"`, phím mũi tên) |
+| `TextField` | Ô nhập liệu đơn có nhãn; bật `mono` cho payload/SQL/mã nguồn và truyền `flashSeq={inputFlashSeq}` |
+| `AddressBar` | Thanh URL giả lập có tiền tố cố định (IDOR, Path Traversal, SSRF…) |
+| `PrimaryButton` | Nút gửi form / hành động chính (`isBusy={isExecuting}`, `busyLabel`) |
+| `ResultNotice` | Banner lỗi SQL, cảnh báo khai thác (`tone="danger"`), xác nhận an toàn (`tone="safe"`), hoặc trạng thái rỗng (`tone="neutral"`) |
+| `Tooltip` | Giải thích ngắn gọn cho nút hoặc icon trợ giúp có thể focus được |
 
 ### Cặp sink frontend
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { JSX } from 'react';
 import { ShoppingCart } from 'lucide-react';
 
+import { LabCard, PrimaryButton } from '@/components';
 import type { LabViewProps } from '@/types';
 
 import { CartTable } from './CartTable';
@@ -99,20 +100,18 @@ export function LabView(props: LabViewProps): JSX.Element {
   // @snippet:end
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-          <ShoppingCart className="h-4 w-4 text-brand-600" aria-hidden="true" />
-          <span>MiniShop · Giỏ hàng</span>
-        </div>
+    <LabCard
+      title="MiniShop · Giỏ hàng"
+      icon={<ShoppingCart className="h-4 w-4" aria-hidden="true" />}
+      headerRight={
         <span className="text-xs text-slate-500">
           {actor ?? 'ẩn danh'} · Số dư:{' '}
           <strong className="text-slate-900">
             {shop.balance === null ? '—' : formatMoney(shop.balance)}
           </strong>
         </span>
-      </div>
-
+      }
+    >
       <section aria-label="Sản phẩm" className="grid gap-1.5 sm:grid-cols-3">
         {shop.products.map((product) => (
           <button
@@ -148,18 +147,18 @@ export function LabView(props: LabViewProps): JSX.Element {
               {items ? formatMoney(clientSubtotal(items)) : '—'}
             </strong>
           </span>
-          <button
-            type="button"
-            disabled={isExecuting || items === null}
+          <PrimaryButton
+            disabled={items === null}
+            isBusy={isExecuting}
+            busyLabel="Đang thanh toán..."
             onClick={() => items && checkout(items)}
-            className="cursor-pointer rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isExecuting ? 'Đang thanh toán...' : 'Thanh toán'}
-          </button>
+            Thanh toán
+          </PrimaryButton>
         </div>
       </section>
 
       <CheckoutSummary result={result} products={shop.products} />
-    </div>
+    </LabCard>
   );
 }

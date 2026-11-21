@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import type { FormEvent, JSX } from 'react';
-import { Globe, Receipt } from 'lucide-react';
+import type { JSX } from 'react';
+import { Receipt } from 'lucide-react';
 
+import { AddressBar, LabCard } from '@/components';
 import type { LabPayload, LabViewProps } from '@/types';
 
 import { OrderDetail } from './OrderDetail';
@@ -58,7 +59,6 @@ export function LabView(props: LabViewProps): JSX.Element {
   const orderId = parseOrderId(orderIdText);
   const orders = useMyOrders(props);
   const lookup = readOrderLookup(lastResponse?.data);
-  const flashClass = inputFlashSeq > 0 ? 'vvwa-input-flash' : '';
 
   // @snippet:start
   const openOrder = (id: number): void => {
@@ -84,23 +84,12 @@ export function LabView(props: LabViewProps): JSX.Element {
   };
   // @snippet:end
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
-    event.preventDefault();
-    if (orderId !== null) {
-      openOrder(orderId);
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-          <Receipt className="h-4 w-4 text-brand-600" aria-hidden="true" />
-          <span>MiniShop · Đơn hàng của tôi</span>
-        </div>
-        <span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>
-      </div>
-
+    <LabCard
+      title="MiniShop · Đơn hàng của tôi"
+      icon={<Receipt className="h-4 w-4" aria-hidden="true" />}
+      headerRight={<span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
+    >
       <section aria-label="Đơn hàng của tôi" className="flex flex-col gap-1.5">
         {orders.length === 0 && <p className="text-xs text-slate-500">Chưa có đơn hàng nào.</p>}
         {orders.map((order) => (
@@ -119,34 +108,27 @@ export function LabView(props: LabViewProps): JSX.Element {
         ))}
       </section>
 
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
-        <label
-          htmlFor="idor-order-id"
-          className="flex flex-1 items-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-500"
-          style={{ fontFamily: 'var(--font-mono)' }}
-        >
-          <Globe className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          <span>minishop.local/orders/</span>
-          <input
-            key={`o-${String(inputFlashSeq)}`}
-            id="idor-order-id"
-            type="number"
-            aria-label="Mã đơn hàng trên URL"
-            value={orderIdText}
-            onChange={(event) => onPayloadChange({ ...payload, order_id: event.target.value })}
-            className={`w-20 bg-transparent text-slate-900 focus:outline-none ${flashClass}`}
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={isExecuting || orderId === null}
-          className="cursor-pointer rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isExecuting ? 'Đang mở...' : 'Mở đơn'}
-        </button>
-      </form>
+      <AddressBar
+        id="idor-order-id"
+        ariaLabel="Mã đơn hàng trên URL"
+        prefix="minishop.local/orders/"
+        type="number"
+        value={orderIdText}
+        onChange={(value) => onPayloadChange({ ...payload, order_id: value })}
+        onSubmit={() => {
+          if (orderId !== null) {
+            openOrder(orderId);
+          }
+        }}
+        submitLabel="Mở đơn"
+        busyLabel="Đang mở..."
+        isBusy={isExecuting}
+        submitDisabled={orderId === null}
+        flashSeq={inputFlashSeq}
+        inputClassName="w-20"
+      />
 
       <OrderDetail lookup={lookup} actor={actor} />
-    </div>
+    </LabCard>
   );
 }

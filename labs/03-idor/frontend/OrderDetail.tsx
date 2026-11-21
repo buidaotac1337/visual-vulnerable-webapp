@@ -1,5 +1,7 @@
 import type { JSX } from 'react';
-import { PackageSearch, ShieldAlert } from 'lucide-react';
+import { PackageSearch } from 'lucide-react';
+
+import { ResultNotice } from '@/components';
 
 import { visibleOrder } from './orderData';
 import type { OrderLookup } from './orderData';
@@ -30,10 +32,12 @@ export function OrderDetail({ lookup, actor }: OrderDetailProps): JSX.Element {
   const order = visibleOrder(lookup);
   if (!order) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
-        <PackageSearch className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
-        <span>{lookup.error ?? 'Không tìm thấy đơn hàng.'}</span>
-      </div>
+      <ResultNotice
+        tone="neutral"
+        icon={<PackageSearch className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />}
+      >
+        {lookup.error ?? 'Không tìm thấy đơn hàng.'}
+      </ResultNotice>
     );
   }
   const foreign = order.owner !== actor;
@@ -43,13 +47,10 @@ export function OrderDetail({ lookup, actor }: OrderDetailProps): JSX.Element {
       className={`flex flex-col gap-3 rounded-lg border p-3 ${foreign ? 'border-danger-300 bg-danger-50/40' : 'border-slate-200 bg-slate-50'}`}
     >
       {foreign && (
-        <p role="alert" className="flex items-center gap-1.5 text-xs font-semibold text-danger-700">
-          <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>
-            Đây là đơn của {order.owner}. {actor ?? 'Người dùng ẩn danh'} đang xem dữ liệu của khách
-            hàng khác.
-          </span>
-        </p>
+        <ResultNotice tone="danger">
+          Đây là đơn của {order.owner}. {actor ?? 'Người dùng ẩn danh'} đang xem dữ liệu của khách
+          hàng khác.
+        </ResultNotice>
       )}
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
         <dt className="text-slate-500">Mã đơn</dt>

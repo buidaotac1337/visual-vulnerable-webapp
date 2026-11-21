@@ -1,6 +1,8 @@
 import type { JSX } from 'react';
 import { ShieldAlert, Star } from 'lucide-react';
 
+import { ResultNotice } from '@/components';
+
 import type { ReviewBodyComponent, ReviewPage } from './reviewData';
 
 interface ReviewListProps {
@@ -54,10 +56,14 @@ export function ReviewList({ page, ReviewBody, findingsById }: ReviewListProps):
             </div>
             <ReviewBody content={review.content} />
             {findings.length > 0 && (
-              <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-danger-700">
-                <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Nội dung đã thành mã thực thi được: {findings.join(', ')}</span>
-              </p>
+              <ResultNotice
+                tone="danger"
+                role={null}
+                icon={<ShieldAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+                className="mt-2"
+              >
+                Nội dung đã thành mã thực thi được: {findings.join(', ')}
+              </ResultNotice>
             )}
           </article>
         );

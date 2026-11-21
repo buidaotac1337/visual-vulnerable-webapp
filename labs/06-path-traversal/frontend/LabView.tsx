@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import type { FormEvent, JSX } from 'react';
-import { FileDown, Globe } from 'lucide-react';
+import type { JSX } from 'react';
+import { FileDown } from 'lucide-react';
 
+import { AddressBar, LabCard } from '@/components';
 import type { LabPayload, LabViewProps } from '@/types';
 
 import { InvoiceViewer } from './InvoiceViewer';
@@ -55,7 +56,6 @@ export function LabView(props: LabViewProps): JSX.Element {
   const invoices = useInvoices(props);
   const fileName = readFileName(payload);
   const result = readDownload(lastResponse?.data);
-  const flashClass = inputFlashSeq > 0 ? 'vvwa-input-flash' : '';
 
   // @snippet:start
   const download = (file: string): void => {
@@ -81,23 +81,12 @@ export function LabView(props: LabViewProps): JSX.Element {
   };
   // @snippet:end
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
-    event.preventDefault();
-    if (fileName !== '') {
-      download(fileName);
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-          <FileDown className="h-4 w-4 text-brand-600" aria-hidden="true" />
-          <span>MiniShop · Hóa đơn của tôi</span>
-        </div>
-        <span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>
-      </div>
-
+    <LabCard
+      title="MiniShop · Hóa đơn của tôi"
+      icon={<FileDown className="h-4 w-4" aria-hidden="true" />}
+      headerRight={<span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
+    >
       <section aria-label="Hóa đơn của tôi" className="flex flex-col gap-1.5">
         {invoices.length === 0 && <p className="text-xs text-slate-500">Chưa có hóa đơn nào.</p>}
         {invoices.map((invoice) => (
@@ -116,35 +105,26 @@ export function LabView(props: LabViewProps): JSX.Element {
         ))}
       </section>
 
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
-        <label
-          htmlFor="pt-file"
-          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-500"
-          style={{ fontFamily: 'var(--font-mono)' }}
-        >
-          <Globe className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          <span className="shrink-0">/invoices/download?file=</span>
-          <input
-            key={`f-${String(inputFlashSeq)}`}
-            id="pt-file"
-            type="text"
-            aria-label="Tên file trên URL"
-            value={fileName}
-            disabled={isExecuting}
-            onChange={(event) => onPayloadChange({ ...payload, file: event.target.value })}
-            className={`min-w-0 flex-1 bg-transparent text-slate-900 focus:outline-none ${flashClass}`}
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={isExecuting || fileName === ''}
-          className="cursor-pointer rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isExecuting ? 'Đang tải...' : 'Tải'}
-        </button>
-      </form>
+      <AddressBar
+        id="pt-file"
+        ariaLabel="Tên file trên URL"
+        prefix="/invoices/download?file="
+        value={fileName}
+        disabled={isExecuting}
+        onChange={(value) => onPayloadChange({ ...payload, file: value })}
+        onSubmit={() => {
+          if (fileName !== '') {
+            download(fileName);
+          }
+        }}
+        submitLabel="Tải"
+        busyLabel="Đang tải..."
+        isBusy={isExecuting}
+        submitDisabled={fileName === ''}
+        flashSeq={inputFlashSeq}
+      />
 
       <InvoiceViewer result={result} invoices={invoices} />
-    </div>
+    </LabCard>
   );
 }

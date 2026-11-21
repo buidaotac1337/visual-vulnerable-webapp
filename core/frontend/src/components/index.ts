@@ -9,5 +9,23 @@ export {
 export { LabWorkspace, ModeSwitch, TopControlBar } from './layout';
 export { FlowPipeline } from './pipeline';
 export { ActorSwitcher, EmptyLabFallback, PayloadChipBar, SandboxPane } from './sandbox';
-export { Tooltip } from './ui';
+export {
+  AddressBar,
+  LabCard,
+  PrimaryButton,
+  ResultNotice,
+  SubTabBar,
+  TextField,
+  Tooltip,
+} from './ui';
+export type {
+  AddressBarProps,
+  LabCardProps,
+  PrimaryButtonProps,
+  ResultNoticeProps,
+  ResultNoticeTone,
+  SubTabBarProps,
+  SubTabItem,
+  TextFieldProps,
+} from './ui';
 export { VerifyModal } from './verify';

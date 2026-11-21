@@ -1,5 +1,7 @@
 import type { JSX } from 'react';
-import { FileSearch, FileText, ShieldAlert } from 'lucide-react';
+import { FileSearch, FileText } from 'lucide-react';
+
+import { ResultNotice } from '@/components';
 
 import { isOwnInvoice, visibleContent } from './invoiceData';
 import type { DownloadResult, Invoice } from './invoiceData';
@@ -26,10 +28,12 @@ export function InvoiceViewer({ result, invoices }: InvoiceViewerProps): JSX.Ele
   const content = visibleContent(result);
   if (content === null) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
-        <FileSearch className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
-        <span>{result.error ?? 'Không có file.'}</span>
-      </div>
+      <ResultNotice
+        tone="neutral"
+        icon={<FileSearch className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />}
+      >
+        {result.error ?? 'Không có file.'}
+      </ResultNotice>
     );
   }
   const foreign = !isOwnInvoice(result.file, invoices);
@@ -43,13 +47,10 @@ export function InvoiceViewer({ result, invoices }: InvoiceViewerProps): JSX.Ele
         <span className="break-all">{result.file}</span>
       </p>
       {foreign && (
-        <p role="alert" className="flex items-center gap-1.5 text-xs font-semibold text-danger-700">
-          <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>
-            File này không nằm trong danh sách hóa đơn của bạn: server đã đọc theo đường dẫn mà
-            client gửi lên.
-          </span>
-        </p>
+        <ResultNotice tone="danger">
+          File này không nằm trong danh sách hóa đơn của bạn: server đã đọc theo đường dẫn mà client
+          gửi lên.
+        </ResultNotice>
       )}
       <pre
         className="max-h-56 overflow-auto rounded border border-slate-200 bg-white p-2 text-xs whitespace-pre-wrap break-all text-slate-800"
