@@ -57,6 +57,7 @@ cp .env.example .env
 | `POSTGRES_PORT` | `5432` | Cổng PostgreSQL trên máy host |
 | `BACKEND_PORT` | `8000` | Cổng API trên máy host |
 | `FRONTEND_PORT` | `5173` | Cổng workspace trên máy host |
+| `VITE_WATCH_POLLING` | `true` | Vite theo dõi file bằng polling. Cần khi chạy Docker trên Windows/macOS, vì bind mount từ máy host không phát sự kiện thay đổi file vào container |
 
 Đổi cổng host không ảnh hưởng giao tiếp nội bộ: frontend luôn proxy `/api` tới `http://backend:8000` trong mạng Compose.
 
@@ -98,7 +99,7 @@ Mật khẩu và các dữ liệu khác (sản phẩm, đơn hàng, đánh giá,
 | Thay đổi | Cơ chế | Cần làm gì |
 | :--- | :--- | :--- |
 | `labs/*/backend/*.py` | Engine nạp lại module từ đĩa ở **mỗi request** | Không cần làm gì |
-| `labs/*/frontend/*.tsx` | Vite HMR | Không cần làm gì |
+| `labs/*/frontend/*.tsx` | Vite HMR (polling trong Docker) | Không cần làm gì; Test My Fix chấm đúng bản vừa lưu |
 | `core/frontend/src/**` | Vite HMR | Không cần làm gì |
 | `core/backend/app/**` | `uvicorn --reload` khởi động lại worker | Không cần làm gì |
 | `core/postgres/init.sql` | Chỉ chạy khi volume trống | `docker compose down -v` |
@@ -114,6 +115,7 @@ Code Inspector tự đọc lại mã nguồn khi cửa sổ trình duyệt đư�
 | Thanh công cụ không hiện `API: OK` (đứng ở `Connecting API...` hoặc hiện lỗi) | Backend chưa healthy hoặc lỗi khởi động | `docker compose logs backend` |
 | API trả `503` | Backend không kết nối được PostgreSQL | Kiểm tra `docker compose ps` và log `postgres` |
 | API trả `400 Unknown actor '…'` | Persona đã bị xóa hoặc đổi tên trong DB | Bấm **Reset DB** |
+| Sửa file frontend nhưng giao diện không cập nhật | Watcher không nhận sự kiện thay đổi file qua bind mount | Giữ `VITE_WATCH_POLLING=true` (mặc định), rồi `docker compose up -d frontend` |
 | Lab không xuất hiện trong danh sách | `meta.json` sai schema hoặc `id` không khớp tên thư mục | Xem warning `Skipping invalid lab` trong log backend |
 | Đổi `init.sql` nhưng DB không đổi | Volume đã được khởi tạo từ trước | `docker compose down -v` rồi chạy lại |
 | Dữ liệu lab bị sửa sau khi thử payload | Hành vi bình thường của lab ghi dữ liệu | Bấm **Reset DB** |

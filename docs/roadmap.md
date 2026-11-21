@@ -15,7 +15,7 @@ Trạng thái phát triển của nền tảng và danh sách bài lab trên Min
 - [x] Phiên đăng nhập: header `X-VVWA-Actor`, `LabContext`/`ctx`, bộ chọn persona ([ADR-0005](adr/0005-lab-session-actor-context.md)).
 - [x] Cặp sink frontend `vulnerable.tsx`/`secure.tsx` (source, Diff, `.zip`), `verifyTests` theo `layer`, toán tử `$contains`/`$notContains`, ESLint chặn sink ([ADR-0006](adr/0006-frontend-sink-grading-and-verify-matchers.md)).
 - [x] Bộ chấm frontend trong document trơ, DOM probe, matcher TypeScript, `VerifyModal` gộp kết quả ([ADR-0006](adr/0006-frontend-sink-grading-and-verify-matchers.md)).
-- [ ] **Lab 02: Stored XSS** (Đánh giá sản phẩm) — sink frontend.
+- [x] **Lab 02: Stored XSS** (Đánh giá sản phẩm) — sink frontend, persona `ctx`.
 - [ ] **Lab 03: IDOR / Broken Access Control** (Xem chi tiết đơn hàng) — cần `ctx`.
 - [ ] **Lab 04: Business Logic & Client-side Trust** (Giỏ hàng / Thanh toán) — cần `ctx`.
 

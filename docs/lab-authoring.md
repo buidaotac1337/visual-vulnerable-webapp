@@ -2,7 +2,7 @@
 
 Hướng dẫn thêm một bài lab mới vào VVWA: cấu trúc thư mục, schema `meta.json`, hợp đồng handler backend, giao diện `LabView`, cặp sink frontend và bộ `verifyTests`. Engine tự phát hiện lab mới, không cần sửa code trong `core/`.
 
-Lab tham khảo: [`labs/01-sql-injection`](../labs/01-sql-injection/README.md).
+Lab tham khảo: [`labs/01-sql-injection`](../labs/01-sql-injection/README.md) (lỗ hổng ở backend), [`labs/02-stored-xss`](../labs/02-stored-xss/README.md) (cặp sink frontend, handler dùng `ctx`).
 
 ## 1. Cấu trúc thư mục
 

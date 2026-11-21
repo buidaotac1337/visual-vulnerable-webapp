@@ -218,3 +218,26 @@ def test_frontend_gate_passes_resolved_pnpm_binary_path(tmp_path: Path) -> None:
 
     assert len(seen_commands) == 5
     assert all(cmd[0] == r"C:\tools\pnpm.CMD" for cmd in seen_commands)
+
+
+def test_backend_gate_runs_mypy_separately_per_lab(tmp_path: Path) -> None:
+    """Labs share module names (secure.py), so each lab backend gets its own mypy run."""
+    (tmp_path / "pyproject.toml").write_text("[tool.vvwa.quality]\n", encoding="utf-8")
+    for lab in ("01-a", "02-b"):
+        (tmp_path / "labs" / lab / "backend").mkdir(parents=True)
+        (tmp_path / "labs" / lab / "backend" / "secure.py").write_text("x = 1\n", encoding="utf-8")
+    seen_commands: list[list[str]] = []
+
+    def _fake_run(cmd: list[str], cwd: Path) -> bool:
+        seen_commands.append(cmd)
+        return True
+
+    with patch("scripts.quality.runners.run_command", side_effect=_fake_run):
+        assert execute_gate("backend", tmp_path, allow_main=False)
+
+    mypy_runs = [cmd[3:] for cmd in seen_commands if cmd[:3] == ["uv", "run", "mypy"]]
+    assert mypy_runs == [
+        ["core/backend/app", "core/backend/tests", "scripts"],
+        ["labs/01-a/backend"],
+        ["labs/02-b/backend"],
+    ]

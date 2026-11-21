@@ -1,0 +1,130 @@
+{
+  "id": "02-stored-xss",
+  "title": "Stored XSS — Đánh giá sản phẩm MiniShop",
+  "category": "XSS",
+  "difficulty": "Cơ bản",
+  "summary": "Kẻ tấn công đăng một đánh giá chứa HTML độc hại. Trang sản phẩm render nội dung đó bằng dangerouslySetInnerHTML, nên script chạy trong trình duyệt của mọi người xem.",
+  "safetyPattern": "Render nội dung người dùng dưới dạng chữ để React tự escape (output encoding). Backend vẫn lưu nguyên văn; không chèn chuỗi người dùng làm HTML.",
+  "actors": ["alice", "bob"],
+  "samplePayloads": [
+    {
+      "label": "Alice xem trang sản phẩm",
+      "description": "Nạn nhân mở trang sản phẩm và tải danh sách đánh giá.",
+      "actor": "alice",
+      "data": {
+        "tab": "view",
+        "product_id": 1
+      }
+    },
+    {
+      "label": "Bob đăng payload onerror",
+      "description": "Thẻ <img> trỏ tới ảnh hỏng; trình duyệt chạy onerror ngay khi render.",
+      "actor": "bob",
+      "data": {
+        "tab": "write",
+        "product_id": 1,
+        "rating": 1,
+        "content": "<img src=x onerror=\"this.outerHTML='<b style=color:#b91c1c>⚠ XSS: đoạn script của bob vừa chạy trong trình duyệt của người xem</b>'\">"
+      }
+    },
+    {
+      "label": "Bob đăng link javascript:",
+      "description": "Liên kết giả voucher; script chạy khi người xem bấm vào.",
+      "actor": "bob",
+      "data": {
+        "tab": "write",
+        "product_id": 1,
+        "rating": 5,
+        "content": "<a href=\"javascript:alert('XSS từ đánh giá của bob')\">Nhận voucher giảm 50% tại đây</a>"
+      }
+    },
+    {
+      "label": "Alice viết đánh giá thường",
+      "description": "Luồng hợp lệ: nội dung có ký tự đặc biệt vẫn phải hiển thị đúng.",
+      "actor": "alice",
+      "data": {
+        "tab": "write",
+        "product_id": 1,
+        "rating": 5,
+        "content": "Gõ êm, pin dùng > 3 tuần & giá \"hời\"!"
+      }
+    }
+  ],
+  "verifyTests": [
+    {
+      "name": "Trang sản phẩm trả về đánh giá có sẵn trong seed",
+      "action": "list_reviews",
+      "input": { "product_id": 1 },
+      "expect": { "count": 1, "reviews": [{ "username": "alice", "rating": 5 }] }
+    },
+    {
+      "name": "Đánh giá được lưu nguyên văn (encode ở đầu ra, không phải đầu vào)",
+      "action": "post_review",
+      "actor": "bob",
+      "input": { "product_id": 1, "rating": 1, "content": "<img src=x onerror=alert(1)>" },
+      "expect": {
+        "saved": true,
+        "review": { "username": "bob", "content": "<img src=x onerror=alert(1)>" }
+      }
+    },
+    {
+      "name": "Chưa đăng nhập thì không đăng được đánh giá",
+      "action": "post_review",
+      "input": { "product_id": 1, "rating": 5, "content": "Ẩn danh" },
+      "expect": { "saved": false }
+    },
+    {
+      "name": "Điểm đánh giá ngoài khoảng 1–5 bị từ chối",
+      "action": "post_review",
+      "actor": "alice",
+      "input": { "product_id": 1, "rating": 9, "content": "Tuyệt vời" },
+      "expect": { "saved": false }
+    },
+    {
+      "name": "Đánh giá thường hiển thị đúng nội dung",
+      "layer": "frontend",
+      "component": "ReviewContent",
+      "props": { "content": "Giao hàng nhanh, đóng gói cẩn thận!" },
+      "expect": { "activeContent": false, "text": "Giao hàng nhanh, đóng gói cẩn thận!" }
+    },
+    {
+      "name": "Ký tự đặc biệt hợp lệ (>, &, \") vẫn hiển thị nguyên dạng",
+      "layer": "frontend",
+      "component": "ReviewContent",
+      "props": { "content": "Pin dùng > 3 tuần & giá \"hời\"" },
+      "expect": { "activeContent": false, "text": "Pin dùng > 3 tuần & giá \"hời\"" }
+    },
+    {
+      "name": "Payload <img onerror> chỉ hiển thị dạng chữ",
+      "layer": "frontend",
+      "component": "ReviewContent",
+      "props": { "content": "<img src=x onerror=alert(1)>" },
+      "expect": {
+        "activeContent": false,
+        "text": { "$contains": "<img src=x onerror=alert(1)>" },
+        "html": { "$notContains": "<img" }
+      }
+    },
+    {
+      "name": "Thẻ <script> không được chèn vào DOM",
+      "layer": "frontend",
+      "component": "ReviewContent",
+      "props": { "content": "<script>alert(1)</script>" },
+      "expect": { "activeContent": false, "text": { "$contains": "<script>alert(1)</script>" } }
+    },
+    {
+      "name": "Liên kết javascript: không trở thành thẻ <a> thật",
+      "layer": "frontend",
+      "component": "ReviewContent",
+      "props": { "content": "<a href=\"javascript:alert(1)\">Nhận voucher</a>" },
+      "expect": { "activeContent": false, "text": { "$contains": "javascript:alert(1)" } }
+    },
+    {
+      "name": "Payload <svg onload> bị vô hiệu hóa",
+      "layer": "frontend",
+      "component": "ReviewContent",
+      "props": { "content": "<svg onload=alert(1)>" },
+      "expect": { "activeContent": false, "text": { "$contains": "<svg onload=alert(1)>" } }
+    }
+  ]
+}

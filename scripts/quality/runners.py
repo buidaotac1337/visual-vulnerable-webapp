@@ -141,22 +141,25 @@ def _current_git_branch(repo_root: Path) -> str:
     return completed.stdout.strip() if completed.returncode == 0 else ""
 
 
-def _collect_mypy_targets(repo_root: Path) -> list[str]:
-    """Build the full list of Python targets checked by mypy --strict.
+def _collect_mypy_runs(repo_root: Path) -> list[list[str]]:
+    """Build the mypy --strict invocations: one for core code, then one per lab backend.
+
+    Every lab ships modules named vulnerable.py and secure.py without a package, so
+    checking two labs in one invocation fails with "Duplicate module named 'secure'".
 
     Args:
         repo_root: Repository root directory.
 
     Returns:
-        List of repo-relative directories to pass to mypy.
+        List of target lists, each passed to its own mypy run.
     """
-    targets = ["core/backend/app", "core/backend/tests", "scripts"]
+    runs = [["core/backend/app", "core/backend/tests", "scripts"]]
     labs_dir = repo_root / "labs"
     if labs_dir.exists():
         for lab_backend in sorted(labs_dir.glob("*/backend")):
             if any(lab_backend.rglob("*.py")):
-                targets.append(lab_backend.relative_to(repo_root).as_posix())
-    return targets
+                runs.append([lab_backend.relative_to(repo_root).as_posix()])
+    return runs
 
 
 def _run_backend_gate(repo_root: Path) -> bool:
@@ -169,13 +172,16 @@ def _run_backend_gate(repo_root: Path) -> bool:
         True when every backend check passes.
     """
     config = load_quality_config(repo_root)
-    mypy_targets = _collect_mypy_targets(repo_root)
+    mypy_runs = [
+        run_command(["uv", "run", "mypy", *targets], cwd=repo_root)
+        for targets in _collect_mypy_runs(repo_root)
+    ]
     checks = [
         print_result(check_file_limits(repo_root, config)),
         print_result(check_barrels(repo_root, config)),
         run_command(["uv", "run", "ruff", "check", "."], cwd=repo_root),
         run_command(["uv", "run", "ruff", "format", "--check", "."], cwd=repo_root),
-        run_command(["uv", "run", "mypy", *mypy_targets], cwd=repo_root),
+        all(mypy_runs),
         run_command(["uv", "run", "pytest", "-v"], cwd=repo_root),
     ]
     return all(checks)
