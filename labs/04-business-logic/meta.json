@@ -1,0 +1,110 @@
+{
+  "id": "04-business-logic",
+  "title": "Business Logic — Giỏ hàng & Thanh toán MiniShop",
+  "category": "Business Logic",
+  "difficulty": "Cơ bản",
+  "summary": "Trang thanh toán gửi cả đơn giá và số lượng của từng món lên server, và server tính tiền bằng chính các con số đó. Sửa giá trong request là mua được hàng với giá tùy ý; đặt số lượng âm là được cộng tiền vào số dư.",
+  "safetyPattern": "Không tin dữ liệu nghiệp vụ từ client: server chỉ nhận product_id và quantity, validate bằng Pydantic (quantity: int = Field(gt=0)) và đọc lại đơn giá từ database trước khi tính tổng và trừ tiền.",
+  "actors": ["alice", "bob"],
+  "samplePayloads": [
+    {
+      "label": "Alice mua hàng bình thường",
+      "description": "Luồng hợp lệ: 1 bàn phím giá niêm yết $89.",
+      "actor": "alice",
+      "data": { "items": [{ "product_id": 1, "quantity": 1, "price": 89 }] }
+    },
+    {
+      "label": "Sửa giá tai nghe thành $1",
+      "description": "Giá nằm trong request nên alice sửa được trước khi gửi (DevTools, proxy).",
+      "actor": "alice",
+      "data": { "items": [{ "product_id": 3, "quantity": 1, "price": 1 }] }
+    },
+    {
+      "label": "Số lượng âm để được cộng tiền",
+      "description": "Mua -5 chuột: tổng tiền là -$225 nên số dư tăng thay vì giảm.",
+      "actor": "alice",
+      "data": { "items": [{ "product_id": 2, "quantity": -5, "price": 45 }] }
+    },
+    {
+      "label": "Bù trừ bằng món số lượng âm",
+      "description": "Tai nghe $120 cộng -3 chuột (-$135): nhận tai nghe mà tổng tiền là -$15.",
+      "actor": "alice",
+      "data": {
+        "items": [
+          { "product_id": 3, "quantity": 1, "price": 120 },
+          { "product_id": 2, "quantity": -3, "price": 45 }
+        ]
+      }
+    },
+    {
+      "label": "Bob mua vượt số dư",
+      "description": "Luồng bị từ chối hợp lệ: 3 tai nghe $360 trong khi bob có $250.",
+      "actor": "bob",
+      "data": { "items": [{ "product_id": 3, "quantity": 3, "price": 120 }] }
+    }
+  ],
+  "verifyTests": [
+    {
+      "name": "Mua nhiều sản phẩm tính đúng tổng tiền và số dư",
+      "action": "checkout",
+      "actor": "alice",
+      "input": {
+        "items": [
+          { "product_id": 1, "quantity": 1, "price": 89 },
+          { "product_id": 2, "quantity": 2, "price": 45 }
+        ]
+      },
+      "expect": { "placed": true, "order": { "total_amount": 179.0 }, "balance": 321.0 }
+    },
+    {
+      "name": "Giá do trình duyệt gửi lên bị bỏ qua",
+      "action": "checkout",
+      "actor": "alice",
+      "input": { "items": [{ "product_id": 3, "quantity": 1, "price": 1 }] },
+      "expect": {
+        "placed": true,
+        "order": { "total_amount": 120.0, "items": [{ "product_id": 3, "unit_price": 120.0 }] },
+        "balance": 380.0
+      }
+    },
+    {
+      "name": "Số lượng âm bị từ chối",
+      "action": "checkout",
+      "actor": "alice",
+      "input": { "items": [{ "product_id": 2, "quantity": -5, "price": 45 }] },
+      "expect": { "placed": false, "order": null }
+    },
+    {
+      "name": "Số lượng 0 bị từ chối",
+      "action": "checkout",
+      "actor": "alice",
+      "input": { "items": [{ "product_id": 1, "quantity": 0, "price": 89 }] },
+      "expect": { "placed": false, "order": null }
+    },
+    {
+      "name": "Món số lượng âm không được bù trừ vào tổng tiền",
+      "action": "checkout",
+      "actor": "alice",
+      "input": {
+        "items": [
+          { "product_id": 3, "quantity": 1, "price": 120 },
+          { "product_id": 2, "quantity": -3, "price": 45 }
+        ]
+      },
+      "expect": { "placed": false, "order": null }
+    },
+    {
+      "name": "Không đủ số dư thì không đặt được hàng",
+      "action": "checkout",
+      "actor": "bob",
+      "input": { "items": [{ "product_id": 3, "quantity": 3, "price": 120 }] },
+      "expect": { "placed": false, "order": null }
+    },
+    {
+      "name": "Chưa đăng nhập thì không thanh toán được",
+      "action": "checkout",
+      "input": { "items": [{ "product_id": 1, "quantity": 1, "price": 89 }] },
+      "expect": { "placed": false, "order": null }
+    }
+  ]
+}
