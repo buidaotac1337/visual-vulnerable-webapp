@@ -75,14 +75,23 @@ Mọi nhãn của workspace (nút topbar, công tắc mode, nút trace, tab Insp
 
 `Tooltip` (`@/components`) theo mẫu WAI-ARIA tooltip: mở khi rê chuột hoặc khi focus bằng bàn phím, giữ mở khi con trỏ di chuyển sang vùng tooltip (WCAG 1.4.13), đóng bằng `Esc` (chặn lan truyền để không đóng modal bao ngoài), rời chuột, mất focus hoặc khi trigger chuyển sang `disabled`, và nối `aria-describedby` (giữ nguyên các ID đã có). Không dùng thuộc tính `title` cho giải thích (không hiện khi dùng bàn phím hay màn hình cảm ứng). Tham số `side="top"` cho control ở đáy panel, `align="start"` cho control sát mép trái và `align="end"` cho control sát mép phải.
 
-### `ModeSwitch`
+### `ModeSwitch` & `LayoutModeSwitch`
 
-Segmented control hai nửa:
+Segmented control hai nửa cho chế độ chạy lab (`ModeSwitch`):
 
 | Nửa | Khi active |
 | :--- | :--- |
 | Vulnerable | Nền `danger-50`, viền `danger-500`, chữ `danger-700` |
 | Secure | Nền `safe-50`, viền `safe-500`, chữ `safe-700` |
+
+`LayoutModeSwitch` (`role="radiogroup"`, ẩn dưới `lg`, icon gọn tại `lg`–`xl` và kèm nhãn từ `2xl`) chuyển giữa ba bố cục desktop dùng vai trò `brand` khi active (`bg-brand-50`, `border-brand-500`, `text-brand-700`): `Song song` (`split`), `Tập trung code` (`code-focus`) và `Sandbox nổi` (`floating`). Hai bề mặt giữ nguyên cây React khi đổi chế độ để không mất trạng thái form đang nhập.
+
+### `SplitDivider`
+
+Thanh kéo dọc (`w-1.5`, `role="separator"`, `aria-orientation="vertical"`) chỉ hiển thị ở chế độ `Song song` từ `lg` trở lên:
+
+* Kéo chuột/chạm hoặc nhấn `ArrowLeft` / `ArrowRight` (`±5%`) để chỉnh tỷ lệ cột Sandbox trong khoảng `30%`–`70%` (lưu `vvwa.splitPercent`).
+* Nháy đúp hoặc nhấn `Home` / `End` để đặt lại về `50%`.
 
 ### `GlowingCodeLine`
 
@@ -131,4 +140,4 @@ Import qua barrel `@/components` (hoặc `../ui` bên trong `core/frontend/src/c
 | Bo góc badge / chip | `9999px` (`rounded-full`) |
 | Chiều cao topbar | `56px` (`h-14`) |
 
-Từ breakpoint `lg` trở lên, khung app cao đúng một màn hình (`h-screen`) và workspace chia hai cột chiếm phần còn lại dưới topbar; trang ngoài không cuộn, mỗi cột cuộn độc lập. Dưới `lg`, hai bề mặt xếp chồng thành một cột.
+Từ breakpoint `lg` trở lên, khung app cao đúng một màn hình (`h-screen`) với ba chế độ bố cục lưu trong `localStorage` (`vvwa.layoutMode`, `vvwa.splitPercent`): **Song song** (mặc định, hai cột cuộn độc lập với `SplitDivider` chỉnh `30%`–`70%`), **Tập trung code** (ẩn cột Sandbox để Inspector chiếm toàn chiều rộng kèm nút pill **Về Song song**), và **Sandbox nổi** (Inspector toàn màn hình, Sandbox thành thẻ nổi góc trên phải dưới thanh tab Inspector `rounded-xl shadow-2xl` có thể thu gọn/mở rộng để không che code hay điều khiển trace). Dưới `lg`, hai bề mặt luôn xếp chồng thành một cột.

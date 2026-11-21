@@ -3,6 +3,9 @@ import type { LabExecutionResponse, LabMetadata, LabMode, TraceLayer, TraceStatu
 /** Active tab inside the right-hand Code & Trace Inspector panel. */
 export type InspectorTab = 'backend' | 'frontend' | 'diff';
 
+/** Desktop (lg+) arrangement of MiniShop Sandbox and Code & Trace Inspector. */
+export type WorkspaceLayoutMode = 'split' | 'code-focus' | 'floating';
+
 /** Playback lifecycle state for step-by-step live trace animation. */
 export type PlaybackStatus = 'idle' | 'playing' | 'paused' | 'completed';
 

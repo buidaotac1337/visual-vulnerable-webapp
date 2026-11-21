@@ -36,5 +36,6 @@ export type {
   PlaybackStatus,
   StepHighlightTarget,
   TraceStepDraft,
+  WorkspaceLayoutMode,
   WorkspaceNotice,
 } from './workspace';

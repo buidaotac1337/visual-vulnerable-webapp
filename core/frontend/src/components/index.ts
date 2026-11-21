@@ -3,10 +3,12 @@ export {
   CodeInspector,
   CodeSnippetView,
   GlowingCodeLine,
+  InspectorHeader,
   TraceControls,
   UnifiedDiffView,
 } from './inspector';
-export { LabWorkspace, ModeSwitch, TopControlBar } from './layout';
+export type { InspectorHeaderProps } from './inspector';
+export { LabWorkspace, LayoutModeSwitch, ModeSwitch, SplitDivider, TopControlBar } from './layout';
 export { FlowPipeline } from './pipeline';
 export { ActorSwitcher, EmptyLabFallback, PayloadChipBar, SandboxPane } from './sandbox';
 export {

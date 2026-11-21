@@ -35,13 +35,14 @@ Workspace chia làm hai bề mặt:
 +-------------------------------------------+-------------------------------------------+
 ```
 
-## 2. Thanh công cụ
+## 2. Thanh công cụ & chế độ bố cục
 
 | Điều khiển | Chức năng |
 | :--- | :--- |
 | **Chọn bài lab** | Danh sách lab được backend tự phát hiện trong `labs/`. Đổi lab sẽ xóa trace và kết quả kiểm thử của lab trước. |
 | **Badge API** | `API: OK (v…)` khi backend sẵn sàng; hiện thông báo lỗi khi không kết nối được. |
 | **Vulnerable / Secure** | Chọn bản cài đặt sẽ thực thi (`backend/vulnerable.py` hoặc `backend/secure.py`). Dữ liệu đã nhập được giữ nguyên khi gạt. |
+| **Bố cục workspace** (`lg+`) | Ba chế độ (lưu qua `localStorage`): **Song song** (chia hai cột, kéo thanh chia `30%`–`70%`; dùng `←`/`→` để chỉnh ±5%, nháy đúp hoặc `Home`/`End` để về `50%`), **Tập trung code** (Inspector toàn chiều rộng kèm nút **Về Song song**), và **Sandbox nổi** (thẻ nổi góc trên phải dưới thanh tab Inspector có nút **Thu gọn** / **Mở rộng** và **Về Song song**, tránh che dòng code và điều khiển trace). Dữ liệu đang nhập trong Sandbox luôn được giữ nguyên khi chuyển chế độ. |
 | **Reset DB** | Chạy lại `seed.sql`, đưa toàn bộ dữ liệu MiniShop về trạng thái ban đầu. |
 | **Test My Fix** | Chạy bộ `verifyTests` của lab với file `vulnerable.*` hiện tại trên đĩa (xem [mục 5](#5-test-my-fix)). |
 | **Tải Snippet** | Tải `<lab_id>-fastapi.zip` gồm bản lỗi, bản vá, diff và README của lab. |

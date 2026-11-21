@@ -2,10 +2,11 @@ import type { JSX } from 'react';
 import { CheckCircle2, Download, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 import { isFrontendVerifyTest, testMyFixTip, UI_LABELS } from '@/lib';
-import type { HealthResponse, LabMetadata, LabMode } from '@/types';
+import type { HealthResponse, LabMetadata, LabMode, WorkspaceLayoutMode } from '@/types';
 
 import { Tooltip } from '../ui';
 
+import { LayoutModeSwitch } from './LayoutModeSwitch';
 import { ModeSwitch } from './ModeSwitch';
 
 interface TopControlBarProps {
@@ -14,11 +15,13 @@ interface TopControlBarProps {
   labs: readonly LabMetadata[];
   selectedLab: LabMetadata | null;
   mode: LabMode;
+  layoutMode?: WorkspaceLayoutMode;
   isResettingDb: boolean;
   isVerifying: boolean;
   isDownloading: boolean;
   onSelectLab: (labId: string) => void;
   onChangeMode: (nextMode: LabMode) => void;
+  onChangeLayoutMode?: (nextMode: WorkspaceLayoutMode) => void;
   onResetDb: () => void;
   onVerify: () => void;
   onDownloadSnippet: () => void;
@@ -93,11 +96,13 @@ export function TopControlBar({
   labs,
   selectedLab,
   mode,
+  layoutMode = 'split',
   isResettingDb,
   isVerifying,
   isDownloading,
   onSelectLab,
   onChangeMode,
+  onChangeLayoutMode,
   onResetDb,
   onVerify,
   onDownloadSnippet,
@@ -128,7 +133,7 @@ export function TopControlBar({
           disabled={labs.length === 0}
           value={selectedLab?.id ?? ''}
           onChange={(event) => onSelectLab(event.target.value)}
-          className="max-w-xs truncate rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-sm font-medium text-slate-800 focus:border-brand-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          className="min-w-0 max-w-[200px] truncate rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-sm font-medium text-slate-800 focus:border-brand-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 xl:max-w-[260px] 2xl:max-w-xs"
         >
           {labs.length === 0 ? (
             <option value="">Chưa có bài lab trong labs/</option>
@@ -146,6 +151,11 @@ export function TopControlBar({
 
       <div className="flex shrink-0 items-center gap-2">
         <ModeSwitch mode={mode} hasFrontendSink={gradesFrontend} onChange={onChangeMode} />
+
+        <LayoutModeSwitch
+          mode={layoutMode}
+          onChange={(nextMode) => onChangeLayoutMode?.(nextMode)}
+        />
 
         <Tooltip tip={UI_LABELS.resetDb.tip}>
           <button
