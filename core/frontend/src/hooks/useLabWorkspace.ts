@@ -28,6 +28,7 @@ import { useLabActor } from './useLabActor';
 import { useLabCatalog } from './useLabCatalog';
 import { useLabMaintenance } from './useLabMaintenance';
 import { useLabSourceSync } from './useLabSourceSync';
+import { useLabVerify } from './useLabVerify';
 import { useTracePlayback } from './useTracePlayback';
 import type { TracePlaybackController } from './useTracePlayback';
 
@@ -105,13 +106,8 @@ export function useLabWorkspace(): LabWorkspaceController {
   const playback = useTracePlayback();
   const { source, sourceError, isRefreshingSource, refreshSource } =
     useLabSourceSync(selectedLabId);
-  const maintenance = useLabMaintenance({
-    selectedLabId,
-    activeCtxRef,
-    refreshSource,
-    setDbResetSeq,
-    setNotice,
-  });
+  const maintenance = useLabMaintenance({ selectedLabId, setDbResetSeq, setNotice });
+  const verify = useLabVerify({ selectedLab, activeCtxRef, refreshSource, setDbResetSeq });
 
   const payload = useMemo<LabPayload>(
     () => (selectedLab ? (payloadsByLab[selectedLab.id] ?? defaultPayloadForLab(selectedLab)) : {}),
@@ -124,10 +120,10 @@ export function useLabWorkspace(): LabWorkspaceController {
       setActiveTab('backend');
       setLastResponse(null);
       setNotice(null);
-      maintenance.resetVerifyState();
+      verify.resetVerifyState();
       playback.clearTrace();
     },
-    [setSelectedLabId, maintenance, playback],
+    [setSelectedLabId, verify, playback],
   );
 
   const changeMode = useCallback(
@@ -245,12 +241,12 @@ export function useLabWorkspace(): LabWorkspaceController {
     dbResetSeq,
     isExecuting,
     isResettingDb: maintenance.isResettingDb,
-    isVerifying: maintenance.isVerifying,
+    isVerifying: verify.isVerifying,
     isDownloading: maintenance.isDownloading,
     lastResponse,
-    verifyResult: maintenance.verifyResult,
-    verifyError: maintenance.verifyError,
-    isVerifyModalOpen: maintenance.isVerifyModalOpen,
+    verifyResult: verify.verifyResult,
+    verifyError: verify.verifyError,
+    isVerifyModalOpen: verify.isVerifyModalOpen,
     notice,
     playback,
     selectLab,
@@ -263,8 +259,8 @@ export function useLabWorkspace(): LabWorkspaceController {
     refreshSource,
     executeAction,
     handleResetDb: maintenance.handleResetDb,
-    handleVerify: maintenance.handleVerify,
-    closeVerifyModal: maintenance.closeVerifyModal,
+    handleVerify: verify.handleVerify,
+    closeVerifyModal: verify.closeVerifyModal,
     handleDownloadSnippet: maintenance.handleDownloadSnippet,
   };
 }

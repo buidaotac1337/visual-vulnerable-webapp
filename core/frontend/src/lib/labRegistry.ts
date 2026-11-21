@@ -3,6 +3,8 @@ import type { ComponentType, LazyExoticComponent } from 'react';
 
 import type { LabViewProps } from '@/types';
 
+import type { SinkModule } from './frontendVerifier';
+
 interface LabViewModule {
   LabView: ComponentType<LabViewProps>;
 }
@@ -20,6 +22,30 @@ for (const [modulePath, loader] of Object.entries(rawLoaders)) {
   if (labId) {
     loaderByLabId.set(labId, loader);
   }
+}
+
+const SINK_LAB_ID_PATTERN = /\/labs\/([^/]+)\/frontend\/vulnerable\.tsx$/;
+
+const rawSinkLoaders = import.meta.glob<SinkModule>('../../../../labs/*/frontend/vulnerable.tsx');
+
+const sinkLoaderByLabId = new Map<string, () => Promise<SinkModule>>();
+for (const [modulePath, loader] of Object.entries(rawSinkLoaders)) {
+  const labId = SINK_LAB_ID_PATTERN.exec(modulePath.replaceAll('\\', '/'))?.[1];
+  if (labId) {
+    sinkLoaderByLabId.set(labId, loader);
+  }
+}
+
+/**
+ * Load labs/<labId>/frontend/vulnerable.tsx (the frontend sink students patch, ADR-0006).
+ * In dev, React Refresh keeps rendered components on the latest saved code.
+ *
+ * @param labId - Kebab-case lab identifier.
+ * @returns The module namespace, or null when the lab has no frontend sink file.
+ */
+export async function loadFrontendSinkModule(labId: string): Promise<SinkModule | null> {
+  const loader = sinkLoaderByLabId.get(labId);
+  return loader ? loader() : null;
 }
 
 const lazyCache = new Map<string, LazyExoticComponent<ComponentType<LabViewProps>>>();

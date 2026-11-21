@@ -12,10 +12,25 @@ export {
   verifyLab,
 } from './api';
 export { parseUnifiedDiff } from './diffParser';
-export { getFrontendSinkFile, isBackendVerifyTest, resolveFrontendFile } from './sourceFiles';
+export {
+  getFrontendSinkFile,
+  isBackendVerifyTest,
+  isFrontendVerifyTest,
+  resolveFrontendFile,
+} from './sourceFiles';
 export type { ResolvedFrontendFile } from './sourceFiles';
 export { tokenizeCodeAsync, tokenizeCodeSyncFallback } from './highlighter';
-export { getLazyLabView, hasLabView } from './labRegistry';
+export { getLazyLabView, hasLabView, loadFrontendSinkModule } from './labRegistry';
+export { probeDom, isJavascriptUrl } from './domProbe';
+export type { DomObservation } from './domProbe';
+export { InvalidExpectationError, matchesExpected } from './expectMatcher';
+export {
+  combineVerifyReports,
+  failFrontendVerifyTests,
+  renderInInertDocument,
+  runFrontendVerifyTests,
+} from './frontendVerifier';
+export type { SinkModule } from './frontendVerifier';
 export {
   computePipelineNodes,
   findFirstStepIndexForLayer,

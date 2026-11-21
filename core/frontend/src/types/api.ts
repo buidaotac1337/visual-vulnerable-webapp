@@ -112,10 +112,16 @@ export interface LabSourceResponse {
   frontend_diff?: string | null;
 }
 
-/** Outcome of one automated verification test case from POST /api/labs/{id}/verify. */
+/** Layer a verify test belongs to: graded by FastAPI or in the browser (ADR-0006). */
+export type VerifyLayer = 'backend' | 'frontend';
+
+/** Outcome of one automated verification test case (backend API or frontend runner). */
 export interface VerifyTestResult {
   name: string;
+  /** Backend action name, or the frontend component export name. */
   action: string;
+  /** Defaults to 'backend' when absent. */
+  layer?: VerifyLayer;
   passed: boolean;
   expected: Record<string, unknown>;
   actual: Record<string, unknown>;

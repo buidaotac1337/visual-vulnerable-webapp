@@ -1,6 +1,6 @@
 """Pydantic schemas for automated Test My Fix verification results."""
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -11,6 +11,7 @@ class VerifyTestResult(BaseModel):
     Attributes:
         name: Human-readable test case label.
         action: Lab handler action that was invoked.
+        layer: Always 'backend' for results produced by the FastAPI verifier.
         passed: Whether all expected fields matched and the handler succeeded.
         expected: Subset of expected key-value pairs.
         actual: Actual data dictionary returned by the lab handler.
@@ -19,6 +20,7 @@ class VerifyTestResult(BaseModel):
 
     name: str
     action: str
+    layer: Literal["backend"] = "backend"
     passed: bool
     expected: dict[str, Any]
     actual: dict[str, Any] = Field(default_factory=dict)

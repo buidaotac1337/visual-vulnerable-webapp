@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — đang triển khai. Phần 1 (mục 1, 2, 3, 5 phía Python, 7) đã xong; phần 2 (mục 4, 5 phía TypeScript, 6: bộ chấm frontend) còn lại. Là điều kiện tiên quyết của Lab 02 Stored XSS.
+Accepted — đã triển khai (`expect_matcher.py`, `frontend_sinks.py`, `lib/expectMatcher.ts`, `lib/domProbe.ts`, `lib/frontendVerifier.ts`, `useLabVerify`). Lab 02 Stored XSS giờ có thể bắt đầu.
 
 * **Date:** 2026-11-21
 * **Deciders:** Maintainers / Agents
@@ -59,7 +59,7 @@ Ngoài ra, quy tắc "không có `dangerouslySetInnerHTML` trong `core/`" ([ADR-
    * Nếu API verify lỗi, modal vẫn hiển thị kết quả frontend kèm lỗi backend.
    * Logic verify tách sang hook mới `useLabVerify` vì `useLabWorkspace.ts` đã 283 dòng, gần ngưỡng cảnh báo.
 7. **Lint ép ranh giới sink** trong `core/frontend/eslint.config.js`, áp dụng cho `core/frontend/src` và `labs/*/frontend`:
-   * `no-restricted-syntax` cấm thuộc tính JSX `dangerouslySetInnerHTML`, cấm **gán** `innerHTML`/`outerHTML`, và cấm gọi `insertAdjacentHTML`.
+   * `no-restricted-syntax` cấm thuộc tính JSX `dangerouslySetInnerHTML` và cả key `dangerouslySetInnerHTML` trong object props (ví dụ `createElement('p', { dangerouslySetInnerHTML })`), cấm **gán** `innerHTML`/`outerHTML`, và cấm gọi `insertAdjacentHTML`. Fixture trong test phải tắt rule tường minh bằng `eslint-disable-next-line` kèm lý do.
    * Có một override duy nhất tắt rule cho `labs/*/frontend/vulnerable.tsx`. Việc *đọc* `innerHTML` trong DOM probe vẫn được phép.
    * Quy tắc Security isolation trong [AGENTS.md](../../AGENTS.md) được cập nhật để nêu đích danh hai file `labs/<id>/backend/vulnerable.py` và `labs/<id>/frontend/vulnerable.tsx`.
 8. **Ngoài phạm vi:**
@@ -79,6 +79,10 @@ Ngoài ra, quy tắc "không có `dangerouslySetInnerHTML` trong `core/`" ([ADR-
 * Matcher tồn tại ở hai nơi (Python và TypeScript). Để giảm rủi ro lệch nhau, hai bộ unit test dùng **cùng danh sách ca kiểm thử** (mirrored), và mọi toán tử mới phải thêm đồng thời ở cả hai.
 * DOM probe là heuristic: nó kiểm các payload mà lab khai báo trong `verifyTests` chứ không chứng minh được là hết mọi biến thể XSS (CSS injection, mutation XSS, `data:` URL…). Mỗi lab phải chọn bộ payload đại diện.
 * Trình duyệt chạy test frontend, nên kết quả này không có trong response của `POST /verify`. Công cụ tự động gọi API trực tiếp chỉ thấy phần backend.
+
+* Lỗi render của React 19 không được ném ra từ `flushSync` mà đi qua `onUncaughtError`; runner bắt lỗi qua callback này để test fail kèm thông báo thay vì làm hỏng trang.
+* Module `frontend/vulnerable.tsx` được nạp qua `import.meta.glob`; khi sinh viên sửa file trong lúc dev, React Refresh dự kiến render code mới nhất cho cùng component. Điều này **chưa được kiểm chứng trên app thật** vì chưa có lab nào có cặp sink: phải kiểm tra khi làm Lab 02.
+* Jsdom không bao giờ chạy `onerror`, kể cả trên document thật, nên test trong Vitest chỉ kiểm cơ chế render/probe. Tính an toàn của document trơ đã được kiểm tra riêng trên Chromium (document thật chạy `onerror` và `iframe srcdoc`; document trơ thì không).
 
 ## Verification
 

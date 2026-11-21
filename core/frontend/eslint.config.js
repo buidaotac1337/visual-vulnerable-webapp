@@ -17,6 +17,12 @@ const SINK_RESTRICTIONS = [
   },
   {
     selector:
+      "Property[key.name='dangerouslySetInnerHTML'], Property[key.value='dangerouslySetInnerHTML']",
+    message:
+      'dangerouslySetInnerHTML (e.g. via createElement props) is only allowed in labs/<id>/frontend/vulnerable.tsx (ADR-0006).',
+  },
+  {
+    selector:
       'AssignmentExpression > MemberExpression.left[property.name=/^(innerHTML|outerHTML)$/]',
     message:
       'Writing innerHTML/outerHTML is only allowed in labs/<id>/frontend/vulnerable.tsx (ADR-0006).',

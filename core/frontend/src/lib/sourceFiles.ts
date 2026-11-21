@@ -1,6 +1,7 @@
 import type {
   BackendVerifyTestCase,
   FrontendFileKind,
+  FrontendVerifyTestCase,
   LabMode,
   LabSourceResponse,
   ParsedSourceFile,
@@ -61,4 +62,14 @@ export function resolveFrontendFile(
  */
 export function isBackendVerifyTest(test: VerifyTestCase): test is BackendVerifyTestCase {
   return test.layer !== 'frontend';
+}
+
+/**
+ * Narrow a verifyTests entry to a frontend test graded in the browser (ADR-0006).
+ *
+ * @param test - Any verifyTests entry from meta.json.
+ * @returns True for tests with layer 'frontend'.
+ */
+export function isFrontendVerifyTest(test: VerifyTestCase): test is FrontendVerifyTestCase {
+  return test.layer === 'frontend';
 }

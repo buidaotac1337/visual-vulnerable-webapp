@@ -17,6 +17,7 @@ export type {
   TraceStatus,
   TraceStep,
   VerifyLabResponse,
+  VerifyLayer,
   VerifyTestCase,
   VerifyTestResult,
 } from './api';
