@@ -1,5 +1,7 @@
 """Typed async database adapter exposed to isolated VVWA lab handlers."""
 
+from collections.abc import AsyncIterator
+from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any, Protocol
@@ -90,6 +92,55 @@ class LabDatabaseProtocol(Protocol):
         """
         ...
 
+    def transaction(self) -> AbstractAsyncContextManager["LabDatabaseProtocol"]:
+        """Execute multiple queries atomically on a single connection inside a transaction.
+
+        Returns:
+            Async context manager yielding a transaction-scoped LabDatabaseProtocol.
+        """
+        ...
+
+
+class _TransactionLabDatabase:
+    """Single-connection LabDatabaseProtocol bound to an active asyncpg transaction."""
+
+    def __init__(self, conn: asyncpg.Connection) -> None:
+        """Bind the adapter to an already-acquired asyncpg connection.
+
+        Args:
+            conn: Active asyncpg connection inside an open transaction.
+        """
+        self._conn = conn
+
+    async def fetch_one(self, query: str, *args: object) -> dict[str, Any] | None:
+        """Fetch a single row on the pinned transaction connection."""
+        record = await self._conn.fetchrow(query, *args)
+        return _normalize_record(record) if record is not None else None
+
+    async def fetch_all(self, query: str, *args: object) -> list[dict[str, Any]]:
+        """Fetch all matching rows on the pinned transaction connection."""
+        records = await self._conn.fetch(query, *args)
+        return [_normalize_record(record) for record in records]
+
+    async def fetch_val(self, query: str, *args: object) -> Any:  # noqa: ANN401
+        """Fetch a single scalar value on the pinned transaction connection."""
+        return _normalize_db_value(await self._conn.fetchval(query, *args))
+
+    async def execute(self, query: str, *args: object) -> str:
+        """Execute a DML statement on the pinned transaction connection."""
+        status: str = await self._conn.execute(query, *args)
+        return status
+
+    @asynccontextmanager
+    async def transaction(self) -> AsyncIterator[LabDatabaseProtocol]:
+        """Open a nested PostgreSQL savepoint on the already-pinned connection.
+
+        Yields:
+            This transaction-scoped adapter inside a SAVEPOINT block.
+        """
+        async with self._conn.transaction():
+            yield self
+
 
 class AsyncpgLabDatabase:
     """Asyncpg-backed implementation of LabDatabaseProtocol using lab_app_user."""
@@ -103,56 +154,31 @@ class AsyncpgLabDatabase:
         self._pool = pool
 
     async def fetch_one(self, query: str, *args: object) -> dict[str, Any] | None:
-        """Fetch a single row using the restricted lab_app_user pool.
-
-        Args:
-            query: SQL query text.
-            *args: Positional bind parameters.
-
-        Returns:
-            JSON-safe row dictionary if found, otherwise None.
-        """
+        """Fetch a single row using the restricted lab_app_user pool."""
         async with self._pool.acquire() as conn:
-            record = await conn.fetchrow(query, *args)
-            return _normalize_record(record) if record is not None else None
+            return await _TransactionLabDatabase(conn).fetch_one(query, *args)
 
     async def fetch_all(self, query: str, *args: object) -> list[dict[str, Any]]:
-        """Fetch all matching rows using the restricted lab_app_user pool.
-
-        Args:
-            query: SQL query text.
-            *args: Positional bind parameters.
-
-        Returns:
-            List of JSON-safe row dictionaries.
-        """
+        """Fetch all matching rows using the restricted lab_app_user pool."""
         async with self._pool.acquire() as conn:
-            records = await conn.fetch(query, *args)
-            return [_normalize_record(record) for record in records]
+            return await _TransactionLabDatabase(conn).fetch_all(query, *args)
 
     async def fetch_val(self, query: str, *args: object) -> Any:  # noqa: ANN401
-        """Fetch a single scalar value using the restricted lab_app_user pool.
-
-        Args:
-            query: SQL query text.
-            *args: Positional bind parameters.
-
-        Returns:
-            Normalized scalar result or None.
-        """
+        """Fetch a single scalar value using the restricted lab_app_user pool."""
         async with self._pool.acquire() as conn:
-            return _normalize_db_value(await conn.fetchval(query, *args))
+            return await _TransactionLabDatabase(conn).fetch_val(query, *args)
 
     async def execute(self, query: str, *args: object) -> str:
-        """Execute a statement using the restricted lab_app_user pool.
-
-        Args:
-            query: SQL statement text.
-            *args: Positional bind parameters.
-
-        Returns:
-            PostgreSQL status tag string.
-        """
+        """Execute a statement using the restricted lab_app_user pool."""
         async with self._pool.acquire() as conn:
-            status: str = await conn.execute(query, *args)
-            return status
+            return await _TransactionLabDatabase(conn).execute(query, *args)
+
+    @asynccontextmanager
+    async def transaction(self) -> AsyncIterator[LabDatabaseProtocol]:
+        """Acquire one pool connection and yield a transactional adapter (ADR-0008).
+
+        Yields:
+            LabDatabaseProtocol executing all queries inside one PostgreSQL transaction.
+        """
+        async with self._pool.acquire() as conn, conn.transaction():
+            yield _TransactionLabDatabase(conn)

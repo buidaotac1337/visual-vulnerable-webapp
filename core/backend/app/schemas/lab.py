@@ -48,9 +48,14 @@ class BackendVerifyTest(BaseModel):
         name: Human-readable test case title displayed in VerifyModal.
         action: Async handler name inside labs/<id>/backend/vulnerable.py.
         input: Request JSON payload supplied to the handler.
-        expect: Subset of key-value pairs expected in response.data.
+        expect: Subset of key-value pairs expected in response.data (or burst summary).
         actor: Optional persona whose session the handler receives via ctx.
+        concurrency: Number of concurrent requests to fire (1..20, default 1; ADR-0008).
+        check_action: Optional follow-up action run after primary call(s) to read DB state.
+        check_input: JSON payload passed to check_action (default empty dict).
     """
+
+    model_config = ConfigDict(populate_by_name=True)
 
     layer: Literal["backend"] = "backend"
     name: str
@@ -58,6 +63,9 @@ class BackendVerifyTest(BaseModel):
     input: dict[str, Any]
     expect: dict[str, Any]
     actor: str | None = None
+    concurrency: int = Field(default=1, ge=1, le=20)
+    check_action: str | None = Field(default=None, alias="checkAction")
+    check_input: dict[str, Any] = Field(default_factory=dict, alias="checkInput")
 
 
 class FrontendVerifyTest(BaseModel):

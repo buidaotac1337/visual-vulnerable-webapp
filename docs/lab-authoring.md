@@ -136,6 +136,7 @@ async def view_order(
 | `await db.fetch_all(sql, *args)` | `list[dict]` |
 | `await db.fetch_val(sql, *args)` | Giá trị cột đầu của dòng đầu, hoặc `None` |
 | `await db.execute(sql, *args)` | Status tag của PostgreSQL, ví dụ `UPDATE 1` |
+| `async with db.transaction() as tx:` | Adapter `tx` chạy mọi truy vấn trong cùng 1 kết nối & transaction (`SELECT ... FOR UPDATE`; gọi `tx.transaction()` lồng nhau tạo savepoint, [ADR-0008](adr/0008-db-transactions-and-concurrent-verify-tests.md)) |
 
 Tham số bind dùng `$1, $2, …`. `Decimal` được chuyển thành `float`, ngày giờ thành chuỗi ISO. `search_path` đã đặt sẵn `minishop`.
 
@@ -269,8 +270,30 @@ Mỗi test thuộc một tầng, xác định bởi `layer` (mặc định `back
 | :--- | :--- |
 | `action` | Hàm trong `backend/vulnerable.py` |
 | `input` | `payload` truyền vào handler |
-| `expect` | So với `response.data` |
+| `expect` | So với `response.data` (hoặc cấu trúc tổng hợp khi dùng `concurrency` / `checkAction`) |
 | `actor` | Tùy chọn. Persona truyền vào `ctx`; phải nằm trong `actors` |
+| `concurrency` | Tùy chọn (`1..20`, mặc định `1`). Số request gọi `action` đồng thời qua `asyncio.gather` ([ADR-0008](adr/0008-db-transactions-and-concurrent-verify-tests.md)) |
+| `checkAction` | Tùy chọn. Action hậu kiểm chạy sau `action` (cùng `actor`) để đọc trạng thái DB cuối vào khóa `"check"` |
+| `checkInput` | Tùy chọn. Payload JSON truyền cho `checkAction` (mặc định `{}`) |
+
+Khi `concurrency > 1`, `expect` so khớp với `{ "total": N, "outcomes": { "normal", "exploited", "blocked", "error" }, "responses": [...], "check": ... }`:
+
+```json
+{
+  "name": "Chặn race condition khi bắn đồng thời 5 request WELCOME10",
+  "action": "apply_coupon",
+  "actor": "alice",
+  "input": { "code": "WELCOME10" },
+  "concurrency": 5,
+  "checkAction": "coupon_status",
+  "checkInput": { "code": "WELCOME10" },
+  "expect": {
+    "total": 5,
+    "outcomes": { "normal": 1, "blocked": 4, "exploited": 0 },
+    "check": { "used_count": 1, "over_limit": false, "balance": 510 }
+  }
+}
+```
 
 Workspace reset DB trước mỗi test backend, nên các test độc lập với nhau. Test fail khi handler báo lỗi (`ok: false`).
 

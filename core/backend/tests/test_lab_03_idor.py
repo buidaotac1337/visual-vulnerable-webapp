@@ -3,6 +3,7 @@
 import io
 import shutil
 import zipfile
+from contextlib import AbstractAsyncContextManager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -76,6 +77,10 @@ class _OrdersDb:
         """Unused by Lab 03."""
         _ = (query, args)
         return "OK"
+
+    def transaction(self) -> AbstractAsyncContextManager[LabDatabaseProtocol]:
+        """Return a no-op async transaction context for protocol compliance."""
+        return nullcontext(self)
 
 
 class _StubDatabaseManager(DatabaseManager):

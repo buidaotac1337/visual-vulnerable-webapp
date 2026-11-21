@@ -4,6 +4,7 @@ import base64
 import io
 import shutil
 import zipfile
+from contextlib import AbstractAsyncContextManager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -62,6 +63,9 @@ class _ShopDb:
                 product["image_url"] = new_url
                 return "UPDATE 1"
         return "UPDATE 0"
+
+    def transaction(self) -> AbstractAsyncContextManager[LabDatabaseProtocol]:
+        return nullcontext(self)
 
 
 class _StubDatabaseManager(DatabaseManager):

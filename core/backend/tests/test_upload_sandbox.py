@@ -1,6 +1,7 @@
 """Unit tests for Settings.upload_sandbox_dir, sandbox outer jail, and reset lifecycle."""
 
 import json
+from contextlib import AbstractAsyncContextManager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +39,9 @@ class _SandboxResetDb:
     async def execute(self, query: str, *args: object) -> str:
         _ = (query, args)
         return "OK"
+
+    def transaction(self) -> AbstractAsyncContextManager[LabDatabaseProtocol]:
+        return nullcontext(self)
 
 
 class _StubManager(DatabaseManager):

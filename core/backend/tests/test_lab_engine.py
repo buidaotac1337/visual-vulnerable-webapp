@@ -1,6 +1,7 @@
 """Unit tests for lab discovery, hot-reload, Pydantic/dataclass labs, and verify."""
 
 import json
+from contextlib import AbstractAsyncContextManager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +41,10 @@ class _FakeLabDb:
         """Return synthetic command status tag."""
         _ = (query, args)
         return "OK"
+
+    def transaction(self) -> AbstractAsyncContextManager[LabDatabaseProtocol]:
+        """Return a no-op async transaction context for protocol compliance."""
+        return nullcontext(self)
 
 
 class _FakeDatabaseManager(DatabaseManager):

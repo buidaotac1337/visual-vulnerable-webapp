@@ -1,0 +1,85 @@
+{
+  "id": "08-race-condition",
+  "title": "Race Condition — Áp mã giảm giá MiniShop",
+  "category": "Business Logic",
+  "difficulty": "Trung bình",
+  "summary": "API áp mã giảm giá đọc `used_count` rồi kiểm tra điều kiện trước khi tăng lượt dùng và cộng thưởng, đồng thời không bọc trong transaction khóa hàng. Khi nhiều request gửi đồng thời rơi vào khe trễ TOCTOU, cùng một mã giới hạn 1 lượt có thể bị áp dụng nhiều lần liên tiếp.",
+  "safetyPattern": "Mở một transaction duy nhất bằng `async with db.transaction() as tx:` và khóa bi quan dòng mã giảm giá bằng `SELECT ... FOR UPDATE` trước khi kiểm tra `used_count < max_uses` và cập nhật số dư trong cùng transaction.",
+  "actors": ["alice", "bob"],
+  "samplePayloads": [
+    {
+      "label": "Áp mã WELCOME10 (1 lần)",
+      "description": "Luồng hợp lệ: áp mã WELCOME10 giảm 10% (+$10.00 trên đơn $100) cho alice.",
+      "actor": "alice",
+      "data": { "code": "WELCOME10", "burst": 1 }
+    },
+    {
+      "label": "Bắn đồng thời 5 request WELCOME10",
+      "description": "Khai thác TOCTOU: gửi song song 5 request vào mã WELCOME10 vốn chỉ được dùng tối đa 1 lần.",
+      "actor": "alice",
+      "data": { "code": "WELCOME10", "burst": 5 }
+    },
+    {
+      "label": "Bắn đồng thời 8 request STUDENT20 (giới hạn 5)",
+      "description": "Khai thác TOCTOU trên mã nhiều lượt: STUDENT20 có max_uses=5 nhưng bị bắn 8 request song song.",
+      "actor": "alice",
+      "data": { "code": "STUDENT20", "burst": 8 }
+    },
+    {
+      "label": "Mã giảm giá không tồn tại",
+      "description": "Luồng từ chối hợp lệ khi bob gửi mã FAKE99 không có trong database.",
+      "actor": "bob",
+      "data": { "code": "FAKE99", "burst": 1 }
+    }
+  ],
+  "verifyTests": [
+    {
+      "name": "Áp mã WELCOME10 hợp lệ 1 lần thành công",
+      "action": "apply_coupon",
+      "actor": "alice",
+      "input": { "code": "WELCOME10" },
+      "expect": { "applied": true, "used_count": 1, "over_limit": false, "balance": 510 }
+    },
+    {
+      "name": "Chặn race condition khi bắn đồng thời 5 request WELCOME10",
+      "action": "apply_coupon",
+      "actor": "alice",
+      "input": { "code": "WELCOME10" },
+      "concurrency": 5,
+      "checkAction": "coupon_status",
+      "checkInput": { "code": "WELCOME10" },
+      "expect": {
+        "total": 5,
+        "outcomes": { "normal": 1, "blocked": 4, "exploited": 0 },
+        "check": { "used_count": 1, "over_limit": false, "balance": 510 }
+      }
+    },
+    {
+      "name": "Chặn race condition khi bắn đồng thời 7 request STUDENT20 (giới hạn 5)",
+      "action": "apply_coupon",
+      "actor": "alice",
+      "input": { "code": "STUDENT20" },
+      "concurrency": 7,
+      "checkAction": "coupon_status",
+      "checkInput": { "code": "STUDENT20" },
+      "expect": {
+        "total": 7,
+        "outcomes": { "normal": 5, "blocked": 2, "exploited": 0 },
+        "check": { "used_count": 5, "over_limit": false, "balance": 600 }
+      }
+    },
+    {
+      "name": "Từ chối mã giảm giá không tồn tại (FAKE99)",
+      "action": "apply_coupon",
+      "actor": "bob",
+      "input": { "code": "FAKE99" },
+      "expect": { "applied": false }
+    },
+    {
+      "name": "Từ chối yêu cầu áp mã khi chưa đăng nhập",
+      "action": "apply_coupon",
+      "input": { "code": "WELCOME10" },
+      "expect": { "applied": false }
+    }
+  ]
+}

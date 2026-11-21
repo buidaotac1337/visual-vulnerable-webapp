@@ -123,6 +123,10 @@ Workspace luôn gọi với `reset_db=true`. Endpoint chỉ chạy test có `lay
 
 `passed` chỉ là `true` khi có ít nhất một test và mọi test đều pass. Lỗi của lab (action không tồn tại, persona không tồn tại, handler ném exception, `expect` dùng toán tử sai) được ghi vào `error` của test tương ứng thay vì làm hỏng cả request.
 
+Với test đồng thời hoặc nhiều bước ([ADR-0008](adr/0008-db-transactions-and-concurrent-verify-tests.md)):
+* Khi `concurrency == 1` và có `checkAction`, engine chạy `action` rồi chạy tiếp `checkAction` (với `checkInput`, cùng `actor`) và đối chiếu `expect` với `{ ...action_data, "check": check_data }`.
+* Khi `concurrency > 1` (`1..20`), engine chạy song song `concurrency` lời gọi `action` qua `asyncio.gather`, đếm `outcomes` (`normal`, `exploited`, `blocked`, `error`), chạy thêm `checkAction` nếu có, và đối chiếu `expect` với `{ "total": N, "outcomes": ..., "responses": [...], "check": ... }`; test tự fail nếu bất kỳ request nào lỗi runtime hoặc `checkAction` thất bại.
+
 ## 4. Lab execution response & trace
 
 ```json
