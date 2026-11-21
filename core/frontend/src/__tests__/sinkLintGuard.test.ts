@@ -56,3 +56,24 @@ describe('ADR-0006 sink lint guard', () => {
     expect(await sinkErrors(reader, 'core/frontend/src/lib/probe.ts')).toBe(0);
   });
 });
+
+describe('Design system colour guard', () => {
+  // Built at run time so this test file itself does not contain a raw palette class.
+  const [red, emerald] = [
+    ['text', 'red', '600'],
+    ['bg', 'emerald', '50'],
+  ].map((p) => p.join('-'));
+  const raw = `export const A = () => <p className={\`p-2 \${'${red}'} ${emerald}\`} />;\n`;
+  const semantic =
+    "export const A = () => <p className={`p-2 ${'text-danger-600'} bg-safe-50`} />;\n";
+
+  it('blocks raw palette colours everywhere, vulnerable.tsx included', async () => {
+    // One string literal and one template chunk carry a raw palette class.
+    expect(await sinkErrors(raw, 'core/frontend/src/components/Bad.tsx')).toBe(2);
+    expect(await sinkErrors(raw, 'labs/99-demo/frontend/vulnerable.tsx')).toBe(2);
+  });
+
+  it('allows the semantic colour roles', async () => {
+    expect(await sinkErrors(semantic, 'labs/99-demo/frontend/LabView.tsx')).toBe(0);
+  });
+});

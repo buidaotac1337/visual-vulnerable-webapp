@@ -26,13 +26,17 @@ Giao diện tách hai bề mặt tương phản để không lẫn giữa **ứn
 
 Dùng nhất quán ở mọi nơi: công tắc mode, node pipeline, dòng code phát sáng và badge kết quả.
 
-| Vai trò | Token | Hex | Nền mờ (`*-soft`) | Dùng cho |
-| :--- | :--- | :--- | :--- | :--- |
-| Vulnerable / Danger | `--color-danger` | `#EF4444` | `rgba(239, 68, 68, 0.16)` | Mode Vulnerable, bước bị khai thác, test fail |
-| Secure / Safe | `--color-safe` | `#10B981` | `rgba(16, 185, 129, 0.16)` | Mode Secure, safety pattern đã chặn, test pass |
-| Warning | `--color-warning` | `#F59E0B` | `rgba(245, 158, 11, 0.16)` | Input chưa kiểm tra, bước có nguy cơ |
-| Info | `--color-info` | `#3B82F6` | `rgba(59, 130, 246, 0.16)` | Bước xử lý bình thường |
-| Brand MiniShop | `--color-brand` | `#4F46E5` | `rgba(79, 70, 229, 0.10)` | Nút, logo, điểm nhấn trong MiniShop |
+| Vai trò | Class Tailwind | Bảng màu gốc | Dùng cho |
+| :--- | :--- | :--- | :--- |
+| Vulnerable / Danger | `*-danger-50` … `*-danger-950`, `*-danger`, `*-danger-soft` | `red` | Mode Vulnerable, bước bị khai thác, test fail |
+| Secure / Safe | `*-safe-*` | `emerald` | Mode Secure, safety pattern đã chặn, test pass |
+| Warning | `*-warning-*` | `amber` | Input chưa kiểm tra, bước có nguy cơ |
+| Info | `*-info-*` | `blue` | Bước xử lý bình thường |
+| Brand MiniShop | `*-brand-*` | `indigo` | Nút, logo, điểm nhấn trong MiniShop |
+
+Mỗi vai trò là một dải màu đầy đủ (`50` … `950`) khai báo trong khối `@theme inline` của `tokens.css`, nên dùng được như mọi màu Tailwind: `bg-danger-50`, `text-safe-700`, `border-warning-300/60`. `*-soft` là nền mờ (16%, brand 10%). Đổi bảng màu gốc của một vai trò trong `tokens.css` là đổi màu toàn bộ giao diện.
+
+ESLint chặn các class màu gốc `red-*`, `emerald-*`, `amber-*`, `blue-*`, `indigo-*` ở mọi file `.ts`/`.tsx`, kể cả lab và `vulnerable.tsx`. Màu trung tính (`slate-*`) và màu nhãn phụ không mang nghĩa bảo mật (`sky`, `violet`) vẫn dùng trực tiếp.
 
 ### Bề mặt & chữ
 
@@ -65,14 +69,20 @@ Font được nạp từ Google Fonts trong `core/frontend/index.html`.
 
 ## 5. Component đặc thù
 
+### Nhãn & `Tooltip`
+
+Mọi nhãn của workspace (nút topbar, công tắc mode, nút trace, tab Inspector, tiêu đề chip payload) lấy từ một nguồn duy nhất: `UI_LABELS` trong `core/frontend/src/lib/uiLabels.ts` (import qua `@/lib`). Mỗi mục có `text` hiển thị, `tip` giải thích bằng tiếng Việt và `busy` nếu nút có trạng thái đang chạy. Thuật ngữ đã quen (Vulnerable, Secure, Reset DB, Test My Fix, Replay, Payload) giữ nguyên làm nhãn; phần giải thích nằm trong tooltip.
+
+`Tooltip` (`@/components`) theo mẫu WAI-ARIA tooltip: mở khi rê chuột hoặc khi focus bằng bàn phím, đóng bằng `Esc`, rời chuột hoặc mất focus, và gắn `aria-describedby` vào phần tử được mô tả. Không dùng thuộc tính `title` cho giải thích (không hiện khi dùng bàn phím hay màn hình cảm ứng). Tham số `side="top"` cho control ở đáy panel, `align="end"` cho control sát mép phải.
+
 ### `ModeSwitch`
 
 Segmented control hai nửa:
 
 | Nửa | Khi active |
 | :--- | :--- |
-| Vulnerable | Nền `red-50`, viền `red-500`, chữ `red-700` |
-| Secure | Nền `emerald-50`, viền `emerald-500`, chữ `emerald-700` |
+| Vulnerable | Nền `danger-50`, viền `danger-500`, chữ `danger-700` |
+| Secure | Nền `safe-50`, viền `safe-500`, chữ `safe-700` |
 
 ### `GlowingCodeLine`
 

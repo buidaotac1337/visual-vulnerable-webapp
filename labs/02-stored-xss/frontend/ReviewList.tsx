@@ -15,7 +15,7 @@ function Stars({ rating }: { rating: number }): JSX.Element {
       {[1, 2, 3, 4, 5].map((value) => (
         <Star
           key={value}
-          className={`h-3 w-3 ${value <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`}
+          className={`h-3 w-3 ${value <= rating ? 'fill-warning-400 text-warning-400' : 'text-slate-300'}`}
           aria-hidden="true"
         />
       ))}
@@ -46,7 +46,7 @@ export function ReviewList({ page, ReviewBody, findingsById }: ReviewListProps):
         return (
           <article
             key={review.id}
-            className={`rounded-lg border p-3 ${findings.length > 0 ? 'border-red-300 bg-red-50/40' : 'border-slate-200 bg-slate-50'}`}
+            className={`rounded-lg border p-3 ${findings.length > 0 ? 'border-danger-300 bg-danger-50/40' : 'border-slate-200 bg-slate-50'}`}
           >
             <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs font-semibold text-slate-800">{review.username}</span>
@@ -54,7 +54,7 @@ export function ReviewList({ page, ReviewBody, findingsById }: ReviewListProps):
             </div>
             <ReviewBody content={review.content} />
             {findings.length > 0 && (
-              <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-red-700">
+              <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-danger-700">
                 <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Nội dung đã thành mã thực thi được: {findings.join(', ')}</span>
               </p>

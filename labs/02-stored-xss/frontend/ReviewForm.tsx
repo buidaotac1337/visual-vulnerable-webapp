@@ -5,10 +5,10 @@ import type { LabPayload } from '@/types';
 
 /** Shared input style of the Lab 02 forms. */
 export const INPUT_CLASS =
-  'rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none';
+  'rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none';
 /** Shared primary button style of the Lab 02 forms. */
 export const BUTTON_CLASS =
-  'inline-flex cursor-pointer items-center justify-center gap-1.5 self-start rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex cursor-pointer items-center justify-center gap-1.5 self-start rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50';
 
 interface WriteReviewFormProps {
   rating: number;
@@ -69,7 +69,7 @@ export function WriteReviewForm(props: WriteReviewFormProps): JSX.Element {
         <span>{isExecuting ? 'Đang gửi...' : 'Gửi đánh giá'}</span>
       </button>
       {saveError && (
-        <p role="alert" className="text-xs font-medium text-amber-700">
+        <p role="alert" className="text-xs font-medium text-warning-700">
           {saveError}
         </p>
       )}

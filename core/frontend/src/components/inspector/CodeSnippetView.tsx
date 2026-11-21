@@ -22,23 +22,23 @@ interface UnmappedTheme {
 
 const UNMAPPED_THEMES: Record<TraceStatus, UnmappedTheme> = {
   danger: {
-    box: 'border-red-500/60 bg-red-950/80 text-red-100',
-    heading: 'text-red-300',
+    box: 'border-danger-500/60 bg-danger-950/80 text-danger-100',
+    heading: 'text-danger-300',
     icon: <AlertOctagon className="h-4 w-4 shrink-0" aria-hidden="true" />,
   },
   warning: {
-    box: 'border-amber-500/60 bg-amber-950/80 text-amber-100',
-    heading: 'text-amber-300',
+    box: 'border-warning-500/60 bg-warning-950/80 text-warning-100',
+    heading: 'text-warning-300',
     icon: <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />,
   },
   safe: {
-    box: 'border-emerald-500/60 bg-emerald-950/80 text-emerald-100',
-    heading: 'text-emerald-300',
+    box: 'border-safe-500/60 bg-safe-950/80 text-safe-100',
+    heading: 'text-safe-300',
     icon: <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />,
   },
   info: {
-    box: 'border-blue-500/60 bg-blue-950/80 text-blue-100',
-    heading: 'text-blue-300',
+    box: 'border-info-500/60 bg-info-950/80 text-info-100',
+    heading: 'text-info-300',
     icon: <Info className="h-4 w-4 shrink-0" aria-hidden="true" />,
   },
 };

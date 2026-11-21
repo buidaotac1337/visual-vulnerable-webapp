@@ -94,7 +94,7 @@ export function LabView(props: LabViewProps): JSX.Element {
     <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-          <UserRound className="h-4 w-4 text-indigo-600" aria-hidden="true" />
+          <UserRound className="h-4 w-4 text-brand-600" aria-hidden="true" />
           <span>MiniShop · Hồ sơ của tôi</span>
         </div>
         <span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>
@@ -116,13 +116,13 @@ export function LabView(props: LabViewProps): JSX.Element {
           value={readEmail(payload)}
           disabled={isExecuting}
           onChange={(event) => onPayloadChange({ ...payload, [FORM_FIELD]: event.target.value })}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-200"
         />
         <ExtraFields payload={payload} disabled={isExecuting} onChange={onPayloadChange} />
         <button
           type="submit"
           disabled={isExecuting}
-          className="cursor-pointer self-end rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer self-end rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isExecuting ? 'Đang lưu...' : extras.length > 0 ? 'Lưu (kèm trường ẩn)' : 'Lưu hồ sơ'}
         </button>

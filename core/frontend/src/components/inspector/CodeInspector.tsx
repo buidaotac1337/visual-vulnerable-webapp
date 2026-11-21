@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import { RefreshCw } from 'lucide-react';
 
-import { resolveFrontendFile, resolveStepTarget } from '@/lib';
+import { resolveFrontendFile, resolveStepTarget, UI_LABELS } from '@/lib';
 import type { ResolvedFrontendFile } from '@/lib';
 import type {
   InspectorTab,
@@ -12,6 +12,8 @@ import type {
   StepHighlightTarget,
   TraceStep,
 } from '@/types';
+
+import { Tooltip } from '../ui';
 
 import { CodeSnippetView } from './CodeSnippetView';
 import { TraceControls } from './TraceControls';
@@ -37,9 +39,9 @@ interface CodeInspectorProps {
 }
 
 const TAB_ITEMS: readonly { id: InspectorTab; label: string }[] = [
-  { id: 'backend', label: 'Backend (.py)' },
-  { id: 'frontend', label: 'Frontend (.tsx)' },
-  { id: 'diff', label: 'Diff' },
+  { id: 'backend', label: UI_LABELS.backendTab.text },
+  { id: 'frontend', label: UI_LABELS.frontendTab.text },
+  { id: 'diff', label: UI_LABELS.diffTab.text },
 ];
 
 interface InspectorView {
@@ -135,7 +137,7 @@ function renderInspectorBody(
 ): JSX.Element {
   if (sourceError) {
     return (
-      <div className="m-4 rounded-lg border border-red-500/40 bg-red-950/50 p-4 text-xs text-red-200">
+      <div className="m-4 rounded-lg border border-danger-500/40 bg-danger-950/50 p-4 text-xs text-danger-200">
         {sourceError}
       </div>
     );
@@ -161,7 +163,7 @@ function TabSwitchNote({ note }: { note: string | null }): JSX.Element {
       role="status"
       className={
         note
-          ? 'shrink-0 border-b border-slate-700 bg-indigo-950/60 px-3 py-1 text-xs text-indigo-200'
+          ? 'shrink-0 border-b border-slate-700 bg-brand-950/60 px-3 py-1 text-xs text-brand-200'
           : 'sr-only'
       }
     >
@@ -240,19 +242,20 @@ export function CodeInspector({
           >
             {activeFileLabel}
           </span>
-          <button
-            type="button"
-            onClick={onRefreshSource}
-            disabled={!lab || isRefreshing}
-            title="Đọc lại mã nguồn mới nhất từ đĩa"
-            aria-label="Làm mới mã nguồn"
-            className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <RefreshCw
-              className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`}
-              aria-hidden="true"
-            />
-          </button>
+          <Tooltip tip={UI_LABELS.refreshSource.tip} align="end">
+            <button
+              type="button"
+              onClick={onRefreshSource}
+              disabled={!lab || isRefreshing}
+              aria-label={UI_LABELS.refreshSource.text}
+              className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`}
+                aria-hidden="true"
+              />
+            </button>
+          </Tooltip>
         </div>
       </div>
 

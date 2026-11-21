@@ -73,7 +73,7 @@ function GenericRunnerView({
           type="text"
           value={actionName}
           onChange={(event) => setActionName(event.target.value)}
-          className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none"
+          className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none"
           style={{ fontFamily: 'var(--font-mono)' }}
         />
       </div>
@@ -88,13 +88,13 @@ function GenericRunnerView({
           rows={5}
           value={rawJson}
           onChange={(event) => setRawJson(event.target.value)}
-          className={`rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-xs text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none ${
+          className={`rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-xs text-slate-900 focus:border-brand-500 focus:bg-white focus:outline-none ${
             inputFlashSeq > 0 ? 'vvwa-input-flash' : ''
           }`}
           style={{ fontFamily: 'var(--font-mono)' }}
         />
         {parseError && (
-          <p role="alert" className="text-xs font-medium text-red-600">
+          <p role="alert" className="text-xs font-medium text-danger-600">
             {parseError}
           </p>
         )}
@@ -103,7 +103,7 @@ function GenericRunnerView({
       <button
         type="submit"
         disabled={isExecuting}
-        className="inline-flex cursor-pointer items-center justify-center gap-1.5 self-start rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex cursor-pointer items-center justify-center gap-1.5 self-start rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Play className="h-3.5 w-3.5" aria-hidden="true" />
         <span>{isExecuting ? 'Đang thực thi...' : 'Gửi yêu cầu'}</span>
@@ -127,7 +127,7 @@ export function EmptyLabFallback(props: EmptyLabFallbackProps): JSX.Element {
   return (
     <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-slate-300 bg-white p-6">
       <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-        <FolderOpen className="h-5 w-5 text-indigo-600" aria-hidden="true" />
+        <FolderOpen className="h-5 w-5 text-brand-600" aria-hidden="true" />
         <span>
           {props.isLoading
             ? 'Đang quét danh sách bài lab...'

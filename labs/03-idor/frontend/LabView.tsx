@@ -95,7 +95,7 @@ export function LabView(props: LabViewProps): JSX.Element {
     <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-          <Receipt className="h-4 w-4 text-indigo-600" aria-hidden="true" />
+          <Receipt className="h-4 w-4 text-brand-600" aria-hidden="true" />
           <span>MiniShop · Đơn hàng của tôi</span>
         </div>
         <span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>
@@ -109,7 +109,7 @@ export function LabView(props: LabViewProps): JSX.Element {
             type="button"
             disabled={isExecuting}
             onClick={() => openOrder(order.id)}
-            className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:border-indigo-300 hover:bg-indigo-50/50 disabled:cursor-not-allowed"
+            className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 disabled:cursor-not-allowed"
           >
             <span className="font-semibold">Đơn #{order.id}</span>
             <span>
@@ -140,7 +140,7 @@ export function LabView(props: LabViewProps): JSX.Element {
         <button
           type="submit"
           disabled={isExecuting || orderId === null}
-          className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isExecuting ? 'Đang mở...' : 'Mở đơn'}
         </button>

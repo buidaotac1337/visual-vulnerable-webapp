@@ -38,7 +38,7 @@ function SecureModeNote({ mode, hasFrontendTests }: GradedFilesProps): JSX.Eleme
   return (
     <p
       role="note"
-      className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs text-amber-900"
+      className="mt-2 rounded-md border border-warning-300 bg-warning-50 px-2.5 py-1.5 text-xs text-warning-900"
     >
       Bạn đang xem chế độ Secure, nhưng Test My Fix luôn chấm bài làm của bạn (
       <code style={MONO}>vulnerable.py</code>
@@ -177,25 +177,25 @@ export function VerifyModal({
       <div className="max-h-[65vh] overflow-y-auto p-5">
         {isLoading ? (
           <div className="flex items-center gap-2 text-sm text-slate-600">
-            <RefreshCw className="h-4 w-4 animate-spin text-indigo-600" aria-hidden="true" />
+            <RefreshCw className="h-4 w-4 animate-spin text-brand-600" aria-hidden="true" />
             <span>Đang chạy bộ kiểm thử verifyTests...</span>
           </div>
         ) : error && !result ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs text-red-700">
+          <div className="rounded-lg border border-danger-200 bg-danger-50 p-3.5 text-xs text-danger-700">
             {error}
           </div>
         ) : result ? (
           <div className="flex flex-col gap-3">
             {error && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs text-red-700">
+              <div className="rounded-lg border border-danger-200 bg-danger-50 p-3.5 text-xs text-danger-700">
                 Không chạy được kiểm thử backend: {error}
               </div>
             )}
             <div
               className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm font-semibold ${
                 result.passed
-                  ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                  : 'border-red-200 bg-red-50 text-red-800'
+                  ? 'border-safe-200 bg-safe-50 text-safe-800'
+                  : 'border-danger-200 bg-danger-50 text-danger-800'
               }`}
             >
               <span>{summaryMessage(result)}</span>
@@ -212,9 +212,9 @@ export function VerifyModal({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-semibold text-slate-900">
                     {item.passed ? (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                      <CheckCircle2 className="h-4 w-4 text-safe-600" aria-hidden="true" />
                     ) : (
-                      <XCircle className="h-4 w-4 text-red-600" aria-hidden="true" />
+                      <XCircle className="h-4 w-4 text-danger-600" aria-hidden="true" />
                     )}
                     <span>{item.name}</span>
                   </div>
@@ -223,7 +223,7 @@ export function VerifyModal({
 
                 {item.error && (
                   <p
-                    className="mt-2 rounded bg-red-100/70 px-2.5 py-1.5 text-red-800"
+                    className="mt-2 rounded bg-danger-100/70 px-2.5 py-1.5 text-danger-800"
                     style={{ fontFamily: 'var(--font-mono)' }}
                   >
                     {item.error}
@@ -235,10 +235,10 @@ export function VerifyModal({
                     className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2"
                     style={{ fontFamily: 'var(--font-mono)' }}
                   >
-                    <pre className="overflow-x-auto rounded bg-white p-2 text-xs text-emerald-700">
+                    <pre className="overflow-x-auto rounded bg-white p-2 text-xs text-safe-700">
                       {`Expected:\n${JSON.stringify(item.expected, null, 2)}`}
                     </pre>
-                    <pre className="overflow-x-auto rounded bg-white p-2 text-xs text-red-700">
+                    <pre className="overflow-x-auto rounded bg-white p-2 text-xs text-danger-700">
                       {`Actual:\n${JSON.stringify(item.actual, null, 2)}`}
                     </pre>
                   </div>
@@ -254,7 +254,7 @@ export function VerifyModal({
           type="button"
           onClick={onRerun}
           disabled={isLoading}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Chạy lại kiểm thử</span>

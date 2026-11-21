@@ -1,8 +1,10 @@
 import type { JSX } from 'react';
 import { CheckCircle2, Download, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
 
-import { isFrontendVerifyTest } from '@/lib';
+import { isFrontendVerifyTest, UI_LABELS } from '@/lib';
 import type { HealthResponse, LabMetadata, LabMode } from '@/types';
+
+import { Tooltip } from '../ui';
 
 import { ModeSwitch } from './ModeSwitch';
 
@@ -26,7 +28,7 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
   if (health) {
     return (
       <span
-        className="hidden rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 xl:inline-flex"
+        className="hidden rounded-full bg-safe-50 px-2.5 py-1 text-xs font-medium text-safe-700 xl:inline-flex"
         title={`${health.service} (${health.environment})`}
       >
         API: {health.status.toUpperCase()} (v{health.version})
@@ -35,7 +37,7 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
   }
   if (apiError) {
     return (
-      <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+      <span className="rounded-full bg-warning-50 px-2.5 py-1 text-xs font-medium text-warning-700">
         {apiError}
       </span>
     );
@@ -103,18 +105,18 @@ export function TopControlBar({
   const isSecure = mode === 'secure';
   const hasLab = selectedLab !== null;
   const gradesFrontend = selectedLab?.verifyTests.some(isFrontendVerifyTest) ?? false;
-  const verifyTitle = `Chấm bài làm của bạn trong backend/vulnerable.py${
-    gradesFrontend ? ' và frontend/vulnerable.tsx' : ''
-  } (ở chế độ nào cũng vậy)`;
+  const verifyTip = gradesFrontend
+    ? UI_LABELS.testMyFix.tip.replace('vulnerable.py', 'vulnerable.py và frontend/vulnerable.tsx')
+    : UI_LABELS.testMyFix.tip;
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4">
       <div className="flex min-w-0 items-center gap-3">
         <div className="flex shrink-0 items-center gap-2 text-base font-semibold text-slate-900">
           {isSecure ? (
-            <ShieldCheck className="h-5 w-5 text-emerald-500" aria-hidden="true" />
+            <ShieldCheck className="h-5 w-5 text-safe-500" aria-hidden="true" />
           ) : (
-            <ShieldAlert className="h-5 w-5 text-red-500" aria-hidden="true" />
+            <ShieldAlert className="h-5 w-5 text-danger-500" aria-hidden="true" />
           )}
           <span className="tracking-tight">VVWA · MiniShop</span>
         </div>
@@ -128,7 +130,7 @@ export function TopControlBar({
           disabled={labs.length === 0}
           value={selectedLab?.id ?? ''}
           onChange={(event) => onSelectLab(event.target.value)}
-          className="max-w-xs truncate rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-sm font-medium text-slate-800 focus:border-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          className="max-w-xs truncate rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-sm font-medium text-slate-800 focus:border-brand-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
         >
           {labs.length === 0 ? (
             <option value="">Chưa có bài lab trong labs/</option>
@@ -147,39 +149,50 @@ export function TopControlBar({
       <div className="flex shrink-0 items-center gap-2">
         <ModeSwitch mode={mode} onChange={onChangeMode} />
 
-        <button
-          type="button"
-          onClick={onResetDb}
-          disabled={isResettingDb}
-          title="Khôi phục database MiniShop về dữ liệu mẫu ban đầu"
-          className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-          <StableLabel label="Reset DB" busyLabel="Đang reset..." isBusy={isResettingDb} />
-        </button>
+        <Tooltip tip={UI_LABELS.resetDb.tip}>
+          <button
+            type="button"
+            onClick={onResetDb}
+            disabled={isResettingDb}
+            className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            <StableLabel
+              label={UI_LABELS.resetDb.text}
+              busyLabel={UI_LABELS.resetDb.busy}
+              isBusy={isResettingDb}
+            />
+          </button>
+        </Tooltip>
 
-        <button
-          type="button"
-          onClick={onVerify}
-          disabled={!hasLab || isVerifying}
-          title={verifyTitle}
-          className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-          <StableLabel label="Test My Fix" busyLabel="Đang kiểm thử..." isBusy={isVerifying} />
-        </button>
+        <Tooltip tip={verifyTip}>
+          <button
+            type="button"
+            onClick={onVerify}
+            disabled={!hasLab || isVerifying}
+            className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+            <StableLabel
+              label={UI_LABELS.testMyFix.text}
+              busyLabel={UI_LABELS.testMyFix.busy}
+              isBusy={isVerifying}
+            />
+          </button>
+        </Tooltip>
 
-        <button
-          type="button"
-          onClick={onDownloadSnippet}
-          disabled={!hasLab || isDownloading}
-          aria-label="Tải Snippet"
-          title="Tải mã nguồn bản lỗi, bản vá, diff và README dạng .zip"
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Download className="h-3.5 w-3.5" aria-hidden="true" />
-          <span className="hidden sm:inline">Tải Snippet</span>
-        </button>
+        <Tooltip tip={UI_LABELS.downloadSnippet.tip} align="end">
+          <button
+            type="button"
+            onClick={onDownloadSnippet}
+            disabled={!hasLab || isDownloading}
+            aria-label={UI_LABELS.downloadSnippet.text}
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Download className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">{UI_LABELS.downloadSnippet.text}</span>
+          </button>
+        </Tooltip>
       </div>
     </header>
   );

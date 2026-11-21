@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { JSX } from 'react';
 import { Sparkles } from 'lucide-react';
 
+import { UI_LABELS } from '@/lib';
 import type { SamplePayload } from '@/types';
 
 interface PayloadChipBarProps {
@@ -29,8 +30,8 @@ export function PayloadChipBar({ payloads, onSelect }: PayloadChipBarProps): JSX
     // relative: keeps the always-mounted sr-only live region inside this card.
     <div className="relative rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
       <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-        <Sparkles className="h-3.5 w-3.5 text-indigo-600" aria-hidden="true" />
-        <span>Payload mẫu (1-click điền sẵn)</span>
+        <Sparkles className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
+        <span>{UI_LABELS.payloads.text}</span>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -44,15 +45,15 @@ export function PayloadChipBar({ payloads, onSelect }: PayloadChipBarProps): JSX
               setPicked(sample.label);
               onSelect(sample);
             }}
-            className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium text-indigo-700 transition-colors hover:border-indigo-500 hover:bg-indigo-100 ${
+            className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium text-brand-700 transition-colors hover:border-brand-500 hover:bg-brand-100 ${
               picked === sample.label
-                ? 'border-solid border-indigo-500 bg-indigo-100'
-                : 'border-dashed border-indigo-300 bg-indigo-50/50'
+                ? 'border-solid border-brand-500 bg-brand-100'
+                : 'border-dashed border-brand-300 bg-brand-50/50'
             }`}
           >
             {sample.label}
             {sample.actor ? (
-              <span className="ml-1.5 rounded-full bg-white/80 px-1.5 text-xs text-indigo-700">
+              <span className="ml-1.5 rounded-full bg-white/80 px-1.5 text-xs text-brand-700">
                 vai {sample.actor}
               </span>
             ) : null}

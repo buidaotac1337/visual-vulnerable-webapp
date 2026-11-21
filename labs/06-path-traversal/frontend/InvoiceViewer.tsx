@@ -36,14 +36,14 @@ export function InvoiceViewer({ result, invoices }: InvoiceViewerProps): JSX.Ele
   return (
     <article
       aria-label={`Nội dung ${result.file}`}
-      className={`flex flex-col gap-2 rounded-lg border p-3 ${foreign ? 'border-red-300 bg-red-50/40' : 'border-slate-200 bg-slate-50'}`}
+      className={`flex flex-col gap-2 rounded-lg border p-3 ${foreign ? 'border-danger-300 bg-danger-50/40' : 'border-slate-200 bg-slate-50'}`}
     >
       <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-900">
-        <FileText className="h-4 w-4 shrink-0 text-indigo-600" aria-hidden="true" />
+        <FileText className="h-4 w-4 shrink-0 text-brand-600" aria-hidden="true" />
         <span className="break-all">{result.file}</span>
       </p>
       {foreign && (
-        <p role="alert" className="flex items-center gap-1.5 text-xs font-semibold text-red-700">
+        <p role="alert" className="flex items-center gap-1.5 text-xs font-semibold text-danger-700">
           <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>
             File này không nằm trong danh sách hóa đơn của bạn: server đã đọc theo đường dẫn mà

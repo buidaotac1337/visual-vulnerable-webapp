@@ -102,7 +102,7 @@ export function LabView(props: LabViewProps): JSX.Element {
     <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-          <ShoppingCart className="h-4 w-4 text-indigo-600" aria-hidden="true" />
+          <ShoppingCart className="h-4 w-4 text-brand-600" aria-hidden="true" />
           <span>MiniShop · Giỏ hàng</span>
         </div>
         <span className="text-xs text-slate-500">
@@ -120,7 +120,7 @@ export function LabView(props: LabViewProps): JSX.Element {
             type="button"
             disabled={isExecuting}
             onClick={() => setLines(addToCart(lines, product))}
-            className="flex cursor-pointer flex-col items-start rounded-lg border border-slate-200 px-3 py-2 text-left text-xs text-slate-700 hover:border-indigo-300 hover:bg-indigo-50/50 disabled:cursor-not-allowed"
+            className="flex cursor-pointer flex-col items-start rounded-lg border border-slate-200 px-3 py-2 text-left text-xs text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 disabled:cursor-not-allowed"
           >
             <span className="font-semibold text-slate-900">{product.name}</span>
             <span>
@@ -152,7 +152,7 @@ export function LabView(props: LabViewProps): JSX.Element {
             type="button"
             disabled={isExecuting || items === null}
             onClick={() => items && checkout(items)}
-            className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isExecuting ? 'Đang thanh toán...' : 'Thanh toán'}
           </button>
