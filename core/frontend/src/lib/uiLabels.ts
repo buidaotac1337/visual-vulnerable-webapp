@@ -1,7 +1,10 @@
-/** One workspace label: the text on screen and the Vietnamese explanation in its tooltip. */
+import type { LabMode } from '@/types';
+
+/** One workspace label: the text on screen and an optional Vietnamese explanation tooltip. */
 export interface UiLabel {
   text: string;
-  tip: string;
+  /** Vietnamese explanation shown in a Tooltip when the label has a focusable control. */
+  tip?: string;
   /** Text while the control is busy, when it has a busy state. */
   busy?: string;
 }
@@ -43,10 +46,7 @@ export const UI_LABELS = {
     tip: 'Phát lại toàn bộ trace từ bước đầu, mỗi bước sáng dòng code tương ứng.',
   },
   nextStep: { text: 'Sau', tip: 'Tiến tới bước trace sau.' },
-  payloads: {
-    text: 'Payload mẫu (1-click điền sẵn)',
-    tip: 'Dữ liệu điền sẵn để thử nhanh: bấm một chip để điền vào form, mô tả hiện ngay bên dưới.',
-  },
+  payloads: { text: 'Payload mẫu (1-click điền sẵn)' },
   backendTab: { text: 'Backend (.py)', tip: 'Mã backend của chế độ đang chọn.' },
   frontendTab: { text: 'Frontend (.tsx)', tip: 'Mã giao diện React của lab.' },
   diffTab: { text: 'Diff', tip: 'Những dòng khác nhau giữa bản lỗi và bản vá.' },
@@ -55,3 +55,31 @@ export const UI_LABELS = {
 
 /** Key of a workspace label in UI_LABELS. */
 export type UiLabelKey = keyof typeof UI_LABELS;
+
+/**
+ * Return the ModeSwitch tooltip for a mode, naming frontend sink files when the lab has one.
+ *
+ * @param mode - Target lab mode (`vulnerable` or `secure`).
+ * @param hasFrontendSink - True when the lab also has `frontend/<mode>.tsx` sink files.
+ * @returns Localized Vietnamese tooltip text for the mode button.
+ */
+export function modeTip(mode: LabMode, hasFrontendSink: boolean): string {
+  if (!hasFrontendSink) {
+    return UI_LABELS[mode].tip;
+  }
+  return mode === 'vulnerable'
+    ? 'Chạy backend/vulnerable.py và frontend/vulnerable.tsx: bản có lỗ hổng, cũng là bài làm bạn sẽ sửa.'
+    : 'Chạy backend/secure.py và frontend/secure.tsx: bản tham chiếu đã áp dụng safety pattern, để so sánh.';
+}
+
+/**
+ * Return the Test My Fix tooltip, naming `frontend/vulnerable.tsx` when graded in the browser.
+ *
+ * @param gradesFrontend - True when the lab declares frontend verifyTests.
+ * @returns Localized Vietnamese tooltip text for the Test My Fix button.
+ */
+export function testMyFixTip(gradesFrontend: boolean): string {
+  return gradesFrontend
+    ? 'Chấm bài làm của bạn trong backend/vulnerable.py và frontend/vulnerable.tsx, ở chế độ nào cũng vậy.'
+    : UI_LABELS.testMyFix.tip;
+}

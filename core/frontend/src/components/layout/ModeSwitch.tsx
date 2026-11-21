@@ -1,23 +1,28 @@
 import type { JSX } from 'react';
 import { Bug, ShieldCheck } from 'lucide-react';
 
-import { UI_LABELS } from '@/lib';
+import { modeTip, UI_LABELS } from '@/lib';
 import type { LabMode } from '@/types';
 
 import { Tooltip } from '../ui';
 
 interface ModeSwitchProps {
   mode: LabMode;
+  hasFrontendSink?: boolean;
   onChange: (nextMode: LabMode) => void;
 }
 
 /**
  * Render the Vulnerable <-> Secure segmented control with semantic security tokens.
  *
- * @param props - Active lab mode and change callback.
+ * @param props - Active lab mode, whether the lab has frontend sink files, and change callback.
  * @returns Accessible radiogroup segmented control element.
  */
-export function ModeSwitch({ mode, onChange }: ModeSwitchProps): JSX.Element {
+export function ModeSwitch({
+  mode,
+  hasFrontendSink = false,
+  onChange,
+}: ModeSwitchProps): JSX.Element {
   const isVuln = mode === 'vulnerable';
 
   return (
@@ -26,7 +31,7 @@ export function ModeSwitch({ mode, onChange }: ModeSwitchProps): JSX.Element {
       aria-label="Chế độ thực thi bài lab"
       className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-100 p-0.5"
     >
-      <Tooltip tip={UI_LABELS.vulnerable.tip}>
+      <Tooltip tip={modeTip('vulnerable', hasFrontendSink)}>
         <button
           type="button"
           role="radio"
@@ -43,7 +48,7 @@ export function ModeSwitch({ mode, onChange }: ModeSwitchProps): JSX.Element {
         </button>
       </Tooltip>
 
-      <Tooltip tip={UI_LABELS.secure.tip}>
+      <Tooltip tip={modeTip('secure', hasFrontendSink)}>
         <button
           type="button"
           role="radio"

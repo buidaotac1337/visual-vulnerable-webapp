@@ -34,9 +34,9 @@ Dùng nhất quán ở mọi nơi: công tắc mode, node pipeline, dòng code p
 | Info | `*-info-*` | `blue` | Bước xử lý bình thường |
 | Brand MiniShop | `*-brand-*` | `indigo` | Nút, logo, điểm nhấn trong MiniShop |
 
-Mỗi vai trò là một dải màu đầy đủ (`50` … `950`) khai báo trong khối `@theme inline` của `tokens.css`, nên dùng được như mọi màu Tailwind: `bg-danger-50`, `text-safe-700`, `border-warning-300/60`. `*-soft` là nền mờ (16%, brand 10%). Đổi bảng màu gốc của một vai trò trong `tokens.css` là đổi màu toàn bộ giao diện.
+Mỗi vai trò là một dải màu đầy đủ (`50` … `950`) khai báo trong khối `@theme inline` của `tokens.css`, nên dùng được như mọi màu Tailwind: `bg-danger-50`, `text-safe-700`, `border-warning-300/60`. `*-soft` là nền mờ (`16%`, brand `10%` từ `indigo-600`). Do `@theme inline` chỉ inline giá trị lúc build và không xuất `--color-danger*` ra `:root`, các shadow/animation runtime (`--glow-*`, `--flash-brand`) tham chiếu biến palette gốc trong `:root`. Đổi bảng màu gốc của một vai trò trong `tokens.css` là đổi màu toàn bộ giao diện.
 
-ESLint chặn các class màu gốc `red-*`, `emerald-*`, `amber-*`, `blue-*`, `indigo-*` ở mọi file `.ts`/`.tsx`, kể cả lab và `vulnerable.tsx`. Màu trung tính (`slate-*`) và màu nhãn phụ không mang nghĩa bảo mật (`sky`, `violet`) vẫn dùng trực tiếp.
+ESLint chặn các class màu gốc `red-*`, `emerald-*`, `amber-*`, `blue-*`, `indigo-*` (theo thang `50`, `100`…`900`, `950`) ở mọi file `.ts`/`.tsx`, kể cả lab và `vulnerable.tsx`. Màu trung tính (`slate-*`) và màu trang trí không mang nghĩa bảo mật (`sky`, `violet`, `yellow`) vẫn dùng trực tiếp.
 
 ### Bề mặt & chữ
 
@@ -71,9 +71,9 @@ Font được nạp từ Google Fonts trong `core/frontend/index.html`.
 
 ### Nhãn & `Tooltip`
 
-Mọi nhãn của workspace (nút topbar, công tắc mode, nút trace, tab Inspector, tiêu đề chip payload) lấy từ một nguồn duy nhất: `UI_LABELS` trong `core/frontend/src/lib/uiLabels.ts` (import qua `@/lib`). Mỗi mục có `text` hiển thị, `tip` giải thích bằng tiếng Việt và `busy` nếu nút có trạng thái đang chạy. Thuật ngữ đã quen (Vulnerable, Secure, Reset DB, Test My Fix, Replay, Payload) giữ nguyên làm nhãn; phần giải thích nằm trong tooltip.
+Mọi nhãn của workspace (nút topbar, công tắc mode, nút trace, tab Inspector, tiêu đề chip payload) lấy từ một nguồn duy nhất: `UI_LABELS` trong `core/frontend/src/lib/uiLabels.ts` (import qua `@/lib`). Mỗi mục có `text` hiển thị, `tip` giải thích bằng tiếng Việt (tùy chọn với tiêu đề không focus được) và `busy` nếu nút có trạng thái đang chạy; `modeTip` và `testMyFixTip` bổ sung tên file `frontend/vulnerable.tsx` / `secure.tsx` cho lab có frontend sink. Thuật ngữ đã quen (Vulnerable, Secure, Reset DB, Test My Fix, Replay, Payload) giữ nguyên làm nhãn; phần giải thích nằm trong tooltip.
 
-`Tooltip` (`@/components`) theo mẫu WAI-ARIA tooltip: mở khi rê chuột hoặc khi focus bằng bàn phím, đóng bằng `Esc`, rời chuột hoặc mất focus, và gắn `aria-describedby` vào phần tử được mô tả. Không dùng thuộc tính `title` cho giải thích (không hiện khi dùng bàn phím hay màn hình cảm ứng). Tham số `side="top"` cho control ở đáy panel, `align="end"` cho control sát mép phải.
+`Tooltip` (`@/components`) theo mẫu WAI-ARIA tooltip: mở khi rê chuột hoặc khi focus bằng bàn phím, giữ mở khi con trỏ di chuyển sang vùng tooltip (WCAG 1.4.13), đóng bằng `Esc` (chặn lan truyền để không đóng modal bao ngoài), rời chuột, mất focus hoặc khi trigger chuyển sang `disabled`, và nối `aria-describedby` (giữ nguyên các ID đã có). Không dùng thuộc tính `title` cho giải thích (không hiện khi dùng bàn phím hay màn hình cảm ứng). Tham số `side="top"` cho control ở đáy panel, `align="start"` cho control sát mép trái và `align="end"` cho control sát mép phải.
 
 ### `ModeSwitch`
 
@@ -89,7 +89,7 @@ Segmented control hai nửa:
 Dòng ứng với bước trace đang active:
 
 * Viền trái `3px` theo `status`.
-* Nền mờ theo `status` và glow `box-shadow: inset 0 0 12px rgba(...)`.
+* Nền mờ (`*-soft`) và glow (`--glow-*` trong `tokens.css`) theo `status`.
 * **Inline Callout** trượt xuống (`200ms`) ngay dưới dòng: `Bước N: <title>` và `detail` bằng font mono.
 
 ### `FlowPipeline`

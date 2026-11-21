@@ -39,7 +39,6 @@ export function PayloadChipBar({ payloads, onSelect }: PayloadChipBarProps): JSX
           <button
             key={sample.label}
             type="button"
-            title={sample.description}
             aria-pressed={picked === sample.label}
             onClick={() => {
               setPicked(sample.label);

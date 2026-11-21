@@ -15,7 +15,7 @@ function Stars({ rating }: { rating: number }): JSX.Element {
       {[1, 2, 3, 4, 5].map((value) => (
         <Star
           key={value}
-          className={`h-3 w-3 ${value <= rating ? 'fill-warning-400 text-warning-400' : 'text-slate-300'}`}
+          className={`h-3 w-3 ${value <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'}`}
           aria-hidden="true"
         />
       ))}

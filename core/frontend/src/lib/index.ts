@@ -12,7 +12,7 @@ export {
   verifyLab,
 } from './api';
 export { parseUnifiedDiff } from './diffParser';
-export { UI_LABELS } from './uiLabels';
+export { modeTip, testMyFixTip, UI_LABELS } from './uiLabels';
 export type { UiLabel, UiLabelKey } from './uiLabels';
 export {
   getFrontendSinkFile,

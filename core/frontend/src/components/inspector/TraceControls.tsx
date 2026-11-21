@@ -39,7 +39,7 @@ export function TraceControls({
     <div className="flex shrink-0 flex-col gap-2.5 border-t border-slate-700 bg-[var(--bg-ide-header)] p-3.5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <Tooltip tip={UI_LABELS.prevStep.tip} side="top">
+          <Tooltip tip={UI_LABELS.prevStep.tip} side="top" align="start">
             <button
               type="button"
               disabled={!hasTrace || activeIndex <= 0}
@@ -51,7 +51,7 @@ export function TraceControls({
             </button>
           </Tooltip>
 
-          <Tooltip tip={UI_LABELS.replay.tip} side="top">
+          <Tooltip tip={UI_LABELS.replay.tip} side="top" align="start">
             <button
               type="button"
               disabled={!hasTrace}

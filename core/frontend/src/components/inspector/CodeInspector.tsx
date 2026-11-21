@@ -38,10 +38,10 @@ interface CodeInspectorProps {
   onNextStep: () => void;
 }
 
-const TAB_ITEMS: readonly { id: InspectorTab; label: string }[] = [
-  { id: 'backend', label: UI_LABELS.backendTab.text },
-  { id: 'frontend', label: UI_LABELS.frontendTab.text },
-  { id: 'diff', label: UI_LABELS.diffTab.text },
+const TAB_ITEMS: readonly { id: InspectorTab; label: string; tip: string }[] = [
+  { id: 'backend', label: UI_LABELS.backendTab.text, tip: UI_LABELS.backendTab.tip },
+  { id: 'frontend', label: UI_LABELS.frontendTab.text, tip: UI_LABELS.frontendTab.tip },
+  { id: 'diff', label: UI_LABELS.diffTab.text, tip: UI_LABELS.diffTab.tip },
 ];
 
 interface InspectorView {
@@ -216,21 +216,26 @@ export function CodeInspector({
             const isSelected = activeTab === item.id;
             const isDisabled = item.id === 'frontend' && !hasFrontendSource;
             return (
-              <button
+              <Tooltip
                 key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={isSelected}
-                disabled={isDisabled}
-                onClick={() => pickTab(item.id)}
-                className={`cursor-pointer whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                  isSelected
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                }`}
+                tip={item.tip}
+                align={item.id === 'backend' ? 'start' : 'center'}
               >
-                {item.label}
-              </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  disabled={isDisabled}
+                  onClick={() => pickTab(item.id)}
+                  className={`cursor-pointer whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                    isSelected
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              </Tooltip>
             );
           })}
         </div>

@@ -38,7 +38,7 @@ const SINK_RESTRICTIONS = [
  * (danger, safe, warning, info, brand). The raw palettes behind those roles are banned in
  * class strings so a role can be recoloured in one place.
  */
-const RAW_PALETTE = '/-(red|emerald|amber|blue|indigo)-[0-9]/';
+const RAW_PALETTE = '/-(red|emerald|amber|blue|indigo)-(50|[1-9]00|950)\\b/';
 const PALETTE_RESTRICTIONS = [
   {
     selector: `Literal[value=${RAW_PALETTE}]`,

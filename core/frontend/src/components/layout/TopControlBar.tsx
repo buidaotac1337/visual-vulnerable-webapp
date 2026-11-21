@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import { CheckCircle2, Download, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
 
-import { isFrontendVerifyTest, UI_LABELS } from '@/lib';
+import { isFrontendVerifyTest, testMyFixTip, UI_LABELS } from '@/lib';
 import type { HealthResponse, LabMetadata, LabMode } from '@/types';
 
 import { Tooltip } from '../ui';
@@ -105,9 +105,7 @@ export function TopControlBar({
   const isSecure = mode === 'secure';
   const hasLab = selectedLab !== null;
   const gradesFrontend = selectedLab?.verifyTests.some(isFrontendVerifyTest) ?? false;
-  const verifyTip = gradesFrontend
-    ? UI_LABELS.testMyFix.tip.replace('vulnerable.py', 'vulnerable.py và frontend/vulnerable.tsx')
-    : UI_LABELS.testMyFix.tip;
+  const verifyTip = testMyFixTip(gradesFrontend);
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4">
@@ -147,7 +145,7 @@ export function TopControlBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <ModeSwitch mode={mode} onChange={onChangeMode} />
+        <ModeSwitch mode={mode} hasFrontendSink={gradesFrontend} onChange={onChangeMode} />
 
         <Tooltip tip={UI_LABELS.resetDb.tip}>
           <button

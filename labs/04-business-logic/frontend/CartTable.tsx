@@ -1,5 +1,7 @@
 import type { JSX } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Info, Trash2 } from 'lucide-react';
+
+import { Tooltip } from '@/components';
 
 import { formatMoney } from './cartData';
 import type { Product } from './cartData';
@@ -43,8 +45,19 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
       <thead>
         <tr className="text-left text-slate-500">
           <th className="py-1 font-medium">Sản phẩm</th>
-          <th className="py-1 text-right font-medium" title="Gửi kèm đơn hàng như một input ẩn">
-            Đơn giá gửi lên
+          <th className="py-1 text-right font-medium">
+            <span className="inline-flex items-center justify-end gap-1">
+              <span>Đơn giá gửi lên</span>
+              <Tooltip tip="Gửi kèm đơn hàng như một input ẩn">
+                <button
+                  type="button"
+                  aria-label="Giải thích đơn giá gửi lên"
+                  className="inline-flex cursor-pointer items-center rounded text-slate-400 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                >
+                  <Info className="h-3 w-3" aria-hidden="true" />
+                </button>
+              </Tooltip>
+            </span>
           </th>
           <th className="py-1 text-right font-medium">SL</th>
           <th className="py-1 text-right font-medium">Thành tiền</th>
