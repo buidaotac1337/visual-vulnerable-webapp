@@ -36,7 +36,8 @@ function getNodeClassName(node: PipelineNodeModel): string {
   if (node.visualState === 'completed') {
     return COMPLETED_NODE_STYLES[node.status];
   }
-  return 'border-slate-200 bg-white text-slate-500 opacity-65';
+  // No opacity: idle nodes must stay readable (WCAG AA); the dashed border marks them as idle.
+  return 'border-dashed border-slate-300 bg-white text-slate-600';
 }
 
 /**
@@ -53,7 +54,7 @@ export function FlowPipeline({ nodes, onSelectLayer }: FlowPipelineProps): JSX.E
         <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Luồng thực thi trực quan (Live Pipeline)
         </h2>
-        <span className="text-[11px] text-slate-400">Bấm vào từng bước để xem dòng code</span>
+        <span className="text-xs text-slate-600">Bấm vào từng bước để xem dòng code</span>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -73,7 +74,7 @@ export function FlowPipeline({ nodes, onSelectLayer }: FlowPipelineProps): JSX.E
                 <span>{node.label}</span>
               </span>
               {node.hasSteps && (
-                <span className="rounded-full bg-white/80 px-1.5 py-0.5 text-[10px] font-bold">
+                <span className="rounded-full bg-white/80 px-1.5 py-0.5 text-xs font-bold">
                   {node.stepCount}
                 </span>
               )}

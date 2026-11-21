@@ -63,6 +63,25 @@ describe('Lab 01 SQL Injection LabView', () => {
       }),
     );
     expect(screen.getByText('Chào mừng admin!')).toBeInTheDocument();
+    // The welcome card is neutral; the bypass is explained in a separate alert.
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Đăng nhập vào tài khoản admin mà không cần mật khẩu đúng',
+    );
+  });
+
+  it('shows a normal login without any alert', () => {
+    const normalResp: LabExecutionResponse = {
+      ok: true,
+      data: {
+        logged_in: true,
+        user: { username: 'alice', email: 'alice@minishop.local', role: 'customer', balance: 500 },
+      },
+      meta: { lab_id: '01-sql-injection', mode: 'vulnerable', outcome: 'normal' },
+      trace: [],
+    };
+    render(<LabView {...makeProps({ lastResponse: normalResp })} />);
+    expect(screen.getByText('Chào mừng alice!')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('renders SQL syntax error banner and failed login card cleanly', () => {
@@ -103,6 +122,7 @@ describe('Lab 01 SQL Injection LabView', () => {
       ok: true,
       data: {
         count: 1,
+        leaked_rows: [0],
         products: [
           {
             id: 1,
@@ -138,6 +158,7 @@ describe('Lab 01 SQL Injection LabView', () => {
       }),
     );
     expect(screen.getByText('admin@minishop.local:admin_secret_2026')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('1 dòng bên dưới không phải sản phẩm');
 
     rerender(
       <LabView

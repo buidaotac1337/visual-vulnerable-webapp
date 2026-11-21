@@ -54,7 +54,7 @@ export function ReviewList({ page, ReviewBody, findingsById }: ReviewListProps):
             </div>
             <ReviewBody content={review.content} />
             {findings.length > 0 && (
-              <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-red-700">
+              <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-red-700">
                 <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Nội dung đã thành mã thực thi được: {findings.join(', ')}</span>
               </p>

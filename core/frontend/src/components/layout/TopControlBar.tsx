@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { CheckCircle2, Download, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
 
+import { isFrontendVerifyTest } from '@/lib';
 import type { HealthResponse, LabMetadata, LabMode } from '@/types';
 
 import { ModeSwitch } from './ModeSwitch';
@@ -46,6 +47,37 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
   );
 }
 
+interface StableLabelProps {
+  label: string;
+  busyLabel: string;
+  isBusy: boolean;
+}
+
+/**
+ * Button label that keeps the width of its longest text, so the toolbar does not shift
+ * when a button switches to its busy text (works at any font size or zoom level).
+ *
+ * @param props - Idle text, busy text, and busy flag.
+ * @returns Both texts stacked in one grid cell, only the current one visible.
+ */
+function StableLabel({ label, busyLabel, isBusy }: StableLabelProps): JSX.Element {
+  return (
+    // Both texts share one grid cell, so the cell is as wide as the wider text; the hidden
+    // one is also aria-hidden, so the button's accessible name is the visible text.
+    <span className="grid">
+      <span aria-hidden={isBusy} className={`col-start-1 row-start-1 ${isBusy ? 'invisible' : ''}`}>
+        {label}
+      </span>
+      <span
+        aria-hidden={!isBusy}
+        className={`col-start-1 row-start-1 ${isBusy ? '' : 'invisible'}`}
+      >
+        {busyLabel}
+      </span>
+    </span>
+  );
+}
+
 /**
  * Render the fixed 56px top navigation bar housing lab selection, mode toggle,
  * and 1-click Reset DB / Test My Fix / Download Snippet controls.
@@ -70,6 +102,10 @@ export function TopControlBar({
 }: TopControlBarProps): JSX.Element {
   const isSecure = mode === 'secure';
   const hasLab = selectedLab !== null;
+  const gradesFrontend = selectedLab?.verifyTests.some(isFrontendVerifyTest) ?? false;
+  const verifyTitle = `Chấm bài làm của bạn trong backend/vulnerable.py${
+    gradesFrontend ? ' và frontend/vulnerable.tsx' : ''
+  } (ở chế độ nào cũng vậy)`;
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4">
@@ -115,26 +151,30 @@ export function TopControlBar({
           type="button"
           onClick={onResetDb}
           disabled={isResettingDb}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          title="Khôi phục database MiniShop về dữ liệu mẫu ban đầu"
+          className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>{isResettingDb ? 'Đang reset...' : 'Reset DB'}</span>
+          <StableLabel label="Reset DB" busyLabel="Đang reset..." isBusy={isResettingDb} />
         </button>
 
         <button
           type="button"
           onClick={onVerify}
           disabled={!hasLab || isVerifying}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          title={verifyTitle}
+          className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>{isVerifying ? 'Đang kiểm thử...' : 'Test My Fix'}</span>
+          <StableLabel label="Test My Fix" busyLabel="Đang kiểm thử..." isBusy={isVerifying} />
         </button>
 
         <button
           type="button"
           onClick={onDownloadSnippet}
           disabled={!hasLab || isDownloading}
+          aria-label="Tải Snippet"
+          title="Tải mã nguồn bản lỗi, bản vá, diff và README dạng .zip"
           className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download className="h-3.5 w-3.5" aria-hidden="true" />

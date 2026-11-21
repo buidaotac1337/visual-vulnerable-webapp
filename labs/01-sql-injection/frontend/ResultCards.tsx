@@ -33,11 +33,17 @@ function renderSqlErrorBanner(message: string): JSX.Element {
         <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
         <span>Lỗi cú pháp SQL (Error-based SQLi)</span>
       </div>
-      <p className="mt-1 break-all text-[11px]" style={{ fontFamily: 'var(--font-mono)' }}>
+      <p className="mt-1 break-all text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
         {message}
       </p>
     </div>
   );
+}
+
+/** Indexes of rows the backend flagged as not being real products (data pulled in by SQLi). */
+function readLeakedRows(response: LabExecutionResponse | null): Set<number> {
+  const raw = response?.data.leaked_rows;
+  return new Set(Array.isArray(raw) ? raw.filter((i): i is number => typeof i === 'number') : []);
 }
 
 function parseUserRecord(response: LabExecutionResponse | null): UserRecord | null {
@@ -100,26 +106,36 @@ export function LoginResultCard({
     );
   }
   const isExploited = response.meta.outcome === 'exploited';
+  // The welcome card stays neutral: a successful login is not an error. What went wrong is
+  // said separately, in words, when the login was a bypass.
   return (
-    <div
-      className={`rounded-lg border p-3 text-xs ${
-        isExploited
-          ? 'border-red-300 bg-red-50 text-red-900'
-          : 'border-emerald-300 bg-emerald-50 text-emerald-900'
-      }`}
-    >
-      <div className="flex items-center justify-between gap-2 font-semibold">
-        <span className="inline-flex items-center gap-1.5">
-          <UserCheck className="h-4 w-4" aria-hidden="true" />
-          Chào mừng {user.username}!
-        </span>
-        <span className="rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-bold uppercase">
-          {user.role}
-        </span>
+    <div className="flex flex-col gap-2">
+      <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-800">
+        <div className="flex items-center justify-between gap-2 font-semibold">
+          <span className="inline-flex items-center gap-1.5">
+            <UserCheck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+            Chào mừng {user.username}!
+          </span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold uppercase">
+            {user.role}
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-slate-600">
+          Email: {user.email} · Số dư ví MiniShop: ${user.balance.toFixed(2)}
+        </p>
       </div>
-      <p className="mt-1 text-[11px] opacity-85">
-        Email: {user.email} · Số dư ví MiniShop: ${user.balance.toFixed(2)}
-      </p>
+      {isExploited && (
+        <p
+          role="alert"
+          className="flex items-start gap-1.5 rounded-lg border border-red-300 bg-red-50 p-3 text-xs font-semibold text-red-800"
+        >
+          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>
+            Đăng nhập vào tài khoản {user.username} mà không cần mật khẩu đúng: payload đã thay đổi
+            điều kiện WHERE của câu truy vấn đăng nhập.
+          </span>
+        </p>
+      )}
     </div>
   );
 }
@@ -150,11 +166,23 @@ export function SearchResultList({
       </div>
     );
   }
-  const isExploited = response?.meta.outcome === 'exploited';
+  const leaked = readLeakedRows(response);
   return (
     <div className="flex flex-col gap-2">
+      {leaked.size > 0 && (
+        <p
+          role="alert"
+          className="flex items-start gap-1.5 rounded-lg border border-red-300 bg-red-50 p-3 text-xs font-semibold text-red-800"
+        >
+          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>
+            {leaked.size} dòng bên dưới không phải sản phẩm: dữ liệu từ bảng hoặc truy vấn khác bị
+            kéo ra qua UNION SELECT.
+          </span>
+        </p>
+      )}
       {products.map((item, idx) => {
-        const isLeakedRow = (item.description.includes(':') || isExploited) && item.stock === 0;
+        const isLeakedRow = leaked.has(idx);
         return (
           <div
             key={`${idx}-${item.id}-${item.name}`}
@@ -169,7 +197,7 @@ export function SearchResultList({
               <span>${item.price.toFixed(2)}</span>
             </div>
             <p
-              className="mt-0.5 break-all text-[11px] opacity-85"
+              className={`mt-0.5 break-all text-xs ${isLeakedRow ? 'text-red-800' : 'text-slate-600'}`}
               style={{ fontFamily: isLeakedRow ? 'var(--font-mono)' : undefined }}
             >
               {item.description}

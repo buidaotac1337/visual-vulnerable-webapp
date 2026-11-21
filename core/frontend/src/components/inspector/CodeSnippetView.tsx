@@ -86,7 +86,7 @@ export function CodeSnippetView({
     <div className="flex flex-col py-2" style={{ fontFamily: 'var(--font-mono)' }}>
       {unmappedTheme && activeStep && (
         <div
-          role="alert"
+          role="status"
           className={`vvwa-callout-animate mx-4 mb-3 rounded-lg border p-3 text-xs ${unmappedTheme.box}`}
         >
           <div className={`flex items-center gap-2 font-semibold ${unmappedTheme.heading}`}>

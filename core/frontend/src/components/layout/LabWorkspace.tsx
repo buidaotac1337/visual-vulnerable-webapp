@@ -16,7 +16,7 @@ const NOTICE_STYLES: Record<WorkspaceNotice['tone'], string> = {
 };
 
 /**
- * Render the Dual-Surface Pedagogy split-screen workspace filling calc(100vh - 56px)
+ * Render the Dual-Surface Pedagogy split-screen workspace filling the space under the top bar
  * with independent vertical scrolling on Light Sandbox and Dark IDE surfaces.
  *
  * @param props - Active lab mode, optional workspace notice, and left/right panes.
@@ -30,9 +30,12 @@ export function LabWorkspace({
 }: LabWorkspaceProps): JSX.Element {
   const modeBorder = mode === 'secure' ? 'border-t-emerald-500' : 'border-t-red-500';
 
+  // Height comes from flex-1 inside the lg:h-screen root (App.tsx), so a taller top bar
+  // (e.g. browser zoom) never pushes it past the screen. lg:grid-rows-[minmax(0,1fr)]
+  // keeps the single row from growing to its content, so each column scrolls on its own.
   return (
     <main
-      className={`grid min-h-0 flex-1 grid-cols-1 border-t-2 lg:h-[calc(100vh-56px)] lg:grid-cols-2 lg:overflow-hidden ${modeBorder}`}
+      className={`grid min-h-0 flex-1 grid-cols-1 border-t-2 lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden ${modeBorder}`}
     >
       <section
         aria-label="MiniShop Sandbox"

@@ -52,7 +52,7 @@ export function InvoiceViewer({ result, invoices }: InvoiceViewerProps): JSX.Ele
         </p>
       )}
       <pre
-        className="max-h-56 overflow-auto rounded border border-slate-200 bg-white p-2 text-[11px] whitespace-pre-wrap break-all text-slate-800"
+        className="max-h-56 overflow-auto rounded border border-slate-200 bg-white p-2 text-xs whitespace-pre-wrap break-all text-slate-800"
         style={{ fontFamily: 'var(--font-mono)' }}
       >
         {content}

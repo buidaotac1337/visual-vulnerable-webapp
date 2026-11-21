@@ -59,7 +59,7 @@ function GenericRunnerView({
     >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-900">MiniShop Generic Sandbox ({mode})</h3>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
           Chưa có LabView.tsx
         </span>
       </div>
@@ -93,7 +93,11 @@ function GenericRunnerView({
           }`}
           style={{ fontFamily: 'var(--font-mono)' }}
         />
-        {parseError && <p className="text-xs font-medium text-red-600">{parseError}</p>}
+        {parseError && (
+          <p role="alert" className="text-xs font-medium text-red-600">
+            {parseError}
+          </p>
+        )}
       </div>
 
       <button

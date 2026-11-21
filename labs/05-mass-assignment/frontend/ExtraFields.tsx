@@ -58,11 +58,11 @@ export function ExtraFields({ payload, disabled, onChange }: ExtraFieldsProps): 
 
   return (
     <fieldset className="flex flex-col gap-1.5 rounded-lg border border-dashed border-amber-300 bg-amber-50/40 p-2.5">
-      <legend className="px-1 text-[11px] font-semibold text-amber-700">
+      <legend className="px-1 text-xs font-semibold text-amber-700">
         Trường thêm vào request (ngoài form)
       </legend>
       {keys.length === 0 && (
-        <p className="text-[11px] text-slate-500">Form chỉ gửi email. Chưa có trường nào khác.</p>
+        <p className="text-xs text-slate-500">Form chỉ gửi email. Chưa có trường nào khác.</p>
       )}
       {keys.map((name) => (
         <div key={name} className="flex items-center gap-1.5">

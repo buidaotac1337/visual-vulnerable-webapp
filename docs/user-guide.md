@@ -74,7 +74,7 @@ Badge kết quả:
 | **Tab Frontend (.tsx)** | File sink `frontend/<mode>.tsx` nếu lab có cặp sink, nếu không là `frontend/LabView.tsx`. Tab bị vô hiệu khi lab không có mã frontend. |
 | **Tab Diff** | Khác biệt giữa bản lỗi và bản vá; lab có cặp sink frontend hiển thị thêm diff `.tsx`. |
 | **Làm mới** | Đọc lại mã nguồn từ đĩa. Việc này cũng tự diễn ra khi cửa sổ được focus lại. |
-| **Dòng phát sáng** | Dòng ứng với bước trace hiện tại, màu theo trạng thái, kèm **Inline Callout** hiển thị tiêu đề và giá trị thực tế của bước. |
+| **Dòng phát sáng** | Dòng ứng với bước trace hiện tại, màu theo trạng thái, kèm **Inline Callout** hiển thị tiêu đề và giá trị thực tế của bước. Khi bước nằm ở file khác, Inspector tự chuyển tab Backend/Frontend và ghi rõ "đã chuyển tab" trên thanh tab; tab Diff không bị tự chuyển. |
 | **Trước / Replay / Sau** | Lùi, phát lại từ đầu (600 ms mỗi bước) hoặc tiến từng bước. |
 | **Safety Pattern** | Tóm tắt cách phòng chống của lab. |
 
@@ -93,6 +93,8 @@ Khi bấm **Test My Fix**, workspace chạy song song hai nhóm kiểm thử kha
 
 * **Backend:** gọi `POST /api/labs/{id}/verify?reset_db=true`. Engine reset DB trước mỗi test, gọi action trong `backend/vulnerable.py` và so kết quả với `expect`.
 * **Frontend:** chạy trong trình duyệt. Component trong `frontend/vulnerable.tsx` được render vào một document trơ (không chạy script, không tải tài nguyên), rồi DOM được quét để tìm nội dung có thể thực thi.
+
+Test My Fix luôn chấm bài làm của bạn trong `vulnerable.*`, kể cả khi workspace đang ở chế độ **Secure**; hộp thoại nhắc điều này khi bạn mở nó từ chế độ Secure.
 
 Hộp thoại kết quả hiển thị `x / y PASS`, từng test kèm badge **Backend** hoặc **Frontend**, giá trị mong đợi, giá trị thực tế và lỗi (nếu có). Lab chỉ đạt khi **mọi** test của cả hai nhóm đều pass. Bấm **Chạy lại kiểm thử** sau mỗi lần sửa file.
 

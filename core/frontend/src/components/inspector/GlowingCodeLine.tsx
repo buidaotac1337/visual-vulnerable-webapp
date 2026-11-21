@@ -77,7 +77,7 @@ export function GlowingCodeLine({
         }`}
         style={theme ? { boxShadow: theme.glow } : undefined}
       >
-        <span className="mr-4 w-8 shrink-0 select-none text-right text-xs text-slate-500">
+        <span className="mr-4 w-8 shrink-0 select-none text-right text-xs text-slate-400">
           {lineNumber}
         </span>
         <span className="whitespace-pre text-[13px] text-slate-200">

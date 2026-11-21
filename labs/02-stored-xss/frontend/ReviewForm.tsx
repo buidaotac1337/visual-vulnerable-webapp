@@ -30,7 +30,9 @@ export function WriteReviewForm(props: WriteReviewFormProps): JSX.Element {
   const { rating, content, inputFlashSeq, isExecuting, saveError, onChange, onSubmit } = props;
   const flashClass = inputFlashSeq > 0 ? 'vvwa-input-flash' : '';
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
+    // noValidate: min/max only guide the spinner; out-of-range values still reach the
+    // backend so students can see the server-side check reject them.
+    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <label htmlFor="xss-rating" className="text-xs font-medium text-slate-700">
           Điểm đánh giá (1–5)
@@ -39,6 +41,8 @@ export function WriteReviewForm(props: WriteReviewFormProps): JSX.Element {
           key={`r-${String(inputFlashSeq)}`}
           id="xss-rating"
           type="number"
+          min={1}
+          max={5}
           value={rating}
           onChange={(event) => onChange({ rating: Number(event.target.value) })}
           className={`${INPUT_CLASS} w-24 ${flashClass}`}
