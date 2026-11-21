@@ -13,3 +13,5 @@ export { useLabWorkspace } from './useLabWorkspace';
 export type { LabWorkspaceController } from './useLabWorkspace';
 export { useTracePlayback } from './useTracePlayback';
 export type { TracePlaybackController } from './useTracePlayback';
+export { useWorkspaceLayout } from './useWorkspaceLayout';
+export type { WorkspaceLayoutController } from './useWorkspaceLayout';

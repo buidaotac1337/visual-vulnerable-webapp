@@ -51,6 +51,22 @@ export const UI_LABELS = {
   frontendTab: { text: 'Frontend (.tsx)', tip: 'Mã giao diện React của lab.' },
   diffTab: { text: 'Diff', tip: 'Những dòng khác nhau giữa bản lỗi và bản vá.' },
   refreshSource: { text: 'Làm mới mã nguồn', tip: 'Đọc lại mã nguồn mới nhất từ đĩa.' },
+  layoutSplit: {
+    text: 'Song song',
+    tip: 'Hiển thị đồng thời MiniShop Sandbox và Code Inspector (có thể kéo thanh chia).',
+  },
+  layoutCodeFocus: {
+    text: 'Tập trung code',
+    tip: 'Mở rộng Code & Trace Inspector toàn chiều rộng để đọc mã nguồn dài.',
+  },
+  layoutFloating: {
+    text: 'Sandbox nổi',
+    tip: 'Giữ Code Inspector toàn màn hình và đặt MiniShop Sandbox thành thẻ nổi có thể thu gọn.',
+  },
+  layoutRestoreSplit: {
+    text: 'Về Song song',
+    tip: 'Quay lại bố cục chia hai cột Song song.',
+  },
 } as const satisfies Record<string, UiLabel>;
 
 /** Key of a workspace label in UI_LABELS. */

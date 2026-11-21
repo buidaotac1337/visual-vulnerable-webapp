@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 
 import { CodeInspector, LabWorkspace, SandboxPane, TopControlBar, VerifyModal } from '@/components';
-import { useLabWorkspace } from '@/hooks';
+import { useLabWorkspace, useWorkspaceLayout } from '@/hooks';
 import { computePipelineNodes, isFrontendVerifyTest } from '@/lib';
 
 /**
@@ -12,6 +12,7 @@ import { computePipelineNodes, isFrontendVerifyTest } from '@/lib';
  */
 export function App(): JSX.Element {
   const ws = useLabWorkspace();
+  const layout = useWorkspaceLayout();
   const pipelineNodes = computePipelineNodes(
     ws.playback.trace,
     ws.playback.activeIndex,
@@ -28,11 +29,13 @@ export function App(): JSX.Element {
         labs={ws.labs}
         selectedLab={ws.selectedLab}
         mode={ws.mode}
+        layoutMode={layout.layoutMode}
         isResettingDb={ws.isResettingDb}
         isVerifying={ws.isVerifying}
         isDownloading={ws.isDownloading}
         onSelectLab={ws.selectLab}
         onChangeMode={ws.changeMode}
+        onChangeLayoutMode={layout.setLayoutMode}
         onResetDb={() => {
           void ws.handleResetDb();
         }}
@@ -47,6 +50,13 @@ export function App(): JSX.Element {
       <LabWorkspace
         mode={ws.mode}
         notice={ws.notice}
+        layoutMode={layout.layoutMode}
+        splitPercent={layout.splitPercent}
+        isFloatingCollapsed={layout.isFloatingCollapsed}
+        onChangeSplit={layout.setSplitPercent}
+        onResetSplit={layout.resetSplit}
+        onToggleFloatingCollapsed={layout.toggleFloatingCollapsed}
+        onChangeLayoutMode={layout.setLayoutMode}
         leftPane={
           <SandboxPane
             isLoadingLabs={ws.isLoadingLabs}

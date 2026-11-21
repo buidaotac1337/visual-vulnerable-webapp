@@ -1,7 +1,6 @@
 import type { JSX } from 'react';
-import { RefreshCw } from 'lucide-react';
 
-import { resolveFrontendFile, resolveStepTarget, UI_LABELS } from '@/lib';
+import { resolveFrontendFile, resolveStepTarget } from '@/lib';
 import type { ResolvedFrontendFile } from '@/lib';
 import type {
   InspectorTab,
@@ -13,9 +12,8 @@ import type {
   TraceStep,
 } from '@/types';
 
-import { Tooltip } from '../ui';
-
 import { CodeSnippetView } from './CodeSnippetView';
+import { InspectorHeader } from './InspectorHeader';
 import { TraceControls } from './TraceControls';
 import { UnifiedDiffView } from './UnifiedDiffView';
 import { useStepTabSwitch } from './useStepTabSwitch';
@@ -38,29 +36,10 @@ interface CodeInspectorProps {
   onNextStep: () => void;
 }
 
-const TAB_ITEMS: readonly { id: InspectorTab; label: string; tip: string }[] = [
-  { id: 'backend', label: UI_LABELS.backendTab.text, tip: UI_LABELS.backendTab.tip },
-  { id: 'frontend', label: UI_LABELS.frontendTab.text, tip: UI_LABELS.frontendTab.tip },
-  { id: 'diff', label: UI_LABELS.diffTab.text, tip: UI_LABELS.diffTab.tip },
-];
-
 interface InspectorView {
   activeTab: InspectorTab;
   mode: LabMode;
   frontendFile: ResolvedFrontendFile | null;
-}
-
-function resolveFileLabel(
-  { activeTab, mode, frontendFile }: InspectorView,
-  hasFeDiff: boolean,
-): string {
-  if (activeTab === 'diff') {
-    return hasFeDiff ? 'vulnerable ↔ secure (.py + .tsx)' : 'vulnerable.py ↔ secure.py';
-  }
-  if (activeTab === 'frontend') {
-    return frontendFile?.label ?? 'frontend/LabView.tsx';
-  }
-  return `backend/${mode}.py`;
 }
 
 function renderDiffTab(source: LabSourceResponse): JSX.Element {
@@ -205,64 +184,19 @@ export function CodeInspector({
   );
 
   const view = buildInspectorView(activeTab, mode, source, target);
-  const hasFrontendSource = view.frontendFile !== null;
-  const activeFileLabel = resolveFileLabel(view, source?.frontend_diff != null);
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-700 bg-[var(--bg-ide-header)] px-3 py-2">
-        <div role="tablist" aria-label="Chế độ xem mã nguồn" className="flex items-center gap-1">
-          {TAB_ITEMS.map((item) => {
-            const isSelected = activeTab === item.id;
-            const isDisabled = item.id === 'frontend' && !hasFrontendSource;
-            return (
-              <Tooltip
-                key={item.id}
-                tip={item.tip}
-                align={item.id === 'backend' ? 'start' : 'center'}
-              >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={isSelected}
-                  disabled={isDisabled}
-                  onClick={() => pickTab(item.id)}
-                  className={`cursor-pointer whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                    isSelected
-                      ? 'bg-slate-900 text-white shadow-xs'
-                      : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              </Tooltip>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span
-            className="hidden text-xs text-slate-400 sm:inline"
-            style={{ fontFamily: 'var(--font-mono)' }}
-          >
-            {activeFileLabel}
-          </span>
-          <Tooltip tip={UI_LABELS.refreshSource.tip} align="end">
-            <button
-              type="button"
-              onClick={onRefreshSource}
-              disabled={!lab || isRefreshing}
-              aria-label={UI_LABELS.refreshSource.text}
-              className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`}
-                aria-hidden="true"
-              />
-            </button>
-          </Tooltip>
-        </div>
-      </div>
+      <InspectorHeader
+        activeTab={activeTab}
+        mode={mode}
+        frontendFileLabel={view.frontendFile?.label ?? null}
+        hasFrontendDiff={source?.frontend_diff != null}
+        canRefresh={lab !== null}
+        isRefreshing={isRefreshing}
+        onSelectTab={pickTab}
+        onRefreshSource={onRefreshSource}
+      />
 
       <TabSwitchNote note={tabNote} />
 
