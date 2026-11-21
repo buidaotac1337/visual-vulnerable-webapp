@@ -131,8 +131,8 @@ export function LoginResultCard({
         >
           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>
-            Đăng nhập vào tài khoản {user.username} mà không cần mật khẩu đúng: payload đã biến điều
-            kiện WHERE thành luôn đúng.
+            Đăng nhập vào tài khoản {user.username} mà không cần mật khẩu đúng: payload đã thay đổi
+            điều kiện WHERE của câu truy vấn đăng nhập.
           </span>
         </p>
       )}
@@ -176,8 +176,8 @@ export function SearchResultList({
         >
           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>
-            {leaked.size} dòng bên dưới không phải sản phẩm: dữ liệu bảng users (tên, email,
-            password_hash) bị kéo ra qua UNION SELECT.
+            {leaked.size} dòng bên dưới không phải sản phẩm: dữ liệu từ bảng hoặc truy vấn khác bị
+            kéo ra qua UNION SELECT.
           </span>
         </p>
       )}
@@ -197,7 +197,7 @@ export function SearchResultList({
               <span>${item.price.toFixed(2)}</span>
             </div>
             <p
-              className="mt-0.5 break-all text-xs opacity-85"
+              className={`mt-0.5 break-all text-xs ${isLeakedRow ? 'text-red-800' : 'text-slate-600'}`}
               style={{ fontFamily: isLeakedRow ? 'var(--font-mono)' : undefined }}
             >
               {item.description}

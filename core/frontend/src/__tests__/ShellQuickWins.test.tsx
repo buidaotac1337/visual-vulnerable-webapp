@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { CodeInspector, PayloadChipBar, VerifyModal } from '@/components';
+import { CodeInspector, PayloadChipBar, TopControlBar, VerifyModal } from '@/components';
 import type { LabSourceResponse, TraceStep } from '@/types';
 
 const SOURCE: LabSourceResponse = {
@@ -33,8 +33,40 @@ describe('Test My Fix target', () => {
 
     rerender(<VerifyModal {...props} mode="secure" />);
     expect(screen.getByRole('note')).toHaveTextContent(
-      'Bạn đang xem chế độ Secure, nhưng Test My Fix luôn chấm vulnerable.py',
+      'Bạn đang xem chế độ Secure, nhưng Test My Fix luôn chấm bài làm của bạn (vulnerable.py), không chấm secure.py.',
     );
+
+    // A lab with a frontend sink (Lab 02) also grades vulnerable.tsx.
+    rerender(<VerifyModal {...props} mode="secure" hasFrontendTests />);
+    expect(screen.getByRole('note')).toHaveTextContent(
+      '(vulnerable.py, vulnerable.tsx), không chấm secure.py hay secure.tsx.',
+    );
+    expect(screen.getByText('frontend/vulnerable.tsx')).toBeInTheDocument();
+  });
+
+  it('keeps the button named by its visible text while busy', () => {
+    const props = {
+      health: null,
+      apiError: null,
+      labs: [],
+      selectedLab: null,
+      mode: 'vulnerable' as const,
+      isResettingDb: false,
+      isVerifying: false,
+      isDownloading: false,
+      onSelectLab: vi.fn(),
+      onChangeMode: vi.fn(),
+      onResetDb: vi.fn(),
+      onVerify: vi.fn(),
+      onDownloadSnippet: vi.fn(),
+    };
+    const { rerender } = render(<TopControlBar {...props} />);
+    expect(screen.getByRole('button', { name: 'Test My Fix' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reset DB' })).toBeInTheDocument();
+
+    rerender(<TopControlBar {...props} isVerifying isResettingDb />);
+    expect(screen.getByRole('button', { name: 'Đang kiểm thử...' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Đang reset...' })).toBeInTheDocument();
   });
 });
 
@@ -87,6 +119,32 @@ describe('Inspector tab follows the trace', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Diff' }));
     expect(onChangeTab).toHaveBeenLastCalledWith('diff');
+    expect(screen.queryByText(/đã chuyển tab/)).toBeNull();
+  });
+
+  it('drops the note when the trace is cleared (lab, mode, or persona change)', () => {
+    const props = {
+      lab: null,
+      mode: 'vulnerable' as const,
+      activeTab: 'backend' as const,
+      source: SOURCE,
+      sourceError: null,
+      isRefreshing: false,
+      totalSteps: 1,
+      activeIndex: 0,
+      playbackStatus: 'paused' as const,
+      onChangeTab: vi.fn(),
+      onRefreshSource: vi.fn(),
+      onPrevStep: vi.fn(),
+      onReplayTrace: vi.fn(),
+      onNextStep: vi.fn(),
+    };
+    const { rerender } = render(
+      <CodeInspector {...props} activeStep={step(1, 'frontend', 'fe-send')} />,
+    );
+    expect(screen.getByText(/đã chuyển tab/)).toBeInTheDocument();
+
+    rerender(<CodeInspector {...props} totalSteps={0} activeIndex={-1} activeStep={null} />);
     expect(screen.queryByText(/đã chuyển tab/)).toBeNull();
   });
 });

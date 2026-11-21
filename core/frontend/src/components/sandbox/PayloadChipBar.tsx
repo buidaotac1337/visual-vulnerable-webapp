@@ -26,7 +26,8 @@ export function PayloadChipBar({ payloads, onSelect }: PayloadChipBarProps): JSX
   const description = payloads.find((sample) => sample.label === picked)?.description;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
+    // relative: keeps the always-mounted sr-only live region inside this card.
+    <div className="relative rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
       <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-600">
         <Sparkles className="h-3.5 w-3.5 text-indigo-600" aria-hidden="true" />
         <span>Payload mẫu (1-click điền sẵn)</span>
@@ -51,7 +52,7 @@ export function PayloadChipBar({ payloads, onSelect }: PayloadChipBarProps): JSX
           >
             {sample.label}
             {sample.actor ? (
-              <span className="ml-1.5 rounded-full bg-indigo-100 px-1.5 text-xs text-indigo-700">
+              <span className="ml-1.5 rounded-full bg-white/80 px-1.5 text-xs text-indigo-700">
                 vai {sample.actor}
               </span>
             ) : null}
@@ -59,11 +60,10 @@ export function PayloadChipBar({ payloads, onSelect }: PayloadChipBarProps): JSX
         ))}
       </div>
 
-      {description ? (
-        <p aria-live="polite" className="mt-2 text-xs text-slate-600">
-          {description}
-        </p>
-      ) : null}
+      {/* Always mounted, so screen readers announce the first description too. */}
+      <p aria-live="polite" className={description ? 'mt-2 text-xs text-slate-600' : 'sr-only'}>
+        {description ?? ''}
+      </p>
     </div>
   );
 }

@@ -154,6 +154,22 @@ function renderInspectorBody(
   return renderSnippetForTab(view, source, target, activeStep);
 }
 
+/** Live region for automatic tab switches; always mounted so the first note is announced. */
+function TabSwitchNote({ note }: { note: string | null }): JSX.Element {
+  return (
+    <p
+      role="status"
+      className={
+        note
+          ? 'shrink-0 border-b border-slate-700 bg-indigo-950/60 px-3 py-1 text-xs text-indigo-200'
+          : 'sr-only'
+      }
+    >
+      {note ?? ''}
+    </p>
+  );
+}
+
 /**
  * Render the Dark IDE surface Code & Trace Inspector with Backend/Frontend/Diff tabs,
  * live @step glow highlighting, manual source refresh, and step playback controls.
@@ -191,7 +207,7 @@ export function CodeInspector({
   const activeFileLabel = resolveFileLabel(view, source?.frontend_diff != null);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="relative flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-700 bg-[var(--bg-ide-header)] px-3 py-2">
         <div role="tablist" aria-label="Chế độ xem mã nguồn" className="flex items-center gap-1">
           {TAB_ITEMS.map((item) => {
@@ -240,14 +256,7 @@ export function CodeInspector({
         </div>
       </div>
 
-      {tabNote && (
-        <p
-          role="status"
-          className="shrink-0 border-b border-slate-700 bg-indigo-950/60 px-3 py-1 text-xs text-indigo-200"
-        >
-          {tabNote}
-        </p>
-      )}
+      <TabSwitchNote note={tabNote} />
 
       <div className="vvwa-ide-scroll min-h-0 flex-1 overflow-auto">
         {renderInspectorBody(view, source, sourceError, target, activeStep)}

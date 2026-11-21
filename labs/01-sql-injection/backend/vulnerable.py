@@ -10,7 +10,8 @@ import asyncpg
 
 from app.db import LabDatabaseProtocol
 
-_PRODUCTS_SQL = "SELECT id, name FROM products ORDER BY id"
+_PRODUCT_COLUMNS = ("id", "name", "description", "price", "stock")
+_PRODUCTS_SQL = "SELECT id, name, description, price, stock FROM products ORDER BY id"
 
 
 async def _is_login_bypass(
@@ -41,20 +42,19 @@ async def _is_login_bypass(
 
 
 def _is_search_exploited(keyword: str, rows: list[dict[str, Any]]) -> bool:
-    """Detect whether product search returned injected rows or tautology bypass.
+    """Detect a tautology-style search that changed the result set without leaking rows.
+
+    Leaked rows are detected exactly by _leaked_rows; this only catches injected syntax
+    (a quote or a comment) that still returned rows, such as ``' OR 1=1--``.
 
     Args:
         keyword: Raw search keyword supplied by the user.
         rows: Matching rows returned by PostgreSQL.
 
     Returns:
-        True when SQL injection altered the expected product search results.
+        True when injected SQL syntax produced results.
     """
-    if not rows:
-        return False
-    has_sqli_syntax = "'" in keyword or "--" in keyword
-    has_leaked_user = any(":" in str(row.get("description", "")) for row in rows)
-    return has_leaked_user or has_sqli_syntax
+    return bool(rows) and ("'" in keyword or "--" in keyword)
 
 
 def _sql_error_response(
@@ -147,6 +147,11 @@ def _build_login_result(
     }
 
 
+def _empty_search() -> dict[str, Any]:
+    """Return search data with no rows, in the same shape as a normal search result."""
+    return {"products": [], "count": 0, "leaked_rows": []}
+
+
 async def _leaked_rows(db: LabDatabaseProtocol, rows: list[dict[str, Any]]) -> list[int]:
     """Return the indexes of returned rows that are not real products (pulled in by SQLi).
 
@@ -157,8 +162,14 @@ async def _leaked_rows(db: LabDatabaseProtocol, rows: list[dict[str, Any]]) -> l
     Returns:
         Row indexes the UI should flag as leaked data.
     """
-    real = {(p["id"], p["name"]) for p in await db.fetch_all(_PRODUCTS_SQL)}
-    return [i for i, row in enumerate(rows) if (row.get("id"), row.get("name")) not in real]
+    if not rows:
+        return []
+    # Compare whole rows: a UNION row can reuse a real product's id and name and still
+    # carry stolen data in another column.
+    real = {tuple(p.get(c) for c in _PRODUCT_COLUMNS) for p in await db.fetch_all(_PRODUCTS_SQL)}
+    return [
+        i for i, row in enumerate(rows) if tuple(row.get(c) for c in _PRODUCT_COLUMNS) not in real
+    ]
 
 
 async def _build_search_result(
@@ -239,7 +250,7 @@ async def search_products(payload: dict[str, Any], db: LabDatabaseProtocol) -> d
         # @step:exec-search-query
         rows = await db.fetch_all(sql)
     except asyncpg.PostgresError as exc:
-        return _sql_error_response("exec-search-query", sql, exc, {"products": [], "count": 0})
+        return _sql_error_response("exec-search-query", sql, exc, _empty_search())
 
     return await _build_search_result(db, sql, keyword, rows)
 

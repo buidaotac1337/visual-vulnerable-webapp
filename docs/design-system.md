@@ -108,4 +108,4 @@ Chip dạng pill (`rounded-full`, `border-dashed`). Bấm chip điền dữ li�
 | Bo góc badge / chip | `9999px` (`rounded-full`) |
 | Chiều cao topbar | `56px` (`h-14`) |
 
-Từ breakpoint `lg` trở lên, workspace chia hai cột và chiếm `calc(100vh - 56px)`; trang ngoài không cuộn, mỗi cột cuộn độc lập. Dưới `lg`, hai bề mặt xếp chồng thành một cột.
+Từ breakpoint `lg` trở lên, khung app cao đúng một màn hình (`h-screen`) và workspace chia hai cột chiếm phần còn lại dưới topbar; trang ngoài không cuộn, mỗi cột cuộn độc lập. Dưới `lg`, hai bề mặt xếp chồng thành một cột.

@@ -25,8 +25,13 @@ const LAYER_BADGE: Record<'backend' | 'frontend', { label: string; className: st
 
 const MONO = { fontFamily: 'var(--font-mono)' } as const;
 
-/** Reminder shown in Secure mode: grading always targets the student's vulnerable.py. */
-function SecureModeNote({ mode }: { mode: LabMode }): JSX.Element | null {
+interface GradedFilesProps {
+  mode: LabMode;
+  hasFrontendTests: boolean;
+}
+
+/** Reminder shown in Secure mode: grading always targets the student's vulnerable.* files. */
+function SecureModeNote({ mode, hasFrontendTests }: GradedFilesProps): JSX.Element | null {
   if (mode !== 'secure') {
     return null;
   }
@@ -35,9 +40,21 @@ function SecureModeNote({ mode }: { mode: LabMode }): JSX.Element | null {
       role="note"
       className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs text-amber-900"
     >
-      Bạn đang xem chế độ Secure, nhưng Test My Fix luôn chấm{' '}
-      <code style={MONO}>vulnerable.py</code> (bài làm của bạn), không chấm{' '}
-      <code style={MONO}>secure.py</code>.
+      Bạn đang xem chế độ Secure, nhưng Test My Fix luôn chấm bài làm của bạn (
+      <code style={MONO}>vulnerable.py</code>
+      {hasFrontendTests ? (
+        <>
+          , <code style={MONO}>vulnerable.tsx</code>
+        </>
+      ) : null}
+      ), không chấm <code style={MONO}>secure.py</code>
+      {hasFrontendTests ? (
+        <>
+          {' '}
+          hay <code style={MONO}>secure.tsx</code>
+        </>
+      ) : null}
+      .
     </p>
   );
 }
@@ -50,8 +67,8 @@ function VerifySubtitle({ hasFrontendTests }: { hasFrontendTests: boolean }): JS
       {hasFrontendTests ? (
         <>
           {' '}
-          và <code style={MONO}>vulnerable.tsx</code> (render trong document trơ, payload không
-          chạy)
+          và <code style={MONO}>frontend/vulnerable.tsx</code> (render trong document trơ, payload
+          không chạy)
         </>
       ) : null}
     </p>
@@ -144,7 +161,7 @@ export function VerifyModal({
             Test My Fix — {labTitle}
           </h2>
           <VerifySubtitle hasFrontendTests={hasFrontendTests} />
-          <SecureModeNote mode={mode} />
+          <SecureModeNote mode={mode} hasFrontendTests={hasFrontendTests} />
         </div>
 
         <button

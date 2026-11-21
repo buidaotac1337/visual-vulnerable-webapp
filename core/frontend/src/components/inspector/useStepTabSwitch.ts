@@ -32,7 +32,12 @@ export function useStepTabSwitch(
   activeTabRef.current = activeTab;
 
   useEffect(() => {
-    if (!targetTab || activeTabRef.current === 'diff') {
+    if (!targetTab) {
+      // No active step (trace cleared on lab, mode, or persona change): drop the old note.
+      setNote(null);
+      return;
+    }
+    if (activeTabRef.current === 'diff') {
       return;
     }
     if (targetTab === activeTabRef.current) {

@@ -80,10 +80,14 @@ class _SqlInjectionStubDb:
         if args:
             needle = str(args[0]).strip("%").lower()
             return [p for p in _PRODUCTS if needle in str(p["name"]).lower()]
-        if query == "SELECT id, name FROM products ORDER BY id":
-            return [{"id": p["id"], "name": p["name"]} for p in _PRODUCTS]
+        if query == "SELECT id, name, description, price, stock FROM products ORDER BY id":
+            return [dict(p) for p in _PRODUCTS]
+        if "DISGUISED" in query:
+            # UNION row that reuses a real product's id and name but carries a stolen hash.
+            return [{**_PRODUCTS[0], "description": "admin_secret_2026", "stock": 0}]
         if "UNION SELECT" in query.upper():
-            return [
+            real = [dict(_PRODUCTS[0])] if "ILIKE '%Ban phim%' UNION" in query else []
+            return real + [
                 {
                     "id": u["id"],
                     "name": u["username"],
@@ -211,12 +215,22 @@ def test_lab_01_search_union_dump_apostrophe_error_and_secure() -> None:
     assert vuln_search["data"]["count"] == 2
     assert vuln_search["data"]["leaked_rows"] == [0, 1]
 
-    normal = client.post(
-        "/api/labs/01-sql-injection/vulnerable/search_products",
-        json={"keyword": "Ban phim"},
-    ).json()
+    def vuln(keyword: str) -> dict[str, Any]:
+        result: dict[str, Any] = client.post(
+            "/api/labs/01-sql-injection/vulnerable/search_products",
+            json={"keyword": keyword},
+        ).json()
+        return result
+
+    normal = vuln("Ban phim")
     assert normal["meta"]["outcome"] == "normal"
     assert normal["data"]["leaked_rows"] == []
+    # Real product first, leaked users after: only the leaked indexes are flagged.
+    mixed = vuln("Ban phim%' UNION SELECT id, username, email, balance, 0 FROM users--")
+    assert mixed["data"]["count"] == 3 and mixed["data"]["leaked_rows"] == [1, 2]
+    # A UNION row disguised with a real id and name is still caught by its other columns.
+    disguised = vuln("' AND 1=0 UNION SELECT 1, 'x', password_hash, 0, 0 FROM users-- DISGUISED")
+    assert disguised["data"]["leaked_rows"] == [0]
 
     sec_search = client.post(
         "/api/labs/01-sql-injection/secure/search_products",
@@ -224,6 +238,7 @@ def test_lab_01_search_union_dump_apostrophe_error_and_secure() -> None:
     ).json()
     assert sec_search["meta"]["outcome"] == "blocked"
     assert sec_search["data"]["count"] == 0
+    assert sec_search["data"]["leaked_rows"] == []
 
     err_search = client.post(
         "/api/labs/01-sql-injection/vulnerable/search_products",
@@ -231,6 +246,7 @@ def test_lab_01_search_union_dump_apostrophe_error_and_secure() -> None:
     ).json()
     assert err_search["meta"]["outcome"] == "error"
     assert "sql_error" in err_search["data"]
+    assert err_search["data"]["leaked_rows"] == []
 
 
 def test_lab_01_verify_blocks_sql_errors_and_passes_when_patched(tmp_path: Path) -> None:

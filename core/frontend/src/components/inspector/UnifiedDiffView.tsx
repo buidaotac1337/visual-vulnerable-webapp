@@ -46,10 +46,10 @@ export function UnifiedDiffView({
         const style = ROW_STYLES[row.kind];
         return (
           <div key={idx} className={`flex px-3 py-0.5 ${style.row}`}>
-            <span className="w-9 shrink-0 select-none text-right text-xs text-slate-500">
+            <span className="w-9 shrink-0 select-none text-right text-xs text-slate-400">
               {row.oldLine ?? ''}
             </span>
-            <span className="mr-3 w-9 shrink-0 select-none text-right text-xs text-slate-500">
+            <span className="mr-3 w-9 shrink-0 select-none text-right text-xs text-slate-400">
               {row.newLine ?? ''}
             </span>
             <span className="mr-1.5 w-3 shrink-0 select-none">{style.prefix}</span>

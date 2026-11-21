@@ -245,7 +245,7 @@ describe('VerifyModal layers', () => {
     expect(screen.getByText('Frontend')).toBeInTheDocument();
     expect(screen.getByText('<ReviewContent />')).toBeInTheDocument();
     expect(screen.getByText(/Không chạy được kiểm thử backend: DB offline/)).toBeInTheDocument();
-    expect(screen.queryByText('vulnerable.tsx')).toBeNull();
+    expect(screen.queryByText('frontend/vulnerable.tsx')).toBeNull();
   });
 
   it('mentions vulnerable.tsx only for labs with frontend tests and explains an empty report', () => {
@@ -268,7 +268,7 @@ describe('VerifyModal layers', () => {
         onClose={vi.fn()}
       />,
     );
-    expect(screen.getByText('vulnerable.tsx')).toBeInTheDocument();
+    expect(screen.getByText('frontend/vulnerable.tsx')).toBeInTheDocument();
     expect(screen.getByText(/chưa khai báo verifyTests/)).toBeInTheDocument();
   });
 });
