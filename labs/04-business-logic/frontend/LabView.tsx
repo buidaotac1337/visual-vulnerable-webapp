@@ -16,8 +16,14 @@ const LAB_ID = '04-business-logic';
 /** Reload the catalog and balance silently on persona, mode, reset, or after each placed order. */
 function useShop(props: LabViewProps): ShopData {
   const { actor, mode, dbResetSeq, lastResponse, onExecute } = props;
-  // Only a placed order changes the balance; rejected checkouts need no reload.
-  const placedOrderId = readCheckout(lastResponse?.data)?.orderId ?? null;
+  // Only a placed order changes the balance. Remember the last one, so a later rejected
+  // checkout (or a cleared response) does not count as a change and reload again.
+  const placedRef = useRef<number | null>(null);
+  const placedId = readCheckout(lastResponse?.data)?.orderId ?? null;
+  if (placedId !== null) {
+    placedRef.current = placedId;
+  }
+  const placedOrderId = placedRef.current;
   const [shop, setShop] = useState<ShopData>({ products: [], balance: null });
   const executeRef = useRef(onExecute);
   executeRef.current = onExecute;

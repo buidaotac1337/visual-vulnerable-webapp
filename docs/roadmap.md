@@ -19,9 +19,9 @@ Trạng thái phát triển của nền tảng và danh sách bài lab trên Min
 - [x] **Lab 03: IDOR / Broken Access Control** (Xem chi tiết đơn hàng) — kiểm tra chủ sở hữu bằng `ctx`.
 - [x] **Lab 04: Business Logic & Client-side Trust** (Giỏ hàng / Thanh toán) — tính lại giá từ DB, `quantity: int = Field(gt=0)`.
 
-## Giai đoạn 3 — Mở rộng
+## Giai đoạn 3 — Mở rộng (đang triển khai)
 
-- [ ] **Lab 05: Mass Assignment** (Cập nhật hồ sơ khách hàng).
+- [x] **Lab 05: Mass Assignment** (Cập nhật hồ sơ khách hàng) — schema `ProfileUpdate` với `extra="forbid"`, `ctx`.
 - [ ] **Lab 06: Path Traversal / File Upload** (Tải hóa đơn & Upload ảnh sản phẩm).
 - [ ] **Lab 07: Race Condition** (Áp mã giảm giá) — cần ADR cho test nhiều bước / đồng thời.
 - [ ] **Lab 08: SSRF** (Kiểm tra ảnh sản phẩm từ URL ngoài).

@@ -1,0 +1,81 @@
+{
+  "id": "05-mass-assignment",
+  "title": "Mass Assignment — Cập nhật hồ sơ khách hàng MiniShop",
+  "category": "Access Control",
+  "difficulty": "Cơ bản",
+  "summary": "Form hồ sơ chỉ có ô email, nhưng server ghi mọi trường trong request khớp với cột của bảng users. Thêm \"role\": \"admin\" hoặc \"balance\" vào request là tự nâng quyền hoặc tự nạp tiền.",
+  "safetyPattern": "Validate request bằng một schema riêng cho thao tác này (Pydantic ProfileUpdate) chỉ khai báo các trường người dùng được sửa và từ chối trường thừa (extra=\"forbid\"). Không gán thẳng dict từ request vào model hay câu UPDATE.",
+  "actors": ["alice", "bob"],
+  "samplePayloads": [
+    {
+      "label": "Alice đổi email",
+      "description": "Luồng hợp lệ: form chỉ gửi trường email.",
+      "actor": "alice",
+      "data": { "email": "alice.new@minishop.local" }
+    },
+    {
+      "label": "Bob thêm role: admin",
+      "description": "Bob lấy tên trường role từ phản hồi API và gửi kèm email.",
+      "actor": "bob",
+      "data": { "email": "bob@minishop.local", "role": "admin" }
+    },
+    {
+      "label": "Alice tự nạp tiền",
+      "description": "Trường balance cũng là một cột của users nên cũng bị ghi.",
+      "actor": "alice",
+      "data": { "email": "alice@minishop.local", "balance": 999999 }
+    },
+    {
+      "label": "Email sai định dạng",
+      "description": "Schema cũng là nơi kiểm tra định dạng dữ liệu được phép sửa.",
+      "actor": "alice",
+      "data": { "email": "khong-phai-email" }
+    }
+  ],
+  "verifyTests": [
+    {
+      "name": "Khách hàng đổi được email của mình",
+      "action": "update_profile",
+      "actor": "alice",
+      "input": { "email": "alice.new@minishop.local" },
+      "expect": {
+        "updated": true,
+        "profile": { "username": "alice", "email": "alice.new@minishop.local", "role": "customer" }
+      }
+    },
+    {
+      "name": "Không tự nâng role lên admin",
+      "action": "update_profile",
+      "actor": "bob",
+      "input": { "email": "bob@minishop.local", "role": "admin" },
+      "expect": { "profile": { "username": "bob", "role": "customer" } }
+    },
+    {
+      "name": "Không tự sửa số dư",
+      "action": "update_profile",
+      "actor": "alice",
+      "input": { "email": "alice@minishop.local", "balance": 999999 },
+      "expect": { "profile": { "username": "alice", "balance": 500.0 } }
+    },
+    {
+      "name": "Email sai định dạng bị từ chối",
+      "action": "update_profile",
+      "actor": "alice",
+      "input": { "email": "khong-phai-email" },
+      "expect": { "updated": false, "profile": { "email": "alice@minishop.local" } }
+    },
+    {
+      "name": "Không dùng được email của tài khoản khác",
+      "action": "update_profile",
+      "actor": "alice",
+      "input": { "email": "bob@minishop.local" },
+      "expect": { "updated": false, "profile": { "email": "alice@minishop.local" } }
+    },
+    {
+      "name": "Chưa đăng nhập thì không sửa được hồ sơ",
+      "action": "update_profile",
+      "input": { "email": "ai-do@minishop.local" },
+      "expect": { "updated": false, "profile": null }
+    }
+  ]
+}
