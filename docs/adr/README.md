@@ -28,3 +28,4 @@ Thư mục này lưu giữ các **Quyết định Kiến trúc (ADR)** quan tr�
 | [0006](0006-frontend-sink-grading-and-verify-matchers.md) | Chấm Bản vá phía Frontend (Sink Files) & Toán tử So khớp cho Test My Fix | Accepted | 2026-11-21 |
 | [0007](0007-file-upload-sandbox-isolation.md) | Cách ly Sandbox Ghi File & Giới hạn Jail cho Lab 07 File Upload | Accepted | 2026-11-22 |
 | [0008](0008-db-transactions-and-concurrent-verify-tests.md) | Giao dịch Cơ sở dữ liệu (`db.transaction()`) & Kiểm thử Đồng thời / Nhiều bước trong `verifyTests` | Accepted | 2026-11-22 |
+| [0009](0009-ssrf-http-client-and-internal-target.md) | Thư viện HTTP Client (`httpx`), Internal Demo Target & Phòng thủ SSRF cho Lab 09 | Accepted | 2026-11-22 |

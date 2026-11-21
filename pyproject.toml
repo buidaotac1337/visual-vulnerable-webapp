@@ -12,7 +12,6 @@ members = ["core/backend"]
 [dependency-groups]
 dev = [
   "vvwa-backend",
-  "httpx==0.28.1",
   "mypy==2.4.1",
   "pre-commit==4.7.0",
   "pytest==9.2.0",
