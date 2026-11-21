@@ -193,7 +193,7 @@ export function CodeInspector({
 
   const view = buildInspectorView(activeTab, mode, source, target);
   const hasFrontendSource = view.frontendFile !== null;
-  const activeFileLabel = resolveFileLabel(view, Boolean(source?.frontend_diff));
+  const activeFileLabel = resolveFileLabel(view, source?.frontend_diff != null);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">

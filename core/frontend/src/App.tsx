@@ -2,7 +2,7 @@ import type { JSX } from 'react';
 
 import { CodeInspector, LabWorkspace, SandboxPane, TopControlBar, VerifyModal } from '@/components';
 import { useLabWorkspace } from '@/hooks';
-import { computePipelineNodes } from '@/lib';
+import { computePipelineNodes, isFrontendVerifyTest } from '@/lib';
 
 /**
  * Root VVWA Dual-Surface Pedagogy application shell connecting the workspace
@@ -91,6 +91,7 @@ export function App(): JSX.Element {
       <VerifyModal
         isOpen={ws.isVerifyModalOpen}
         labTitle={ws.selectedLab?.title ?? ''}
+        hasFrontendTests={ws.selectedLab?.verifyTests.some(isFrontendVerifyTest) ?? false}
         isLoading={ws.isVerifying}
         result={ws.verifyResult}
         error={ws.verifyError}

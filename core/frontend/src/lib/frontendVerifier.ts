@@ -26,15 +26,21 @@ function errorMessage(error: unknown): string {
  * handlers never fire. The container is never attached to the live page, so a
  * still-vulnerable sink cannot execute its payload while being graded.
  *
+ * `flushSync` only commits the render; passive effects (`useEffect`) and the state
+ * updates they schedule run on later macrotasks. Sinks written as
+ * `useEffect(() => { ref.current.innerHTML = html })` would otherwise be probed
+ * before they write, and pass while still vulnerable — so the runner yields a few
+ * macrotasks until the DOM settles before probing.
+ *
  * @param component - React component exported by frontend/vulnerable.tsx.
  * @param props - Props from the verifyTests entry.
- * @returns DomObservation of the rendered subtree.
- * @throws The first uncaught render error raised by the component.
+ * @returns DomObservation of the settled subtree.
+ * @throws The first uncaught render or effect error raised by the component.
  */
-export function renderInInertDocument(
+export async function renderInInertDocument(
   component: AnyComponent,
   props: Record<string, unknown>,
-): DomObservation {
+): Promise<DomObservation> {
   const inertDoc = document.implementation.createHTMLDocument('');
   const container = inertDoc.createElement('div');
   inertDoc.body.appendChild(container);
@@ -48,12 +54,35 @@ export function renderInInertDocument(
     flushSync(() => {
       root.render(createElement(component, props));
     });
+    await settleEffects(container);
     if (renderError !== null) {
       throw renderError instanceof Error ? renderError : new Error(String(renderError));
     }
     return probeDom(container);
   } finally {
     root.unmount();
+  }
+}
+
+/** Upper bound on macrotask yields while waiting for effects to stop changing the DOM. */
+const MAX_SETTLE_ROUNDS = 10;
+
+function nextMacrotask(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+}
+
+async function settleEffects(container: Element): Promise<void> {
+  // Reading innerHTML is allowed; it is only compared, never written back.
+  let previous = container.innerHTML;
+  for (let round = 0; round < MAX_SETTLE_ROUNDS; round += 1) {
+    await nextMacrotask();
+    const current = container.innerHTML;
+    if (round > 0 && current === previous) {
+      return;
+    }
+    previous = current;
   }
 }
 
@@ -71,6 +100,20 @@ export function failFrontendVerifyTests(
   return tests.map((test) => failedResult(test, error));
 }
 
+/**
+ * Accept function/class components and React wrapper objects such as React.memo or
+ * forwardRef (objects tagged with $$typeof).
+ *
+ * @param value - Export looked up in vulnerable.tsx.
+ * @returns True when the value can be passed to createElement as a component.
+ */
+function isRenderableComponent(value: unknown): value is AnyComponent {
+  return (
+    typeof value === 'function' ||
+    (typeof value === 'object' && value !== null && '$$typeof' in value)
+  );
+}
+
 function failedResult(test: FrontendVerifyTestCase, error: string): VerifyTestResult {
   return {
     name: test.name,
@@ -83,16 +126,19 @@ function failedResult(test: FrontendVerifyTestCase, error: string): VerifyTestRe
   };
 }
 
-function runOne(test: FrontendVerifyTestCase, sink: SinkModule | null): VerifyTestResult {
+async function runOne(
+  test: FrontendVerifyTestCase,
+  sink: SinkModule | null,
+): Promise<VerifyTestResult> {
   if (!sink) {
     return failedResult(test, 'Lab chưa có cặp frontend/vulnerable.tsx + secure.tsx.');
   }
-  const component = sink[test.component];
-  if (typeof component !== 'function') {
+  const component = Object.hasOwn(sink, test.component) ? sink[test.component] : undefined;
+  if (!isRenderableComponent(component)) {
     return failedResult(test, `Không tìm thấy component '${test.component}' trong vulnerable.tsx.`);
   }
   try {
-    const observation = renderInInertDocument(component as AnyComponent, test.props);
+    const observation = await renderInInertDocument(component, test.props);
     const actual = { ...observation };
     return {
       name: test.name,
@@ -113,13 +159,17 @@ function runOne(test: FrontendVerifyTestCase, sink: SinkModule | null): VerifyTe
  *
  * @param tests - Frontend verifyTests from meta.json.
  * @param sink - Loaded vulnerable.tsx module, or null when the lab has no sink pair.
- * @returns One VerifyTestResult per test, in order.
+ * @returns One VerifyTestResult per test, in order (tests run one after another).
  */
-export function runFrontendVerifyTests(
+export async function runFrontendVerifyTests(
   tests: readonly FrontendVerifyTestCase[],
   sink: SinkModule | null,
-): VerifyTestResult[] {
-  return tests.map((test) => runOne(test, sink));
+): Promise<VerifyTestResult[]> {
+  const results: VerifyTestResult[] = [];
+  for (const test of tests) {
+    results.push(await runOne(test, sink));
+  }
+  return results;
 }
 
 /**

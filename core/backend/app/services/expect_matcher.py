@@ -1,7 +1,11 @@
 """Expectation matching semantics for Test My Fix (ADR-0006).
 
-The TypeScript twin lives in core/frontend/src/lib and must keep identical
-semantics; both test suites share the same case list.
+The TypeScript twin lives in core/frontend/src/lib/expectMatcher.ts and must keep
+identical semantics; both test suites share the same case lists.
+
+Every branch evaluates all of its children (no short-circuit), so a mistyped
+operator anywhere in an expect block always raises, even while other assertions
+in the same block are still failing.
 """
 
 from collections.abc import Callable
@@ -16,6 +20,8 @@ _STRING_OPERATORS: dict[str, Callable[[str, str], bool]] = {
     "$notContains": lambda actual, operand: operand not in actual,
 }
 
+_MISSING = object()
+
 
 def _is_operator_object(expected: object) -> bool:
     """Return True for a non-empty dict whose keys all start with '$'.
@@ -25,12 +31,17 @@ def _is_operator_object(expected: object) -> bool:
 
     Returns:
         True when the dict must be interpreted as matcher operators.
+
+    Raises:
+        InvalidExpectationError: If the dict mixes '$' operators with plain keys.
     """
-    return (
-        isinstance(expected, dict)
-        and bool(expected)
-        and all(isinstance(key, str) and key.startswith(OPERATOR_PREFIX) for key in expected)
-    )
+    if not isinstance(expected, dict) or not expected:
+        return False
+    operator_keys = [k for k in expected if isinstance(k, str) and k.startswith(OPERATOR_PREFIX)]
+    if operator_keys and len(operator_keys) != len(expected):
+        msg = f"Expect object mixes operators {sorted(operator_keys)} with plain keys."
+        raise InvalidExpectationError(msg)
+    return bool(operator_keys)
 
 
 def _apply_operator(operator: str, operand: object, actual: object) -> bool:
@@ -57,12 +68,48 @@ def _apply_operator(operator: str, operand: object, actual: object) -> bool:
     return isinstance(actual, str) and check(actual, operand)
 
 
-def matches_expected(expected: Any, actual: Any) -> bool:  # noqa: ANN401
-    """Check actual against expected with strict bools, operators, and subset dicts.
+def _matches_dict(expected: dict[Any, Any], actual: object) -> bool:
+    """Subset-match a dict, evaluating every expected key even when one already failed.
 
-    Rules: bools compare by identity (True never equals 1); an all-'$' dict is an
-    operator object; other dicts match as recursive subsets; lists need equal
-    length and pairwise matches; everything else uses equality.
+    Args:
+        expected: Expected subset.
+        actual: Value produced by the lab.
+
+    Returns:
+        True when actual is a dict containing every expected key with a matching value.
+    """
+    container = actual if isinstance(actual, dict) else {}
+    outcomes = [
+        matches_expected(val, container.get(key, _MISSING)) for key, val in expected.items()
+    ]
+    return isinstance(actual, dict) and all(outcomes)
+
+
+def _matches_list(expected: list[Any], actual: object) -> bool:
+    """Match a list pairwise, evaluating every expected item even when one already failed.
+
+    Args:
+        expected: Expected list.
+        actual: Value produced by the lab.
+
+    Returns:
+        True when actual is a list of equal length whose items all match.
+    """
+    items = actual if isinstance(actual, list) else []
+    outcomes = [
+        matches_expected(item, items[i] if i < len(items) else _MISSING)
+        for i, item in enumerate(expected)
+    ]
+    return isinstance(actual, list) and len(items) == len(expected) and all(outcomes)
+
+
+def matches_expected(expected: Any, actual: Any) -> bool:  # noqa: ANN401
+    """Check actual against expected with operators, subset dicts, and strict bools.
+
+    Rules: an all-'$' dict is an operator object (mixing '$' and plain keys is an
+    error); other dicts match as recursive subsets; lists need equal length and
+    pairwise matches; bools compare by identity (True never equals 1); everything
+    else uses equality.
 
     Args:
         expected: Expected value or nested structure from meta.json.
@@ -72,22 +119,15 @@ def matches_expected(expected: Any, actual: Any) -> bool:  # noqa: ANN401
         True when actual satisfies expected.
 
     Raises:
-        InvalidExpectationError: If an operator object is malformed.
+        InvalidExpectationError: If an operator object is malformed anywhere in expected.
     """
-    if isinstance(expected, bool) or isinstance(actual, bool):
-        return isinstance(expected, bool) and isinstance(actual, bool) and expected is actual
     if _is_operator_object(expected):
-        # Evaluate every operator so an unknown one always surfaces, even after a miss.
         outcomes = [_apply_operator(op, operand, actual) for op, operand in expected.items()]
         return all(outcomes)
     if isinstance(expected, dict):
-        return isinstance(actual, dict) and all(
-            key in actual and matches_expected(val, actual[key]) for key, val in expected.items()
-        )
+        return _matches_dict(expected, actual)
     if isinstance(expected, list):
-        return (
-            isinstance(actual, list)
-            and len(expected) == len(actual)
-            and all(matches_expected(e, a) for e, a in zip(expected, actual, strict=True))
-        )
-    return bool(actual == expected)
+        return _matches_list(expected, actual)
+    if isinstance(expected, bool) or isinstance(actual, bool):
+        return isinstance(expected, bool) and isinstance(actual, bool) and expected is actual
+    return actual is not _MISSING and bool(actual == expected)

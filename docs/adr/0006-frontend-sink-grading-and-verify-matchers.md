@@ -43,14 +43,15 @@ Ngoài ra, quy tắc "không có `dangerouslySetInnerHTML` trong `core/`" ([ADR-
    * `POST /api/labs/{id}/verify` chỉ chạy test backend. Test frontend do trình duyệt chạy.
 4. **Bộ chấm frontend (`core/frontend/src/lib/frontendVerifier.ts`):**
    * Nạp module `frontend/vulnerable.tsx` qua `import.meta.glob`. Nhờ HMR, module luôn là bản sinh viên vừa lưu.
-   * Render `component` với `props` vào một container thuộc **document trơ** tạo bằng `document.implementation.createHTMLDocument('')`, dùng `createRoot` và `flushSync`. Document trơ không có browsing context nên không chạy script, không tải ảnh và không kích hoạt `onerror`/`onload`. **Container không bao giờ được gắn vào document thật.** Chấm xong thì unmount.
+   * Render `component` với `props` vào một container thuộc **document trơ** tạo bằng `document.implementation.createHTMLDocument('')`, dùng `createRoot` và `flushSync`, rồi chờ vài macrotask cho tới khi DOM ổn định để các `useEffect` (ví dụ sink dạng `ref.current.innerHTML = html`) kịp chạy trước khi kiểm tra. Document trơ không có browsing context nên không chạy script, không tải ảnh và không kích hoạt `onerror`/`onload`. **Container không bao giờ được gắn vào document thật.** Chấm xong thì unmount.
    * Sau đó một **DOM probe** quét cây vừa render và trả về observation `{ text, html, activeContent, findings }`. `activeContent` là `true` khi gặp bất kỳ dấu hiệu nào sau đây:
      * phần tử `script`, `iframe`, `object`, `embed`;
      * thuộc tính `on*` hoặc `srcdoc`;
      * thuộc tính URL (`href`, `src`, `action`, `formaction`, `xlink:href`) có scheme `javascript:`, sau khi đã trim, chuyển chữ thường và bỏ ký tự điều khiển.
    * `expect` được so với observation bằng cùng matcher như backend (mục 5). Nếu component ném lỗi khi render thì test **fail** kèm thông báo lỗi.
 5. **Toán tử so khớp `expect`** (Python ở `verifier.py`, TypeScript ở frontend, cùng ngữ nghĩa):
-   * Một object có **mọi key bắt đầu bằng `$`** được coi là object toán tử. Phase 2 có `$contains: string` (chuỗi thực tế chứa chuỗi này) và `$notContains: string`.
+   * Một object có **mọi key bắt đầu bằng `$`** được coi là object toán tử; object trộn key `$` với key thường là lỗi. Phase 2 có `$contains: string` (chuỗi thực tế chứa chuỗi này) và `$notContains: string`.
+   * Không dừng sớm ở bất kỳ nhánh nào (object, list, object toán tử), để toán tử gõ sai luôn lộ ra dù các assertion khác đang fail.
    * Toán tử không xác định thì test **fail** với lỗi rõ ràng, không bao giờ âm thầm pass.
    * Quy tắc hiện có vẫn giữ: so khớp subset đệ quy cho dict, list phải cùng độ dài, bool so nghiêm ngặt.
    * Ví dụ: `"expect": { "activeContent": false, "text": { "$contains": "<img src=x" } }` nghĩa là payload bị vô hiệu hóa nhưng nội dung đánh giá vẫn hiển thị dưới dạng chữ.
@@ -81,6 +82,7 @@ Ngoài ra, quy tắc "không có `dangerouslySetInnerHTML` trong `core/`" ([ADR-
 * Trình duyệt chạy test frontend, nên kết quả này không có trong response của `POST /verify`. Công cụ tự động gọi API trực tiếp chỉ thấy phần backend.
 
 * Lỗi render của React 19 không được ném ra từ `flushSync` mà đi qua `onUncaughtError`; runner bắt lỗi qua callback này để test fail kèm thông báo thay vì làm hỏng trang.
+* `flushSync` không chạy `useEffect`; runner chờ tối đa 10 macrotask cho tới khi `innerHTML` ngừng thay đổi. Sink dùng effect bất đồng bộ dài hơn (ví dụ `fetch` hoặc `setTimeout` lâu) có thể bị kiểm tra trước khi ghi DOM; lab phải viết sink đồng bộ trong render hoặc effect.
 * Module `frontend/vulnerable.tsx` được nạp qua `import.meta.glob`; khi sinh viên sửa file trong lúc dev, React Refresh dự kiến render code mới nhất cho cùng component. Điều này **chưa được kiểm chứng trên app thật** vì chưa có lab nào có cặp sink: phải kiểm tra khi làm Lab 02.
 * Jsdom không bao giờ chạy `onerror`, kể cả trên document thật, nên test trong Vitest chỉ kiểm cơ chế render/probe. Tính an toàn của document trơ đã được kiểm tra riêng trên Chromium (document thật chạy `onerror` và `iframe srcdoc`; document trơ thì không).
 

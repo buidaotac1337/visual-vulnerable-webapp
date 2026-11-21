@@ -41,6 +41,20 @@ MATCHER_CASES: list[tuple[Any, Any, bool]] = [
     ({"$notContains": "x"}, None, False),
     ({"text": {"$contains": "hi"}}, {"text": "oh hi"}, True),
     ({}, {"anything": 1}, True),
+    ({"a": None}, {}, False),
+    ({"a": {"b": 1}}, True, False),
+    ([{"a": 1}], "x", False),
+]
+
+# Mirrored in core/frontend/src/__tests__/expectMatcher.test.ts — keep both lists identical.
+MATCHER_ERROR_CASES: list[tuple[Any, Any]] = [
+    ({"$regex": "x"}, "zzz"),
+    ({"$contains": 1}, "zzz"),
+    ({"$notContains": "zzz", "$bogus": "x"}, "zzz"),
+    ({"$contains": "a", "x": 1}, "a"),
+    ({"ok": False, "text": {"$contain": "x"}}, {"ok": True, "text": "x"}),
+    ([{"$bogus": "x"}], "not a list"),
+    ({"activeContent": {"$contain": "x"}}, {"activeContent": True}),
 ]
 
 _VULN_HANDLER = """
@@ -138,14 +152,11 @@ def test_matcher_cases(expected: Any, actual: Any, result: bool) -> None:  # noq
     assert matches_expected(expected, actual) is result
 
 
-@pytest.mark.parametrize(
-    "expected",
-    [{"$regex": "x"}, {"$contains": 1}, {"$notContains": "zzz", "$bogus": "x"}],
-)
-def test_matcher_rejects_unknown_or_malformed_operators(expected: dict[str, Any]) -> None:
-    """Unknown operators and non-string operands raise, even after an earlier miss."""
+@pytest.mark.parametrize(("expected", "actual"), MATCHER_ERROR_CASES)
+def test_matcher_rejects_unknown_or_malformed_operators(expected: Any, actual: Any) -> None:  # noqa: ANN401
+    """Malformed operators raise wherever they sit, even after sibling assertions failed."""
     with pytest.raises(InvalidExpectationError):
-        matches_expected(expected, "zzz")
+        matches_expected(expected, actual)
 
 
 def test_verify_layer_discriminator_defaults_to_backend() -> None:

@@ -7,6 +7,8 @@ import type { VerifyLabResponse, VerifyTestResult } from '@/types';
 interface VerifyModalProps {
   isOpen: boolean;
   labTitle: string;
+  /** True when the lab declares frontend verifyTests, so the subtitle mentions vulnerable.tsx. */
+  hasFrontendTests?: boolean;
   isLoading: boolean;
   result: VerifyLabResponse | null;
   error: string | null;
@@ -18,6 +20,32 @@ const LAYER_BADGE: Record<'backend' | 'frontend', { label: string; className: st
   backend: { label: 'Backend', className: 'bg-sky-100 text-sky-800' },
   frontend: { label: 'Frontend', className: 'bg-violet-100 text-violet-800' },
 };
+
+const MONO = { fontFamily: 'var(--font-mono)' } as const;
+
+function VerifySubtitle({ hasFrontendTests }: { hasFrontendTests: boolean }): JSX.Element {
+  return (
+    <p className="text-xs text-slate-500">
+      Kiểm thử tự động trên <code style={MONO}>vulnerable.py</code> (Reset DB sạch trước mỗi test)
+      {hasFrontendTests ? (
+        <>
+          {' '}
+          và <code style={MONO}>vulnerable.tsx</code> (render trong document trơ, payload không
+          chạy)
+        </>
+      ) : null}
+    </p>
+  );
+}
+
+function summaryMessage(result: VerifyLabResponse): string {
+  if (result.total === 0) {
+    return 'Bài lab này chưa khai báo verifyTests nào trong meta.json.';
+  }
+  return result.passed
+    ? 'Tuyệt vời! Bản vá của bạn đã vượt qua toàn bộ kiểm thử.'
+    : 'Bản vá chưa đạt yêu cầu — hãy xem chi tiết bên dưới.';
+}
 
 function ResultTarget({ item }: { item: VerifyTestResult }): JSX.Element {
   const layer = item.layer ?? 'backend';
@@ -48,6 +76,7 @@ function ResultTarget({ item }: { item: VerifyTestResult }): JSX.Element {
 export function VerifyModal({
   isOpen,
   labTitle,
+  hasFrontendTests = false,
   isLoading,
   result,
   error,
@@ -93,13 +122,7 @@ export function VerifyModal({
           <h2 id="vvwa-verify-title" className="text-base font-semibold text-slate-900">
             Test My Fix — {labTitle}
           </h2>
-          <p className="text-xs text-slate-500">
-            Kiểm thử tự động trên{' '}
-            <code style={{ fontFamily: 'var(--font-mono)' }}>vulnerable.py</code> (Reset DB sạch
-            trước mỗi test) và{' '}
-            <code style={{ fontFamily: 'var(--font-mono)' }}>vulnerable.tsx</code> (render trong
-            document trơ, payload không chạy)
-          </p>
+          <VerifySubtitle hasFrontendTests={hasFrontendTests} />
         </div>
 
         <button
@@ -136,11 +159,7 @@ export function VerifyModal({
                   : 'border-red-200 bg-red-50 text-red-800'
               }`}
             >
-              <span>
-                {result.passed
-                  ? 'Tuyệt vời! Bản vá của bạn đã vượt qua toàn bộ kiểm thử.'
-                  : 'Bản vá chưa đạt yêu cầu — hãy xem chi tiết bên dưới.'}
-              </span>
+              <span>{summaryMessage(result)}</span>
               <span>
                 {result.passed_count} / {result.total} PASS
               </span>

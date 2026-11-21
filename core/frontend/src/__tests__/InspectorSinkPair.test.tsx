@@ -28,13 +28,17 @@ const SOURCE: LabSourceResponse = {
     '--- vulnerable.tsx\n+++ secure.tsx\n@@ -1 +1 @@\n-export const ReviewContent = "VULN_SINK_MARKER";\n+export const ReviewContent = "SAFE_SINK_MARKER";\n',
 };
 
-function renderInspector(activeTab: InspectorTab, mode: LabMode): void {
+function renderInspector(
+  activeTab: InspectorTab,
+  mode: LabMode,
+  source: LabSourceResponse = SOURCE,
+): void {
   render(
     <CodeInspector
       lab={null}
       mode={mode}
       activeTab={activeTab}
-      source={SOURCE}
+      source={source}
       sourceError={null}
       isRefreshing={false}
       totalSteps={0}
@@ -69,5 +73,11 @@ describe('ADR-0006 frontend sink pair in the inspector', () => {
     expect(screen.getByText('Frontend: vulnerable.tsx ↔ secure.tsx')).toBeInTheDocument();
     expect(screen.getByText(/Không có khác biệt — mã nguồn vulnerable.py/)).toBeInTheDocument();
     expect(screen.getAllByText(/SINK_MARKER/)).toHaveLength(2);
+  });
+
+  it('keeps the combined Diff header label when the frontend sink is already patched', () => {
+    renderInspector('diff', 'vulnerable', { ...SOURCE, frontend_diff: '' });
+    expect(screen.getByText('vulnerable ↔ secure (.py + .tsx)')).toBeInTheDocument();
+    expect(screen.getByText(/mã nguồn vulnerable.tsx hiện khớp/)).toBeInTheDocument();
   });
 });

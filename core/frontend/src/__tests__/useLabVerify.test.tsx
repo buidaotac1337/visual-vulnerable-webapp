@@ -127,6 +127,91 @@ describe('useLabVerify (ADR-0006)', () => {
   });
 });
 
+describe('useLabVerify run sequencing', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function deferredFetch(): { release: () => void } {
+    const pending: (() => void)[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        () =>
+          new Promise<Response>((resolve) => {
+            pending.push(() => {
+              resolve({
+                ok: true,
+                status: 200,
+                json: async () => BACKEND_REPORT,
+              } as unknown as Response);
+            });
+          }),
+      ),
+    );
+    return {
+      release: () => {
+        pending.shift()?.();
+      },
+    };
+  }
+
+  it('reset (e.g. switching labs) clears isVerifying and ignores the stale run', async () => {
+    const gate = deferredFetch();
+    const { result } = setup();
+    let run: Promise<void> = Promise.resolve();
+    act(() => {
+      run = result.current.handleVerify();
+    });
+    expect(result.current.isVerifying).toBe(true);
+    act(() => {
+      result.current.resetVerifyState();
+    });
+    expect(result.current.isVerifying).toBe(false);
+    await act(async () => {
+      gate.release();
+      await run;
+    });
+    expect(result.current.isVerifying).toBe(false);
+    expect(result.current.verifyResult).toBeNull();
+  });
+
+  it('an older run finishing first does not end a newer run', async () => {
+    const gate = deferredFetch();
+    const { result } = setup();
+    let first: Promise<void> = Promise.resolve();
+    let second: Promise<void> = Promise.resolve();
+    act(() => {
+      first = result.current.handleVerify();
+    });
+    act(() => {
+      second = result.current.handleVerify();
+    });
+    await act(async () => {
+      gate.release();
+      await first;
+    });
+    expect(result.current.isVerifying).toBe(true);
+    await act(async () => {
+      gate.release();
+      await second;
+    });
+    expect(result.current.isVerifying).toBe(false);
+    expect(result.current.verifyResult?.total).toBe(2);
+  });
+
+  it('shows an empty failing report for a lab without verifyTests instead of a blank modal', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = setup({ ...LAB, verifyTests: [] });
+    await act(async () => {
+      await result.current.handleVerify();
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(result.current.verifyResult).toMatchObject({ total: 0, passed: false });
+  });
+});
+
 describe('VerifyModal layers', () => {
   it('labels each result with its layer and shows a backend error next to frontend results', () => {
     render(
@@ -160,5 +245,30 @@ describe('VerifyModal layers', () => {
     expect(screen.getByText('Frontend')).toBeInTheDocument();
     expect(screen.getByText('<ReviewContent />')).toBeInTheDocument();
     expect(screen.getByText(/Không chạy được kiểm thử backend: DB offline/)).toBeInTheDocument();
+    expect(screen.queryByText('vulnerable.tsx')).toBeNull();
+  });
+
+  it('mentions vulnerable.tsx only for labs with frontend tests and explains an empty report', () => {
+    render(
+      <VerifyModal
+        isOpen
+        labTitle="Lab 02 XSS"
+        hasFrontendTests
+        isLoading={false}
+        error={null}
+        result={{
+          ok: true,
+          lab_id: '02-xss',
+          passed: false,
+          total: 0,
+          passed_count: 0,
+          results: [],
+        }}
+        onRerun={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('vulnerable.tsx')).toBeInTheDocument();
+    expect(screen.getByText(/chưa khai báo verifyTests/)).toBeInTheDocument();
   });
 });

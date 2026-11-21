@@ -2,11 +2,22 @@
 import { ESLint } from 'eslint';
 import { describe, expect, it } from 'vitest';
 
-/** Repository root as a filesystem path (the lint script runs ESLint from there). */
+/**
+ * Repository root as a filesystem path (the lint script runs ESLint from there).
+ * Derived from import.meta.url instead of node:url/fileURLToPath because the app
+ * tsconfig intentionally excludes Node typings.
+ */
 function repoRoot(): string {
   const pathname = decodeURIComponent(new URL('../../../../', import.meta.url).pathname);
   return /^\/[A-Za-z]:\//.test(pathname) ? pathname.slice(1) : pathname;
 }
+
+const ROOT = repoRoot();
+// One shared instance: building ESLint (and loading its flat config) per call is slow.
+const ESLINT = new ESLint({
+  cwd: ROOT,
+  overrideConfigFile: `${ROOT}core/frontend/eslint.config.js`,
+});
 
 const SINK_SNIPPETS: Record<string, string> = {
   jsx: 'export const A = (p: { h: string }) => <div dangerouslySetInnerHTML={{ __html: p.h }} />;\n',
@@ -19,12 +30,7 @@ const SINK_SNIPPETS: Record<string, string> = {
 };
 
 async function sinkErrors(code: string, relativePath: string): Promise<number> {
-  const root = repoRoot();
-  const eslint = new ESLint({
-    cwd: root,
-    overrideConfigFile: `${root}core/frontend/eslint.config.js`,
-  });
-  const [result] = await eslint.lintText(code, { filePath: `${root}${relativePath}` });
+  const [result] = await ESLINT.lintText(code, { filePath: `${ROOT}${relativePath}` });
   return (result?.messages ?? []).filter((m) => m.ruleId === 'no-restricted-syntax').length;
 }
 

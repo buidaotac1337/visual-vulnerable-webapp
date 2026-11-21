@@ -24,6 +24,23 @@ const MATCHER_CASES: [unknown, unknown, boolean][] = [
   [{ $notContains: 'x' }, null, false],
   [{ text: { $contains: 'hi' } }, { text: 'oh hi' }, true],
   [{}, { anything: 1 }, true],
+  [{ a: null }, {}, false],
+  [{ a: { b: 1 } }, true, false],
+  [[{ a: 1 }], 'x', false],
+];
+
+// Mirrored from MATCHER_ERROR_CASES in test_frontend_sink_pair.py — keep identical.
+const MATCHER_ERROR_CASES: [unknown, unknown][] = [
+  [{ $regex: 'x' }, 'zzz'],
+  [{ $contains: 1 }, 'zzz'],
+  [{ $notContains: 'zzz', $bogus: 'x' }, 'zzz'],
+  [{ $contains: 'a', x: 1 }, 'a'],
+  [
+    { ok: false, text: { $contain: 'x' } },
+    { ok: true, text: 'x' },
+  ],
+  [[{ $bogus: 'x' }], 'not a list'],
+  [{ activeContent: { $contain: 'x' } }, { activeContent: true }],
 ];
 
 describe('expectMatcher (TypeScript twin of expect_matcher.py)', () => {
@@ -31,12 +48,9 @@ describe('expectMatcher (TypeScript twin of expect_matcher.py)', () => {
     expect(matchesExpected(expected, actual)).toBe(result);
   });
 
-  it.each([[{ $regex: 'x' }], [{ $contains: 1 }], [{ $notContains: 'zzz', $bogus: 'x' }]])(
-    'rejects unknown or malformed operator %j',
-    (expected) => {
-      expect(() => matchesExpected(expected, 'zzz')).toThrow(InvalidExpectationError);
-    },
-  );
+  it.each(MATCHER_ERROR_CASES)('rejects malformed expect %j against %j', (expected, actual) => {
+    expect(() => matchesExpected(expected, actual)).toThrow(InvalidExpectationError);
+  });
 
   it('does not treat inherited keys as present', () => {
     expect(matchesExpected({ toString: 1 }, {})).toBe(false);

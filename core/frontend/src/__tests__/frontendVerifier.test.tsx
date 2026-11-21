@@ -1,10 +1,10 @@
-import { createElement } from 'react';
+import { createElement, memo, useEffect, useRef, useState } from 'react';
 import type { JSX } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { combineVerifyReports, isJavascriptUrl, probeDom, runFrontendVerifyTests } from '@/lib';
 import type { SinkModule } from '@/lib';
-import type { FrontendVerifyTestCase, VerifyLabResponse } from '@/types';
+import type { FrontendVerifyTestCase, VerifyLabResponse, VerifyTestResult } from '@/types';
 
 const PAYLOAD = '<img src=x onerror="window.__vvwaPwned = 1">';
 
@@ -70,9 +70,9 @@ describe('frontend verify runner (inert document)', () => {
     delete (window as unknown as Record<string, unknown>).__vvwaPwned;
   });
 
-  it('fails a vulnerable sink without executing its payload or touching the page', () => {
+  it('fails a vulnerable sink without executing its payload or touching the page', async () => {
     const sink: SinkModule = { ReviewContent: VulnerableReview };
-    const [result] = runFrontendVerifyTests([TEST], sink);
+    const [result] = await runFrontendVerifyTests([TEST], sink);
     expect(result?.passed).toBe(false);
     expect(result?.layer).toBe('frontend');
     expect(result?.actual).toMatchObject({ activeContent: true, findings: ['<img onerror>'] });
@@ -80,26 +80,64 @@ describe('frontend verify runner (inert document)', () => {
     expect(document.querySelector('img')).toBeNull();
   });
 
-  it('passes the patched sink that renders the payload as text', () => {
-    const [result] = runFrontendVerifyTests([TEST], { ReviewContent: SafeReview });
+  it('passes the patched sink that renders the payload as text', async () => {
+    const [result] = await runFrontendVerifyTests([TEST], { ReviewContent: SafeReview });
     expect(result).toMatchObject({ passed: true, error: null, action: 'ReviewContent' });
   });
 
-  it('reports render errors, missing exports, and a missing sink module', () => {
-    const [crash] = runFrontendVerifyTests([TEST], { ReviewContent: Exploding });
+  it('reports render errors, missing exports, and a missing sink module', async () => {
+    const [crash] = await runFrontendVerifyTests([TEST], { ReviewContent: Exploding });
     expect(crash?.passed).toBe(false);
     expect(crash?.error).toContain('boom in render');
 
-    const [missing] = runFrontendVerifyTests([TEST], { Other: SafeReview });
+    const [missing] = await runFrontendVerifyTests([TEST], { Other: SafeReview });
     expect(missing?.error).toContain("'ReviewContent'");
 
-    const [noSink] = runFrontendVerifyTests([TEST], null);
+    const [noSink] = await runFrontendVerifyTests([TEST], null);
     expect(noSink?.error).toContain('vulnerable.tsx');
   });
 
-  it('reports malformed operators as a failed test instead of throwing', () => {
+  it('accepts React.memo components and ignores inherited export names', async () => {
+    const [memoResult] = await runFrontendVerifyTests([TEST], { ReviewContent: memo(SafeReview) });
+    expect(memoResult?.passed).toBe(true);
+
+    const inherited = Object.create({ ReviewContent: SafeReview }) as SinkModule;
+    const [protoResult] = await runFrontendVerifyTests([TEST], inherited);
+    expect(protoResult?.error).toContain("'ReviewContent'");
+  });
+
+  it('waits for useEffect state updates before probing', async () => {
+    function EffectText({ content }: { content: string }): JSX.Element {
+      const [shown, setShown] = useState('');
+      useEffect(() => {
+        setShown(content);
+      }, [content]);
+      return <p>{shown}</p>;
+    }
+    const [result] = await runFrontendVerifyTests([TEST], { ReviewContent: EffectText });
+    expect(result?.actual).toMatchObject({ text: PAYLOAD });
+  });
+
+  it('fails an effect-based innerHTML sink instead of passing it before the effect runs', async () => {
+    function EffectSink({ content }: { content: string }): JSX.Element {
+      const ref = useRef<HTMLDivElement | null>(null);
+      useEffect(() => {
+        if (ref.current) {
+          // eslint-disable-next-line no-restricted-syntax -- test fixture standing in for vulnerable.tsx
+          ref.current.innerHTML = content;
+        }
+      }, [content]);
+      return <div ref={ref} />;
+    }
+    const [result] = await runFrontendVerifyTests([TEST], { ReviewContent: EffectSink });
+    expect(result?.passed).toBe(false);
+    expect(result?.actual).toMatchObject({ activeContent: true });
+    expect((window as unknown as Record<string, unknown>).__vvwaPwned).toBeUndefined();
+  });
+
+  it('reports malformed operators as a failed test instead of throwing', async () => {
     const badTest = { ...TEST, expect: { text: { $regex: 'x' } } };
-    const [result] = runFrontendVerifyTests([badTest], { ReviewContent: SafeReview });
+    const [result] = await runFrontendVerifyTests([badTest], { ReviewContent: SafeReview });
     expect(result?.passed).toBe(false);
     expect(result?.error).toContain('$regex');
   });
@@ -116,20 +154,23 @@ describe('combineVerifyReports', () => {
       { name: 'b', action: 'post_review', passed: true, expected: {}, actual: {}, error: null },
     ],
   };
-  const [frontendPass] = runFrontendVerifyTests([TEST], { ReviewContent: SafeReview });
+  const frontendPass: VerifyTestResult = {
+    name: TEST.name,
+    action: 'ReviewContent',
+    layer: 'frontend',
+    passed: true,
+    expected: {},
+    actual: {},
+    error: null,
+  };
 
   it('passes only when both layers pass', () => {
-    const combined = combineVerifyReports(
-      '02-xss',
-      backend,
-      frontendPass ? [frontendPass] : [],
-      false,
-    );
+    const combined = combineVerifyReports('02-xss', backend, [frontendPass], false);
     expect(combined).toMatchObject({ passed: true, total: 2, passed_count: 2 });
   });
 
   it('fails when the backend request errored even if frontend tests pass', () => {
-    const combined = combineVerifyReports('02-xss', null, frontendPass ? [frontendPass] : [], true);
+    const combined = combineVerifyReports('02-xss', null, [frontendPass], true);
     expect(combined).toMatchObject({ ok: false, passed: false, total: 1, passed_count: 1 });
   });
 

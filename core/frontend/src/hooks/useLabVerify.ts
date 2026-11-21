@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 
 import {
@@ -60,7 +60,7 @@ async function runFrontendTests(
     return [];
   }
   try {
-    return runFrontendVerifyTests(tests, await loadSink(lab.id));
+    return await runFrontendVerifyTests(tests, await loadSink(lab.id));
   } catch (error: unknown) {
     return failFrontendVerifyTests(tests, getErrorMessage(error, 'Không nạp được vulnerable.tsx.'));
   }
@@ -84,12 +84,16 @@ export function useLabVerify({
   const [verifyResult, setVerifyResult] = useState<VerifyLabResponse | null>(null);
   const [verifyError, setVerifyError] = useState<string | null>(null);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
+  // Each run (and each reset) takes a new sequence number; only the latest run may update state.
+  const runSeqRef = useRef<number>(0);
 
   const handleVerify = useCallback(async (): Promise<void> => {
     if (!selectedLab) {
       return;
     }
     const lab = selectedLab;
+    runSeqRef.current += 1;
+    const runSeq = runSeqRef.current;
     setIsVerifyModalOpen(true);
     setIsVerifying(true);
     setVerifyError(null);
@@ -101,15 +105,17 @@ export function useLabVerify({
     if (backend.report) {
       setDbResetSeq((seq) => seq + 1);
     }
-    setIsVerifying(false);
-    if (activeCtxRef.current.labId !== lab.id) {
+    if (runSeq !== runSeqRef.current || activeCtxRef.current.labId !== lab.id) {
       return;
     }
-    const hasResults = backend.report !== null || frontend.length > 0;
+    setIsVerifying(false);
+    // Only a backend failure with nothing else to show collapses to the plain error view;
+    // a lab without any verifyTests still gets an (empty, failing) report instead of a blank modal.
+    const errorOnly = backend.error !== null && frontend.length === 0;
     setVerifyResult(
-      hasResults
-        ? combineVerifyReports(lab.id, backend.report, frontend, backend.error !== null)
-        : null,
+      errorOnly
+        ? null
+        : combineVerifyReports(lab.id, backend.report, frontend, backend.error !== null),
     );
     setVerifyError(backend.error);
   }, [selectedLab, loadSink, refreshSource, setDbResetSeq, activeCtxRef]);
@@ -119,6 +125,8 @@ export function useLabVerify({
   }, []);
 
   const resetVerifyState = useCallback((): void => {
+    runSeqRef.current += 1;
+    setIsVerifying(false);
     setVerifyResult(null);
     setVerifyError(null);
     setIsVerifyModalOpen(false);
