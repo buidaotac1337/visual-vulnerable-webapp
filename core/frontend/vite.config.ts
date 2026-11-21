@@ -55,6 +55,12 @@ export default defineConfig({
     fs: {
       allow: [path.resolve(__dirname, '../..')],
     },
+    // Bind mounts from a Windows/macOS host into Docker do not deliver inotify events,
+    // so HMR for core/frontend/src and labs/ needs polling inside the container.
+    watch: {
+      usePolling: process.env.VITE_WATCH_POLLING === 'true',
+      interval: 300,
+    },
     proxy: {
       '/api': {
         target: process.env.VITE_API_PROXY_TARGET ?? 'http://localhost:8000',

@@ -44,7 +44,7 @@ Cấu hình cổng, biến môi trường và xử lý sự cố: xem [Cài đ�
 | ID | Lab | Nhóm | Mức độ | Trạng thái |
 | :--- | :--- | :--- | :--- | :--- |
 | [`01-sql-injection`](labs/01-sql-injection/README.md) | SQL Injection — Đăng nhập & Tìm kiếm MiniShop | Injection | Cơ bản | Có sẵn |
-| `02` | Stored XSS — Đánh giá sản phẩm | XSS | — | Tiếp theo |
+| [`02-stored-xss`](labs/02-stored-xss/README.md) | Stored XSS — Đánh giá sản phẩm MiniShop | XSS | Cơ bản | Có sẵn |
 | `03` | IDOR — Xem chi tiết đơn hàng | Access Control | — | Kế hoạch |
 | `04` | Business Logic — Giỏ hàng & Thanh toán | Business Logic | — | Kế hoạch |
 
