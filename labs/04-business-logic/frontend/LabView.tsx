@@ -6,23 +6,18 @@ import type { LabViewProps } from '@/types';
 
 import { CartTable } from './CartTable';
 import { CheckoutSummary } from './CheckoutSummary';
-import {
-  buildRenderSteps,
-  clientSubtotal,
-  formatMoney,
-  readCart,
-  readCheckout,
-  readShop,
-  toRequestItems,
-  writeCart,
-} from './cartData';
-import type { CartLine, Product, RequestItem, ShopData } from './cartData';
+import { buildRenderSteps, formatMoney, readCheckout, readShop } from './cartData';
+import type { Product, ShopData } from './cartData';
+import { clientSubtotal, isValidQuantity, readCart, toRequestItems, writeCart } from './cartForm';
+import type { CartLine, RequestItem } from './cartForm';
 
 const LAB_ID = '04-business-logic';
 
-/** Reload the catalog and balance silently on persona, mode, reset, or after each checkout. */
+/** Reload the catalog and balance silently on persona, mode, reset, or after each placed order. */
 function useShop(props: LabViewProps): ShopData {
   const { actor, mode, dbResetSeq, lastResponse, onExecute } = props;
+  // Only a placed order changes the balance; rejected checkouts need no reload.
+  const placedOrderId = readCheckout(lastResponse?.data)?.orderId ?? null;
   const [shop, setShop] = useState<ShopData>({ products: [], balance: null });
   const executeRef = useRef(onExecute);
   executeRef.current = onExecute;
@@ -30,16 +25,22 @@ function useShop(props: LabViewProps): ShopData {
   useEffect(() => {
     let active = true;
     void executeRef.current('load_shop', {}, { silent: true }).then((response) => {
-      if (active) {
-        setShop(readShop(response?.data));
+      // Keep the last good catalog if a silent reload fails.
+      if (active && response?.ok) {
+        setShop(readShop(response.data));
       }
     });
     return () => {
       active = false;
     };
-  }, [actor, mode, dbResetSeq, lastResponse]);
+  }, [actor, mode, dbResetSeq, placedOrderId]);
 
   return shop;
+}
+
+/** One more unit than typed, or 1 when the typed quantity is not a whole number. */
+function nextQuantity(text: string): number {
+  return isValidQuantity(text) ? Number(text) + 1 : 1;
 }
 
 /** Add one unit of a product, with its catalog price, to the cart. */
@@ -49,7 +50,7 @@ function addToCart(lines: readonly CartLine[], product: Product): CartLine[] {
     return [...lines, { productId: product.id, quantity: '1', price: String(product.price) }];
   }
   return lines.map((line, i) =>
-    i === index ? { ...line, quantity: String(Number(line.quantity) + 1) } : line,
+    i === index ? { ...line, quantity: String(nextQuantity(line.quantity)) } : line,
   );
 }
 

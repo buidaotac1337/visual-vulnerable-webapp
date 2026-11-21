@@ -2,7 +2,9 @@ import type { JSX } from 'react';
 import { Trash2 } from 'lucide-react';
 
 import { formatMoney } from './cartData';
-import type { CartLine, Product } from './cartData';
+import type { Product } from './cartData';
+import { lineFlags, lineTotal } from './cartForm';
+import type { CartLine } from './cartForm';
 
 interface CartTableProps {
   lines: readonly CartLine[];
@@ -13,11 +15,6 @@ interface CartTableProps {
 
 const INPUT_CLASS =
   'w-16 rounded border bg-white px-1.5 py-1 text-right text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-200';
-
-function lineTotal(line: CartLine): string {
-  const value = Number(line.price) * Number(line.quantity);
-  return Number.isFinite(value) ? formatMoney(value) : '—';
-}
 
 /**
  * Editable cart of the MiniShop checkout page.
@@ -58,8 +55,8 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
         {lines.map((line, index) => {
           const product = products.find((item) => item.id === line.productId);
           const name = product?.name ?? `Sản phẩm #${String(line.productId)}`;
-          const priceEdited = product !== undefined && Number(line.price) !== product.price;
-          const quantityBad = Number(line.quantity) <= 0;
+          const flags = lineFlags(line, product);
+          const total = lineTotal(line);
           return (
             <tr
               key={`${String(index)}-${String(line.productId)}`}
@@ -67,9 +64,9 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
             >
               <td className="py-1.5 pr-2">
                 <span className="block text-slate-900">{name}</span>
-                {priceEdited && (
+                {flags.listedPrice !== null && (
                   <span className="text-[11px] text-red-600">
-                    Niêm yết {formatMoney(product.price)}
+                    Niêm yết {formatMoney(flags.listedPrice)}
                   </span>
                 )}
               </td>
@@ -81,7 +78,7 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
                   value={line.price}
                   disabled={disabled}
                   onChange={(event) => update(index, { price: event.target.value })}
-                  className={`${INPUT_CLASS} ${priceEdited ? 'border-red-400' : 'border-slate-300'}`}
+                  className={`${INPUT_CLASS} ${flags.priceBad ? 'border-red-400' : 'border-slate-300'}`}
                 />
               </td>
               <td className="py-1.5 text-right">
@@ -91,10 +88,12 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
                   value={line.quantity}
                   disabled={disabled}
                   onChange={(event) => update(index, { quantity: event.target.value })}
-                  className={`${INPUT_CLASS} ${quantityBad ? 'border-red-400' : 'border-slate-300'}`}
+                  className={`${INPUT_CLASS} ${flags.quantityBad ? 'border-red-400' : 'border-slate-300'}`}
                 />
               </td>
-              <td className="py-1.5 text-right font-semibold text-slate-900">{lineTotal(line)}</td>
+              <td className="py-1.5 text-right font-semibold text-slate-900">
+                {total === null ? '—' : formatMoney(total)}
+              </td>
               <td className="py-1.5 text-right">
                 <button
                   type="button"

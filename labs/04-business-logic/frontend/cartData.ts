@@ -1,4 +1,4 @@
-import type { LabExecutionResponse, LabPayload, TraceStepDraft } from '@/types';
+import type { LabExecutionResponse, TraceStepDraft } from '@/types';
 
 /** Catalog product returned by load_shop. */
 export interface Product {
@@ -12,20 +12,6 @@ export interface Product {
 export interface ShopData {
   products: Product[];
   balance: number | null;
-}
-
-/** Cart line as held in the form; values stay as typed until checkout. */
-export interface CartLine {
-  productId: number;
-  quantity: string;
-  price: string;
-}
-
-/** Cart line exactly as the browser sends it in the checkout request body. */
-export interface RequestItem {
-  product_id: number;
-  quantity: number;
-  price: number;
 }
 
 /** One line of a placed order. */
@@ -46,15 +32,8 @@ export interface CheckoutResult {
   error: string | null;
 }
 
-const QUANTITY_RE = /^-?\d+$/;
-const PRICE_RE = /^-?\d+(\.\d+)?$/;
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
-}
-
-function asText(value: unknown): string {
-  return typeof value === 'number' || typeof value === 'string' ? String(value) : '';
 }
 
 function asNumberOrNull(value: unknown): number | null {
@@ -88,65 +67,6 @@ export function readShop(data: Record<string, unknown> | undefined): ShopData {
     })),
     balance: asNumberOrNull(data?.balance),
   };
-}
-
-/**
- * Read the cart held in the sandbox payload.
- *
- * @param payload - Sandbox payload with an 'items' array.
- * @returns Cart lines in form order.
- */
-export function readCart(payload: LabPayload): CartLine[] {
-  const items = Array.isArray(payload.items) ? payload.items : [];
-  return items.filter(isRecord).map((raw) => ({
-    productId: Number(raw.product_id),
-    quantity: asText(raw.quantity),
-    price: asText(raw.price),
-  }));
-}
-
-/**
- * Turn the cart into the payload shape stored by the sandbox.
- *
- * @param lines - Cart lines.
- * @returns Raw items for LabPayload.items.
- */
-export function writeCart(lines: readonly CartLine[]): Record<string, unknown>[] {
-  return lines.map((line) => ({
-    product_id: line.productId,
-    quantity: line.quantity,
-    price: line.price,
-  }));
-}
-
-/**
- * Build the checkout request body the browser sends, as numbers.
- *
- * @param lines - Cart lines.
- * @returns Request items, or null while the cart is empty or a field is not a number.
- */
-export function toRequestItems(lines: readonly CartLine[]): RequestItem[] | null {
-  const valid = lines.every(
-    (line) => QUANTITY_RE.test(line.quantity.trim()) && PRICE_RE.test(line.price.trim()),
-  );
-  if (lines.length === 0 || !valid) {
-    return null;
-  }
-  return lines.map((line) => ({
-    product_id: line.productId,
-    quantity: Number(line.quantity),
-    price: Number(line.price),
-  }));
-}
-
-/**
- * Subtotal computed by the browser from the prices and quantities it is about to send.
- *
- * @param items - Request items.
- * @returns Sum of price × quantity.
- */
-export function clientSubtotal(items: readonly RequestItem[]): number {
-  return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 }
 
 /**
@@ -201,11 +121,16 @@ export function abuseNote(result: CheckoutResult, products: readonly Product[]):
       ? `Số lượng âm làm tổng tiền âm: số dư được cộng thêm ${formatMoney(-total)} thay vì bị trừ.`
       : 'Món có số lượng âm hoặc bằng 0 đã được trừ vào tổng tiền.';
   }
-  const fair = fairTotal(result, products);
-  if (Math.abs(fair - total) > 0.005) {
-    return `Giá niêm yết là ${formatMoney(fair)}, server đã tính theo đơn giá trình duyệt gửi lên.`;
+  // Per line, like the backend: two edited prices must not hide each other in the total.
+  const edited = result.lines.some((line) => {
+    const product = products.find((item) => item.id === line.productId);
+    return product !== undefined && Math.abs(product.price - line.unitPrice) > 0.005;
+  });
+  if (!edited) {
+    return null;
   }
-  return null;
+  const fair = formatMoney(fairTotal(result, products));
+  return `Giá niêm yết là ${fair}, server đã tính theo đơn giá trình duyệt gửi lên.`;
 }
 
 /**
@@ -243,7 +168,7 @@ export function buildRenderSteps(
       layer: 'frontend',
       tag: 'fe-render-result',
       status: note ? 'danger' : 'info',
-      title: note ? 'Đơn hàng được chấp nhận với giá sai' : 'Hiển thị xác nhận đơn hàng',
+      title: note ? 'Đơn hàng được chấp nhận với tổng tiền sai' : 'Hiển thị xác nhận đơn hàng',
       detail: note ? `${order} ${note}` : order,
     },
   ];

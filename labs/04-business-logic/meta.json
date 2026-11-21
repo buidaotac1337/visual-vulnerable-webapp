@@ -21,13 +21,13 @@
     },
     {
       "label": "Số lượng âm để được cộng tiền",
-      "description": "Mua -5 chuột: tổng tiền là $-225 nên số dư tăng thay vì giảm.",
+      "description": "Mua -5 chuột: tổng tiền là -$225 nên số dư tăng thay vì giảm.",
       "actor": "alice",
       "data": { "items": [{ "product_id": 2, "quantity": -5, "price": 45 }] }
     },
     {
       "label": "Bù trừ bằng món số lượng âm",
-      "description": "Tai nghe $120 cộng -3 chuột ($-135): nhận tai nghe mà tổng tiền là $-15.",
+      "description": "Tai nghe $120 cộng -3 chuột (-$135): nhận tai nghe mà tổng tiền là -$15.",
       "actor": "alice",
       "data": {
         "items": [
@@ -63,7 +63,8 @@
       "input": { "items": [{ "product_id": 3, "quantity": 1, "price": 1 }] },
       "expect": {
         "placed": true,
-        "order": { "total_amount": 120.0, "items": [{ "product_id": 3, "unit_price": 120.0 }] }
+        "order": { "total_amount": 120.0, "items": [{ "product_id": 3, "unit_price": 120.0 }] },
+        "balance": 380.0
       }
     },
     {

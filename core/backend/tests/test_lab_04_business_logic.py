@@ -152,8 +152,11 @@ def test_lab_04_vulnerable_trusts_client_price_and_quantity() -> None:
     refund = _checkout(client, "vulnerable", [{"product_id": 2, "quantity": -5, "price": 45}])
     assert refund["meta"]["outcome"] == "exploited"
     assert refund["data"]["balance"] == 724.0
-    charge = next(s for s in refund["trace"] if s["tag"] == "charge-balance")
-    assert charge["status"] == "danger"
+    steps = {s["tag"]: s for s in refund["trace"]}
+    assert steps["charge-balance"]["status"] == "danger"
+    assert steps["price-cart"]["title"] == "Tổng tiền tính từ giá client gửi: -$225.00"
+    assert "số lượng -5 (phải > 0)" in steps["price-cart"]["detail"]
+    assert "DB" not in steps["price-cart"]["detail"]
 
 
 def test_lab_04_secure_reprices_and_rejects_bad_quantities() -> None:
@@ -175,6 +178,8 @@ def test_lab_04_secure_reprices_and_rejects_bad_quantities() -> None:
     assert missing["data"]["error"] == "Sản phẩm id=99 không tồn tại."
     stock = _checkout(client, "secure", [{"product_id": 3, "quantity": 16}])
     assert "chỉ còn 15" in stock["data"]["error"]
+    split = [{"product_id": 3, "quantity": 10}, {"product_id": 3, "quantity": 10}]
+    assert "chỉ còn 15" in _checkout(client, "secure", split)["data"]["error"]
 
 
 def test_lab_04_load_shop_returns_catalog_and_session_balance() -> None:

@@ -35,22 +35,18 @@ def _money(value: object) -> Decimal:
     return Decimal(str(value)).quantize(_CENT)
 
 
+def _usd(amount: Decimal | float) -> str:
+    """Format dollars with the sign in front, e.g. '-$225.00' (same as the lab UI)."""
+    return f"-${-amount:.2f}" if amount < 0 else f"${amount:.2f}"
+
+
 def _step(layer: str, tag: str, status: str, title: str, detail: str) -> dict[str, Any]:
     """Build one raw trace step for the @step tag of the highlighted line."""
     return {"layer": layer, "tag": tag, "status": status, "title": title, "detail": detail}
 
 
 def _rejected(error: str, steps: Steps, outcome: str = "normal") -> dict[str, Any]:
-    """Build the response for a checkout that placed no order.
-
-    Args:
-        error: Reason shown to the user.
-        steps: Trace steps collected so far.
-        outcome: Pedagogical outcome label.
-
-    Returns:
-        Lab execution dictionary.
-    """
+    """Build the response for a checkout that placed no order, with the reason shown."""
     return {
         "data": {"placed": False, "order": None, "balance": None, "error": error},
         "meta": {"outcome": outcome},
@@ -73,34 +69,29 @@ def _invalid_cart(exc: ValidationError) -> str:
 
 
 async def _load_catalog(db: LabDatabaseProtocol, items: list["CartItem"]) -> Catalog:
-    """Load the products referenced by the cart.
-
-    Args:
-        db: Restricted lab database adapter.
-        items: Cart lines.
-
-    Returns:
-        Products keyed by id.
-    """
+    """Load the products referenced by the cart, keyed by id."""
     rows = await db.fetch_all(_CATALOG_SQL, [item.product_id for item in items])
     return {int(row["id"]): row for row in rows}
 
 
 def _catalog_error(catalog: Catalog, items: list["CartItem"]) -> str:
-    """Check that every product exists and has enough stock.
+    """Check that every product exists and has stock for all of its cart lines together.
 
     Args:
         catalog: Products keyed by id.
-        items: Cart lines.
+        items: Cart lines (one product may appear on several lines).
 
     Returns:
         Error message, or '' when the cart matches the catalog.
     """
+    wanted: dict[int, int] = {}
     for item in items:
-        product = catalog.get(item.product_id)
+        wanted[item.product_id] = wanted.get(item.product_id, 0) + item.quantity
+    for product_id, quantity in wanted.items():
+        product = catalog.get(product_id)
         if product is None:
-            return f"Sản phẩm id={item.product_id} không tồn tại."
-        if item.quantity > int(product["stock"]):
+            return f"Sản phẩm id={product_id} không tồn tại."
+        if quantity > int(product["stock"]):
             return f"{product['name']} chỉ còn {product['stock']} sản phẩm trong kho."
     return ""
 
@@ -116,8 +107,8 @@ def _describe(lines: list[tuple["CartItem", Decimal]], catalog: Catalog) -> str:
         One-line summary.
     """
     return "; ".join(
-        f"{catalog[item.product_id]['name']} x {item.quantity} @ ${price} "
-        f"(niêm yết ${_money(catalog[item.product_id]['price'])})"
+        f"{catalog[item.product_id]['name']} x {item.quantity} @ {_usd(price)} "
+        f"(niêm yết {_usd(_money(catalog[item.product_id]['price']))})"
         for item, price in lines
     )
 
@@ -164,7 +155,7 @@ def _placed(
     """
     total = sum((price * item.quantity for item, price in lines), Decimal(0))
     ignored = [
-        f"{catalog[item.product_id]['name']}: client gửi ${sent}, DB ${price}"
+        f"{catalog[item.product_id]['name']}: client gửi {_usd(sent)}, DB {_usd(price)}"
         for index, (item, price) in enumerate(lines)
         if (sent := _sent_price(payload.get("items"), index)) is not None and sent != price
     ]
@@ -180,15 +171,15 @@ def _placed(
             "backend",
             "price-cart",
             "safe" if ignored else "info",
-            f"Tổng tiền tính từ giá trong DB: ${total}",
+            f"Tổng tiền tính từ giá trong DB: {_usd(total)}",
             f"Bỏ qua giá client gửi: {'; '.join(ignored)}." if ignored else "Giá client bị bỏ qua.",
         ),
         _step(
             "database",
             "charge-balance",
             "info",
-            f"Trừ ${total} khỏi số dư",
-            f"{_CHARGE_SQL} -- số dư còn ${balance:.2f}",
+            f"Trừ {_usd(total)} khỏi số dư",
+            f"{_CHARGE_SQL} -- số dư còn {_usd(balance)}",
         ),
         _step("database", "insert-order", "info", f"Tạo đơn #{order_id}", "status = 'paid'"),
     ]
@@ -267,8 +258,8 @@ async def checkout(
     # @step:charge-balance
     balance = await db.fetch_val(_CHARGE_SQL, total, actor.id)
     if balance is None:
-        step = _step("database", "charge-balance", "info", "Số dư không đủ", f"Cần ${total}.")
-        return _rejected(f"Số dư không đủ để thanh toán ${total}.", [step])
+        step = _step("database", "charge-balance", "info", "Số dư không đủ", f"Cần {_usd(total)}.")
+        return _rejected(f"Số dư không đủ để thanh toán {_usd(total)}.", [step])
 
     # @step:insert-order
     order_id = await db.fetch_val(_ORDER_SQL, actor.id, total)

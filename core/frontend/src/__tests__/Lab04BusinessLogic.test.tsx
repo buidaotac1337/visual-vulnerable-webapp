@@ -10,11 +10,8 @@ import type {
 } from '@/types';
 
 import { LabView } from '../../../../labs/04-business-logic/frontend/LabView';
-import {
-  buildRenderSteps,
-  readCart,
-  toRequestItems,
-} from '../../../../labs/04-business-logic/frontend/cartData';
+import { buildRenderSteps } from '../../../../labs/04-business-logic/frontend/cartData';
+import { readCart, toRequestItems } from '../../../../labs/04-business-logic/frontend/cartForm';
 
 const LAB_04_META: LabMetadata = {
   id: '04-business-logic',
@@ -127,6 +124,74 @@ describe('Lab 04 Business Logic LabView', () => {
     expect(screen.getByText(error)).toBeTruthy();
     expect(buildRenderSteps(rejected, PRODUCTS)).toEqual([
       expect.objectContaining({ status: 'info', title: 'Hiển thị lỗi thanh toán' }),
+    ]);
+  });
+
+  it('reloads the shop only after a placed order and keeps the catalog on a failed reload', async () => {
+    const onExecute = vi.fn(async (action: string) =>
+      action === 'load_shop' ? response({ products: PRODUCTS, balance: 500 }) : null,
+    );
+    const { rerender } = render(<LabView {...makeProps({ onExecute })} />);
+    expect(await screen.findByText('$500.00')).toBeTruthy();
+
+    const rejected = response({ placed: false, order: null, balance: null, error: 'Hết tiền' });
+    await act(async () => {
+      rerender(<LabView {...makeProps({ onExecute, lastResponse: rejected })} />);
+    });
+    expect(onExecute).toHaveBeenCalledTimes(1);
+
+    onExecute.mockImplementation(async () => ({ ...response({ error: 'boom' }), ok: false }));
+    await act(async () => {
+      rerender(<LabView {...makeProps({ onExecute, lastResponse: placed(2, 45, 410) })} />);
+    });
+    expect(onExecute).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole('button', { name: /^Chuot/ })).toBeTruthy();
+    expect(screen.getByText('$500.00')).toBeTruthy();
+  });
+
+  it('flags invalid cart fields and restarts a non-numeric quantity at 1', async () => {
+    const onPayloadChange = vi.fn();
+    const payload = {
+      items: [
+        { product_id: 1, quantity: '', price: '89' },
+        { product_id: 2, quantity: '2', price: '.5' },
+      ],
+    };
+    render(<LabView {...makeProps({ payload, onPayloadChange })} />);
+    await screen.findByText('$500.00');
+    expect(screen.getByLabelText('Số lượng Ban phim')).toHaveClass('border-red-400');
+    expect(screen.getAllByText('—')).toHaveLength(2);
+    expect(screen.getByText('$1.00')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Thanh toán' })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: /^Ban phim/ }));
+    expect(onPayloadChange).toHaveBeenLastCalledWith({
+      items: [
+        { product_id: 1, quantity: '1', price: '89' },
+        { product_id: 2, quantity: '2', price: '.5' },
+      ],
+    });
+  });
+
+  it('detects edited prices per line even when they cancel out in the total', () => {
+    const swapped = response({
+      placed: true,
+      order: {
+        id: 4,
+        total_amount: 134,
+        items: [
+          { product_id: 1, name: 'Ban phim', quantity: 1, unit_price: 45 },
+          { product_id: 2, name: 'Chuot', quantity: 1, unit_price: 89 },
+        ],
+      },
+      balance: 366,
+      error: null,
+    });
+    expect(buildRenderSteps(swapped, PRODUCTS)).toEqual([
+      expect.objectContaining({
+        status: 'danger',
+        title: 'Đơn hàng được chấp nhận với tổng tiền sai',
+      }),
     ]);
   });
 
