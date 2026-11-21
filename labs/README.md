@@ -9,6 +9,7 @@ Mỗi thư mục con là một bài lab độc lập, được backend tự phá
 | [`03-idor`](03-idor/README.md) | IDOR — Xem chi tiết đơn hàng MiniShop | Access Control | Cơ bản |
 | [`04-business-logic`](04-business-logic/README.md) | Business Logic — Giỏ hàng & Thanh toán MiniShop | Business Logic | Cơ bản |
 | [`05-mass-assignment`](05-mass-assignment/README.md) | Mass Assignment — Cập nhật hồ sơ khách hàng MiniShop | Access Control | Cơ bản |
+| [`06-path-traversal`](06-path-traversal/README.md) | Path Traversal — Tải hóa đơn MiniShop | File Handling | Cơ bản |
 
 ## Cấu trúc một lab
 

@@ -1,0 +1,97 @@
+{
+  "id": "06-path-traversal",
+  "title": "Path Traversal — Tải hóa đơn MiniShop",
+  "category": "File Handling",
+  "difficulty": "Cơ bản",
+  "summary": "Trang tải hóa đơn ghép tên file client gửi lên vào thư mục hóa đơn rồi đọc file đó. Chỉ cần chèn '../' là đọc được file cấu hình bí mật, file xuất dữ liệu khách hàng hay bất kỳ file nào trên server, kể cả hóa đơn của người khác.",
+  "safetyPattern": "Không dùng tên file của client làm đường dẫn: chỉ chấp nhận tên khớp mẫu cố định (INV-0000.txt), resolve() rồi kiểm tra đường dẫn thật vẫn nằm trong thư mục hóa đơn (is_relative_to), và kiểm tra hóa đơn thuộc về ctx.actor trước khi đọc.",
+  "actors": ["alice", "bob"],
+  "samplePayloads": [
+    {
+      "label": "Alice tải hóa đơn của mình",
+      "description": "Luồng hợp lệ: hóa đơn của đơn #1.",
+      "actor": "alice",
+      "data": { "file": "INV-0001.txt" }
+    },
+    {
+      "label": "Đọc file cấu hình bí mật",
+      "description": "'../' đi ra khỏi thư mục invoices/ sang config/ bên cạnh.",
+      "actor": "alice",
+      "data": { "file": "../config/secrets.env" }
+    },
+    {
+      "label": "Đọc /etc/passwd của server",
+      "description": "Đủ nhiều '../' là tới thư mục gốc của server (backend chạy Linux trong Docker).",
+      "actor": "alice",
+      "data": { "file": "../../../../../../etc/passwd" }
+    },
+    {
+      "label": "File xuất dữ liệu khách hàng",
+      "description": "Không cần '../': file nội bộ nằm ngay trong thư mục hóa đơn.",
+      "actor": "alice",
+      "data": { "file": "export.csv" }
+    },
+    {
+      "label": "Tải hóa đơn của bob",
+      "description": "Tên hóa đơn đoán được: INV-0002.txt là của bob.",
+      "actor": "alice",
+      "data": { "file": "INV-0002.txt" }
+    },
+    {
+      "label": "Lách bộ lọc ....//",
+      "description": "Thử với bản vá chỉ xóa chuỗi '../': ....// sẽ thành ../ sau khi lọc.",
+      "actor": "alice",
+      "data": { "file": "....//config/secrets.env" }
+    }
+  ],
+  "verifyTests": [
+    {
+      "name": "Alice tải được hóa đơn của mình",
+      "action": "download_invoice",
+      "actor": "alice",
+      "input": { "file": "INV-0001.txt" },
+      "expect": { "found": true, "file": "INV-0001.txt", "content": { "$contains": "Đơn hàng #1 của alice" } }
+    },
+    {
+      "name": "Bob tải được hóa đơn của mình",
+      "action": "download_invoice",
+      "actor": "bob",
+      "input": { "file": "INV-0002.txt" },
+      "expect": { "found": true, "content": { "$contains": "Đơn hàng #2 của bob" } }
+    },
+    {
+      "name": "Không đi ra khỏi thư mục hóa đơn bằng ../",
+      "action": "download_invoice",
+      "actor": "alice",
+      "input": { "file": "../config/secrets.env" },
+      "expect": { "found": false, "content": null }
+    },
+    {
+      "name": "Không lách được bằng ....//",
+      "action": "download_invoice",
+      "actor": "alice",
+      "input": { "file": "....//config/secrets.env" },
+      "expect": { "found": false, "content": null }
+    },
+    {
+      "name": "Không tải được file không phải hóa đơn trong cùng thư mục",
+      "action": "download_invoice",
+      "actor": "alice",
+      "input": { "file": "export.csv" },
+      "expect": { "found": false, "content": null }
+    },
+    {
+      "name": "Không tải được hóa đơn của người khác",
+      "action": "download_invoice",
+      "actor": "alice",
+      "input": { "file": "INV-0002.txt" },
+      "expect": { "found": false, "content": null }
+    },
+    {
+      "name": "Chưa đăng nhập thì không tải được hóa đơn",
+      "action": "download_invoice",
+      "input": { "file": "INV-0001.txt" },
+      "expect": { "found": false, "content": null }
+    }
+  ]
+}
