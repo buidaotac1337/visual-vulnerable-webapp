@@ -22,7 +22,8 @@ Trạng thái phát triển của nền tảng và danh sách bài lab trên Min
 ## Giai đoạn 3 — Mở rộng (đang triển khai)
 
 - [x] **Lab 05: Mass Assignment** (Cập nhật hồ sơ khách hàng) — schema `ProfileUpdate` với `extra="forbid"`, `ctx`.
-- [ ] **Lab 06: Path Traversal / File Upload** (Tải hóa đơn & Upload ảnh sản phẩm).
+- [x] **Lab 06: Path Traversal** (Tải hóa đơn) — tên file theo mẫu, `resolve()` + `is_relative_to()`, kiểm tra chủ sở hữu bằng `ctx`.
+- [ ] **File Upload** (Upload ảnh sản phẩm) — tách khỏi Lab 06; cần ADR cho sandbox ghi file, vì container backend mount `labs/` và `core/backend/app` với quyền ghi.
 - [ ] **Lab 07: Race Condition** (Áp mã giảm giá) — cần ADR cho test nhiều bước / đồng thời.
 - [ ] **Lab 08: SSRF** (Kiểm tra ảnh sản phẩm từ URL ngoài).
 
@@ -35,6 +36,7 @@ Trạng thái phát triển của nền tảng và danh sách bài lab trên Min
 | 03 IDOR | Chi tiết đơn hàng | Không kiểm tra chủ sở hữu | `order.user_id == ctx.actor.id` | `ctx` ([ADR-0005](adr/0005-lab-session-actor-context.md)) |
 | 04 Business Logic | Giỏ hàng, thanh toán | Tin `price`, `quantity` (số âm) từ client | Tính lại giá từ DB, validate Pydantic `gt=0` | `ctx` |
 | 05 Mass Assignment | Hồ sơ khách hàng | Ghi thẳng `dict` vào DB (tự nâng `role`) | Pydantic schema giới hạn trường | `ctx` |
-| 06 Path Traversal / Upload | Hóa đơn, ảnh sản phẩm | Ghép chuỗi đường dẫn | `Path.resolve()` + whitelist phần mở rộng | — |
+| 06 Path Traversal | Tải hóa đơn | Ghép chuỗi đường dẫn | Tên file theo mẫu, `resolve()` + `is_relative_to()`, kiểm tra chủ sở hữu | `ctx` |
+| File Upload | Ảnh sản phẩm | Ghép tên file upload vào đường dẫn ghi | Tên file do server sinh, whitelist phần mở rộng | ADR sandbox ghi file |
 | 07 Race Condition | Mã giảm giá | Đọc–kiểm tra–ghi không khóa | `SELECT ... FOR UPDATE` / atomic update | `ctx`, ADR mới |
 | 08 SSRF | Ảnh sản phẩm từ URL | `httpx.get(url)` trực tiếp | Allowlist domain, chặn dải IP nội bộ | Dependency mới cần ADR |
