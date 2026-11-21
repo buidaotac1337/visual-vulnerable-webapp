@@ -8,6 +8,7 @@ Mỗi thư mục con là một bài lab độc lập, được backend tự phá
 | [`02-stored-xss`](02-stored-xss/README.md) | Stored XSS — Đánh giá sản phẩm MiniShop | XSS | Cơ bản |
 | [`03-idor`](03-idor/README.md) | IDOR — Xem chi tiết đơn hàng MiniShop | Access Control | Cơ bản |
 | [`04-business-logic`](04-business-logic/README.md) | Business Logic — Giỏ hàng & Thanh toán MiniShop | Business Logic | Cơ bản |
+| [`05-mass-assignment`](05-mass-assignment/README.md) | Mass Assignment — Cập nhật hồ sơ khách hàng MiniShop | Access Control | Cơ bản |
 
 ## Cấu trúc một lab
 

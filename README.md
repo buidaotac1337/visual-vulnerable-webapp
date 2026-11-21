@@ -47,7 +47,8 @@ Cấu hình cổng, biến môi trường và xử lý sự cố: xem [Cài đ�
 | [`02-stored-xss`](labs/02-stored-xss/README.md) | Stored XSS — Đánh giá sản phẩm MiniShop | XSS | Cơ bản | Có sẵn |
 | [`03-idor`](labs/03-idor/README.md) | IDOR — Xem chi tiết đơn hàng MiniShop | Access Control | Cơ bản | Có sẵn |
 | [`04-business-logic`](labs/04-business-logic/README.md) | Business Logic — Giỏ hàng & Thanh toán MiniShop | Business Logic | Cơ bản | Có sẵn |
-| `05` | Mass Assignment — Cập nhật hồ sơ khách hàng | Access Control | — | Kế hoạch |
+| [`05-mass-assignment`](labs/05-mass-assignment/README.md) | Mass Assignment — Cập nhật hồ sơ khách hàng MiniShop | Access Control | Cơ bản | Có sẵn |
+| `06` | Path Traversal / File Upload — Hóa đơn & Ảnh sản phẩm | File Handling | — | Kế hoạch |
 
 Danh sách đầy đủ: [Lộ trình](docs/roadmap.md).
 
