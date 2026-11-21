@@ -21,7 +21,7 @@ _EXPORT_SQL = "SELECT username, email, balance FROM users ORDER BY id"
 _OWNER_SQL = "SELECT 1 FROM orders WHERE id = $1 AND user_id = $2"
 _MY_ORDERS_SQL = "SELECT id, total_amount FROM orders WHERE user_id = $1 ORDER BY id"
 _MAX_BYTES = 4096
-_INVOICE_RE = re.compile(r"\AINV-(\d{4})\.txt\Z")
+_INVOICE_RE = re.compile(r"\AINV-([0-9]{4})\.txt\Z")  # [0-9]: ASCII digits only
 _SECRETS = "# MiniShop internal config (demo, not real)\nMINISHOP_ADMIN_TOKEN=lab06-demo-token\n"
 
 Steps = list[dict[str, Any]]
@@ -29,7 +29,8 @@ Steps = list[dict[str, Any]]
 
 def _base_dir() -> Path:
     """Return the lab sandbox folder (never a folder mounted from the host)."""
-    return Path(os.environ.get("VVWA_LAB06_DIR", Path(tempfile.gettempdir()) / "vvwa-minishop"))
+    # "or": an empty VVWA_LAB06_DIR must not fall back to the current folder.
+    return Path(os.environ.get("VVWA_LAB06_DIR") or Path(tempfile.gettempdir()) / "vvwa-minishop")
 
 
 def _invoice_name(order_id: int) -> str:
@@ -65,7 +66,7 @@ async def _prepare_files(db: LabDatabaseProtocol) -> Path:
         )
     for stale in invoices.glob("INV-*.txt"):
         if stale.name not in current:
-            stale.unlink()
+            stale.unlink(missing_ok=True)
     return invoices
 
 
@@ -74,13 +75,20 @@ def _read_capped(path: Path) -> str | None:
     try:
         with path.open("rb") as handle:
             return handle.read(_MAX_BYTES).decode("utf-8", errors="replace")
-    except OSError:
+    except (OSError, ValueError):  # ValueError: embedded null byte
         return None
 
 
 def _step(layer: str, tag: str, status: str, title: str, detail: str) -> dict[str, Any]:
     """Build one raw trace step for the @step tag of the highlighted line."""
     return {"layer": layer, "tag": tag, "status": status, "title": title, "detail": detail}
+
+
+def _name_step(name: str) -> dict[str, Any]:
+    """Describe the file name read from the request."""
+    return _step(
+        "backend", "read-file-name", "info", "Đọc tên file từ URL (client kiểm soát)", repr(name)
+    )
 
 
 def _not_found(name: str, steps: Steps, outcome: str) -> dict[str, Any]:
@@ -132,30 +140,32 @@ async def download_invoice(
     if actor is None:
         step = _step("backend", "require-session", "warning", "Chưa đăng nhập", "Cần phiên.")
         return _not_found(name, [step], "normal")
+    steps: Steps = [_name_step(name)]
 
     # @step:validate-name
     match = _INVOICE_RE.fullmatch(name)
     if match is None:
         detail = f"{name!r} không khớp mẫu INV-0000.txt: không có '/', '..' hay phần mở rộng khác."
-        step = _step("backend", "validate-name", "safe", "Từ chối tên file", detail)
-        return _not_found(name, [step], "blocked")
+        steps.append(_step("backend", "validate-name", "safe", "Từ chối tên file", detail))
+        return _not_found(name, steps, "blocked")
 
     # @step:build-path
     real = (invoice_dir / name).resolve()
     if not real.is_relative_to(invoice_dir.resolve()):
-        step = _step("backend", "build-path", "safe", "Đường dẫn ra ngoài thư mục", str(real))
-        return _not_found(name, [step], "blocked")
-    steps: Steps = [
-        _step("backend", "build-path", "safe", "Đường dẫn nằm trong thư mục hóa đơn", str(real)),
-    ]
-
-    # @step:check-owner
-    if await db.fetch_val(_OWNER_SQL, int(match[1]), actor.id) is None:
-        title = "0 bản ghi: không tồn tại hoặc không phải hóa đơn của bạn"
         steps.append(
-            _step("database", "check-owner", "safe", title, f"{_OWNER_SQL} -- $1 = {match[1]}")
+            _step("backend", "build-path", "safe", "Đường dẫn ra ngoài thư mục", str(real))
         )
         return _not_found(name, steps, "blocked")
+    steps.append(_step("backend", "build-path", "safe", "Đường dẫn nằm trong thư mục", str(real)))
+
+    # @step:check-owner
+    owned = await db.fetch_val(_OWNER_SQL, int(match[1]), actor.id) is not None
+    detail = f"{_OWNER_SQL} -- $1 = {int(match[1])}, $2 = {actor.id} ({actor.username})"
+    if not owned:
+        title = "0 bản ghi: không tồn tại hoặc không phải hóa đơn của bạn"
+        steps.append(_step("database", "check-owner", "safe", title, detail))
+        return _not_found(name, steps, "blocked")
+    steps.append(_step("database", "check-owner", "info", "Hóa đơn thuộc về bạn", detail))
 
     # @step:read-file
     content = _read_capped(real)

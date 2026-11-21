@@ -86,6 +86,24 @@ describe('Lab 06 Path Traversal LabView', () => {
     expect(options.frontendStepsAfter?.(found('INV-0001.txt', 'Hóa đơn'))).toEqual([
       expect.objectContaining({ status: 'info', title: 'Hiển thị hóa đơn' }),
     ]);
+    // Same rule as the backend: reaching my own invoice through a path is still flagged.
+    expect(options.frontendStepsAfter?.(found('./INV-0001.txt', 'Hóa đơn'))).toEqual([
+      expect.objectContaining({ status: 'danger' }),
+    ]);
+  });
+
+  it("never shows one persona's invoices to another when a reload fails", async () => {
+    const onExecute = vi.fn(async () => response(MY_INVOICES));
+    const props = makeProps({ onExecute });
+    const { rerender } = render(<LabView {...props} />);
+    await screen.findByText('INV-0001.txt');
+
+    onExecute.mockImplementation(async () => response({ error: 'SyntaxError' }, false));
+    await act(async () => {
+      rerender(<LabView {...props} actor="bob" />);
+    });
+    expect(screen.queryByText('INV-0001.txt')).toBeNull();
+    expect(screen.getByText('Chưa có hóa đơn nào.')).toBeTruthy();
   });
 
   it('opens an invoice from the list', async () => {
@@ -103,7 +121,9 @@ describe('Lab 06 Path Traversal LabView', () => {
   it('warns when the server returns a file that is not my invoice', async () => {
     const leak = found('../config/secrets.env', 'MINISHOP_ADMIN_TOKEN=lab06-demo-token');
     render(<LabView {...makeProps({ lastResponse: leak })} />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('Đây không phải hóa đơn của bạn');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'File này không nằm trong danh sách hóa đơn của bạn',
+    );
     expect(screen.getByText('MINISHOP_ADMIN_TOKEN=lab06-demo-token')).toBeTruthy();
   });
 

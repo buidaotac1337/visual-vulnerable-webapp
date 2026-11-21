@@ -7,6 +7,7 @@ Students patch this file and verify the fix with Test My Fix.
 """
 
 import os
+import re
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,7 @@ _EXPORT_SQL = "SELECT username, email, balance FROM users ORDER BY id"
 _OWNER_SQL = "SELECT 1 FROM orders WHERE id = $1 AND user_id = $2"
 _MY_ORDERS_SQL = "SELECT id, total_amount FROM orders WHERE user_id = $1 ORDER BY id"
 _MAX_BYTES = 4096
+_INVOICE_RE = re.compile(r"\AINV-([0-9]{4})\.txt\Z")
 _SECRETS = "# MiniShop internal config (demo, not real)\nMINISHOP_ADMIN_TOKEN=lab06-demo-token\n"
 
 Steps = list[dict[str, Any]]
@@ -29,7 +31,8 @@ Steps = list[dict[str, Any]]
 
 def _base_dir() -> Path:
     """Return the lab sandbox folder (never a folder mounted from the host)."""
-    return Path(os.environ.get("VVWA_LAB06_DIR", Path(tempfile.gettempdir()) / "vvwa-minishop"))
+    # "or": an empty VVWA_LAB06_DIR must not fall back to the current folder.
+    return Path(os.environ.get("VVWA_LAB06_DIR") or Path(tempfile.gettempdir()) / "vvwa-minishop")
 
 
 def _invoice_name(order_id: int) -> str:
@@ -65,7 +68,7 @@ async def _prepare_files(db: LabDatabaseProtocol) -> Path:
         )
     for stale in invoices.glob("INV-*.txt"):
         if stale.name not in current:
-            stale.unlink()
+            stale.unlink(missing_ok=True)
     return invoices
 
 
@@ -74,13 +77,20 @@ def _read_capped(path: Path) -> str | None:
     try:
         with path.open("rb") as handle:
             return handle.read(_MAX_BYTES).decode("utf-8", errors="replace")
-    except OSError:
+    except (OSError, ValueError):  # ValueError: embedded null byte
         return None
 
 
 def _step(layer: str, tag: str, status: str, title: str, detail: str) -> dict[str, Any]:
     """Build one raw trace step for the @step tag of the highlighted line."""
     return {"layer": layer, "tag": tag, "status": status, "title": title, "detail": detail}
+
+
+def _name_step(name: str) -> dict[str, Any]:
+    """Describe the file name read from the request."""
+    return _step(
+        "backend", "read-file-name", "info", "Đọc tên file từ URL (client kiểm soát)", repr(name)
+    )
 
 
 def _not_found(name: str, steps: Steps, outcome: str) -> dict[str, Any]:
@@ -97,22 +107,32 @@ def _not_found(name: str, steps: Steps, outcome: str) -> dict[str, Any]:
     }
 
 
-async def _is_own_invoice(db: LabDatabaseProtocol, path: Path, user_id: int) -> bool:
-    """Tell whether a path is an invoice, inside the invoice folder, of the given user.
+def _resolve(path: str) -> Path | None:
+    """Resolve a path, or None when the OS rejects it (null byte, too long, symlink loop)."""
+    try:
+        return Path(path).resolve()
+    except (OSError, ValueError, RuntimeError):
+        return None
+
+
+async def _leak_reason(db: LabDatabaseProtocol, name: str, real: Path, user_id: int) -> str:
+    """Explain why a returned file is not a plain request for the user's own invoice.
 
     Args:
         db: Restricted lab database adapter.
-        path: Resolved file path.
+        name: File name sent by the client.
+        real: Resolved path that was read.
         user_id: Session user id.
 
     Returns:
-        True only for the user's own invoice files.
+        Trace title for a leak, or '' for the user's own invoice asked by its plain name.
     """
-    folder = (_base_dir() / "invoices").resolve()
-    stem = path.name.removeprefix("INV-").removesuffix(".txt")
-    if path.parent != folder or not path.name.startswith("INV-") or not stem.isdigit():
-        return False
-    return await db.fetch_val(_OWNER_SQL, int(stem), user_id) is not None
+    if name != real.name or real.parent != (_base_dir() / "invoices").resolve():
+        return "Tên file chứa đường dẫn: server đọc theo đường dẫn client chọn!"
+    match = _INVOICE_RE.fullmatch(real.name)
+    if match is None or await db.fetch_val(_OWNER_SQL, int(match[1]), user_id) is None:
+        return "Trả về file không phải hóa đơn của bạn!"
+    return ""
 
 
 async def list_invoices(
@@ -150,31 +170,25 @@ async def download_invoice(
     if actor is None:
         step = _step("backend", "require-session", "warning", "Chưa đăng nhập", "Cần phiên.")
         return _not_found(name, [step], "normal")
+    steps: Steps = [_name_step(name)]
 
     # @step:build-path
     path = f"{invoice_dir}/{name}"
-    real = Path(path).resolve()
-    steps: Steps = [
-        _step(
-            "backend",
-            "build-path",
-            "warning",
-            "Ghép tên file của client vào thư mục hóa đơn",
-            f"{path}  ->  đường dẫn thật: {real}",
-        ),
-    ]
+    real = _resolve(path)
+    detail = f"{path}  ->  đường dẫn thật: {real}"
+    steps.append(_step("backend", "build-path", "warning", "Ghép tên file vào thư mục", detail))
     # @step:read-file
     content = _read_capped(Path(path))
-    if content is None:
+    if content is None or real is None:
         steps.append(_step("backend", "read-file", "info", "Không đọc được file", str(real)))
         return _not_found(name, steps, "normal")
 
-    leaked = not await _is_own_invoice(db, real, actor.id)
-    title = "Trả về file không phải hóa đơn của bạn!" if leaked else "Trả hóa đơn của bạn"
-    steps.append(_step("backend", "read-file", "danger" if leaked else "info", title, str(real)))
+    reason = await _leak_reason(db, name, real, actor.id)
+    status = "danger" if reason else "info"
+    steps.append(_step("backend", "read-file", status, reason or "Trả hóa đơn của bạn", str(real)))
     return {
         "data": {"found": True, "file": name, "content": content, "error": None},
-        "meta": {"outcome": "exploited" if leaked else "normal"},
+        "meta": {"outcome": "exploited" if reason else "normal"},
         "trace": steps,
     }
 

@@ -27,7 +27,7 @@ Backend trong Docker chạy bằng `root`, nên mọi file trong container đề
 **Không dùng tên file của client làm đường dẫn.** Kiểm tra theo ba lớp, lớp nào cũng trả cùng một thông báo "Không có hóa đơn":
 
 ```python
-match = re.fullmatch(r"INV-(\d{4})\.txt", name)  # 1. Chỉ nhận tên đúng mẫu
+match = re.fullmatch(r"INV-([0-9]{4})\.txt", name)  # 1. Chỉ nhận tên đúng mẫu (chữ số ASCII)
 real = (invoice_dir / name).resolve()  # 2. Đường dẫn thật phải nằm trong thư mục
 if not real.is_relative_to(invoice_dir.resolve()):
     ...

@@ -45,7 +45,10 @@ export function InvoiceViewer({ result, invoices }: InvoiceViewerProps): JSX.Ele
       {foreign && (
         <p role="alert" className="flex items-center gap-1.5 text-xs font-semibold text-red-700">
           <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>Đây không phải hóa đơn của bạn: server đã trả về một file khác trên máy chủ.</span>
+          <span>
+            File này không nằm trong danh sách hóa đơn của bạn: server đã đọc theo đường dẫn mà
+            client gửi lên.
+          </span>
         </p>
       )}
       <pre

@@ -146,14 +146,27 @@ def test_lab_06_vulnerable_reads_files_outside_the_invoice(_sandbox: Path) -> No
         assert marker in leak["data"]["content"]
         assert leak["trace"][-1]["status"] == "danger"
 
+    # Own invoice through a path: the server still read a client-chosen path.
+    dotted = _download(client, "vulnerable", "./INV-0001.txt")
+    assert dotted["meta"]["outcome"] == "exploited"
+    assert dotted["trace"][-1]["title"].startswith("Tên file chứa đường dẫn")
+    assert [s["tag"] for s in own["trace"]][1:] == ["read-file-name", "build-path", "read-file"]
+
     (_sandbox / "big.txt").write_text("x" * 10_000, encoding="utf-8")
     assert len(_download(client, "vulnerable", "../big.txt")["data"]["content"]) == 4096
+    nul = _download(client, "vulnerable", "INV-0001.txt\x00")
+    assert (nul["ok"], nul["data"]["found"]) == (True, False)
 
 
 def test_lab_06_secure_allows_only_own_invoices_and_hides_why(_sandbox: Path) -> None:
     """Secure mode denies every other file with the same 'not found' shape."""
     client, db = _make_client()
-    assert _download(client, "secure", "INV-0002.txt", "bob")["data"]["found"] is True
+    own = _download(client, "secure", "INV-0002.txt", "bob")
+    assert own["data"]["found"] is True
+    tags = [s["tag"] for s in own["trace"]][1:]
+    assert tags == ["read-file-name", "build-path", "check-owner", "read-file"]
+    unicode_digits = "INV-" + chr(0x0660) * 3 + chr(0x0661) + ".txt"  # Arabic-Indic 0001
+    assert _download(client, "secure", unicode_digits)["trace"][-1]["tag"] == "validate-name"
     for name in ["../config/secrets.env", "....//config/secrets.env", "export.csv", "INV-0002.txt"]:
         denied = _download(client, "secure", name)
         assert denied["meta"]["outcome"] == "blocked", name
@@ -199,6 +212,17 @@ def test_lab_06_verify_fails_unpatched_and_passes_with_secure(tmp_path: Path) ->
     }
 
     backend = labs_dir / "06-path-traversal" / "backend"
+    vulnerable = (backend / "vulnerable.py").read_text(encoding="utf-8")
+    read_name = '    name = str(payload.get("file", ""))\n'
+    assert vulnerable.count(read_name) == 1
+    naive = vulnerable.replace(read_name, read_name.replace("))", ")).replace('../', '')"))
+    (backend / "vulnerable.py").write_text(naive, encoding="utf-8")
+    patched = client.post(f"{_LAB}/verify?reset_db=true").json()
+    assert patched["passed_count"] == 4
+    assert "Không lách được bằng ....//" in {
+        r["name"] for r in patched["results"] if not r["passed"]
+    }
+
     (backend / "vulnerable.py").write_text(
         (backend / "secure.py").read_text(encoding="utf-8"),
         encoding="utf-8",

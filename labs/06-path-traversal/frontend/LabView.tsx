@@ -10,10 +10,15 @@ import type { Invoice } from './invoiceData';
 
 const LAB_ID = '06-path-traversal';
 
+interface OwnedInvoices {
+  owner: string | null;
+  items: Invoice[];
+}
+
 /** Load 'Hóa đơn của tôi' silently whenever the persona, mode, or database changes. */
 function useInvoices(props: LabViewProps): Invoice[] {
   const { actor, mode, dbResetSeq, onExecute } = props;
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loaded, setLoaded] = useState<OwnedInvoices>({ owner: null, items: [] });
   const executeRef = useRef(onExecute);
   executeRef.current = onExecute;
 
@@ -22,7 +27,7 @@ function useInvoices(props: LabViewProps): Invoice[] {
     void executeRef.current('list_invoices', {}, { silent: true }).then((response) => {
       // Keep the last good list if a silent reload fails.
       if (active && response?.ok) {
-        setInvoices(readInvoices(response.data));
+        setLoaded({ owner: actor, items: readInvoices(response.data) });
       }
     });
     return () => {
@@ -30,7 +35,8 @@ function useInvoices(props: LabViewProps): Invoice[] {
     };
   }, [actor, mode, dbResetSeq]);
 
-  return invoices;
+  // A list kept from another persona (reload failed after a switch) is not this one's.
+  return loaded.owner === actor ? loaded.items : [];
 }
 
 /** File name typed in the address bar (the sandbox payload is the request body). */

@@ -64,7 +64,9 @@ export function visibleContent(result: DownloadResult): string | null {
 }
 
 /**
- * Whether a returned file is one of the user's own invoices.
+ * Whether a returned file is one of the user's own invoices, asked for by its plain name.
+ * Like the backend, a path such as './INV-0001.txt' does not count: the server read a
+ * path the client chose, even if it happens to land on the user's own invoice.
  *
  * @param file - File name the client asked for.
  * @param invoices - The user's invoices from list_invoices.
@@ -108,7 +110,7 @@ export function buildRenderSteps(
       layer: 'frontend',
       tag: 'fe-render-file',
       status: foreign ? 'danger' : 'info',
-      title: foreign ? 'Trình duyệt hiển thị file không phải hóa đơn của bạn' : 'Hiển thị hóa đơn',
+      title: foreign ? 'Trình duyệt hiển thị file ngoài danh sách hóa đơn' : 'Hiển thị hóa đơn',
       detail: `${result.file}: ${String(content.length)} ký tự`,
     },
   ];
