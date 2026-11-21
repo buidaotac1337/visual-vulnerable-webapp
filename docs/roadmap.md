@@ -25,7 +25,7 @@ Trạng thái phát triển của nền tảng và danh sách bài lab trên Min
 - [x] **Lab 06: Path Traversal** (Tải hóa đơn) — tên file theo mẫu, `resolve()` + `is_relative_to()`, kiểm tra chủ sở hữu bằng `ctx`.
 - [x] **Lab 07: File Upload** (Tải ảnh sản phẩm MiniShop) — sandbox ghi file tách biệt có outer jail ([ADR-0007](adr/0007-file-upload-sandbox-isolation.md)), kiểm tra magic bytes, sinh tên UUID trong `uploads/`.
 - [x] **Lab 08: Race Condition** (Áp mã giảm giá MiniShop) — giao dịch `db.transaction()` với `SELECT ... FOR UPDATE` và kiểm thử đồng thời / hậu kiểm ([ADR-0008](adr/0008-db-transactions-and-concurrent-verify-tests.md)).
-- [ ] **Lab 09: SSRF** (Kiểm tra ảnh sản phẩm từ URL ngoài).
+- [x] **Lab 09: SSRF** (Kiểm tra ảnh sản phẩm từ URL ngoài) — `httpx` bất đồng bộ, sidecar nội bộ `internal-metadata` / `minishop-cdn`, lọc DNS/IP & cấm redirect ([ADR-0009](adr/0009-ssrf-http-client-and-internal-target.md)).
 
 ## Danh mục lab
 
@@ -39,4 +39,4 @@ Trạng thái phát triển của nền tảng và danh sách bài lab trên Min
 | 06 Path Traversal | Tải hóa đơn | Ghép chuỗi đường dẫn | Tên file theo mẫu, `resolve()` + `is_relative_to()`, kiểm tra chủ sở hữu | `ctx` |
 | 07 File Upload | Ảnh sản phẩm | Tin header `Content-Type`, ghép thẳng `filename` | Magic bytes, tên UUID, giới hạn trong `uploads/` | `ctx`, [ADR-0007](adr/0007-file-upload-sandbox-isolation.md) |
 | 08 Race Condition | Mã giảm giá | Đọc–kiểm tra–ghi không khóa | `db.transaction()` + `SELECT ... FOR UPDATE` | `ctx`, [ADR-0008](adr/0008-db-transactions-and-concurrent-verify-tests.md) |
-| 09 SSRF | Ảnh sản phẩm từ URL | `httpx.get(url)` trực tiếp | Allowlist domain, chặn dải IP nội bộ | Dependency mới cần ADR |
+| 09 SSRF | Ảnh sản phẩm từ URL | `httpx.AsyncClient(follow_redirects=True)` không kiểm tra host/IP | Allowlist domain, lọc IP sau DNS (kể cả `ipv4_mapped`), `follow_redirects=False`, kiểm tra magic bytes | `ctx`, [ADR-0009](adr/0009-ssrf-http-client-and-internal-target.md) |

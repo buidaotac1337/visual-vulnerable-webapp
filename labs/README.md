@@ -12,6 +12,7 @@ Mỗi thư mục con là một bài lab độc lập, được backend tự phá
 | [`06-path-traversal`](06-path-traversal/README.md) | Path Traversal — Tải hóa đơn MiniShop | File Handling | Cơ bản |
 | [`07-file-upload`](07-file-upload/README.md) | File Upload — Tải ảnh sản phẩm MiniShop | File Handling | Trung bình |
 | [`08-race-condition`](08-race-condition/README.md) | Race Condition — Áp mã giảm giá MiniShop | Business Logic | Trung bình |
+| [`09-ssrf`](09-ssrf/README.md) | SSRF — Kiểm tra ảnh sản phẩm từ URL ngoài | SSRF | Trung bình |
 
 ## Cấu trúc một lab
 

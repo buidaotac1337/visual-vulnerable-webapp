@@ -28,6 +28,8 @@ class Settings(BaseSettings):
         labs_dir: Filesystem directory containing isolated security lab folders.
         seed_sql_path: Filesystem path to the idempotent MiniShop seed SQL script.
         upload_sandbox_dir: Isolated temp directory outside repo/labs for upload labs.
+        ssrf_allowed_hosts: Comma-separated allowlisted hostnames for Lab 09 SSRF checks.
+        ssrf_demo_cdn_host: Explicit offline Docker bridge demo CDN hostname for Lab 09.
         db_pool_min_size: Minimum connections maintained in the app asyncpg pool.
         db_pool_max_size: Maximum connections allowed in the app asyncpg pool.
         db_connect_timeout: PostgreSQL connection timeout in seconds.
@@ -55,6 +57,8 @@ class Settings(BaseSettings):
         default_factory=lambda: _DEFAULT_REPO_ROOT / "core" / "postgres" / "seed.sql",
     )
     upload_sandbox_dir: Path = Field(default_factory=_default_upload_sandbox_dir)
+    ssrf_allowed_hosts: str = Field(default="minishop-cdn")
+    ssrf_demo_cdn_host: str = Field(default="minishop-cdn")
     db_pool_min_size: int = Field(default=1, ge=1)
     db_pool_max_size: int = Field(default=10, ge=1)
     db_connect_timeout: float = Field(default=5.0, gt=0.0)
@@ -110,6 +114,17 @@ class Settings(BaseSettings):
             List of non-empty origin URLs stripped of surrounding whitespace.
         """
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def ssrf_allowed_host_set(self) -> frozenset[str]:
+        """Parse comma-separated SSRF allowlist hostnames into lowercase entries.
+
+        Returns:
+            Frozenset of normalized hostnames permitted by Lab 09 secure mode.
+        """
+        return frozenset(
+            host.strip().lower() for host in self.ssrf_allowed_hosts.split(",") if host.strip()
+        )
 
 
 @lru_cache(maxsize=1)

@@ -18,6 +18,25 @@ services:
       timeout: 3s
       retries: 10
 
+  internal-metadata:
+    build:
+      context: .
+      dockerfile: core/backend/Dockerfile
+    container_name: vvwa-internal-metadata
+    command: ["uvicorn", "app.internal_demo:app", "--host", "0.0.0.0", "--port", "8090"]
+    volumes:
+      - ./core/backend/app:/app/core/backend/app
+    networks:
+      default:
+        aliases:
+          - internal-metadata
+          - minishop-cdn
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   backend:
     build:
       context: .
@@ -28,6 +47,7 @@ services:
       VVWA_CORS_ORIGINS: ${VVWA_CORS_ORIGINS:-http://localhost:5173}
       VVWA_DATABASE_URL: ${VVWA_DATABASE_URL:-postgresql://lab_app_user:lab_app_pass@postgres:5432/minishop}
       VVWA_ADMIN_DATABASE_URL: ${VVWA_ADMIN_DATABASE_URL:-postgresql://lab_admin_user:lab_admin_pass@postgres:5432/minishop}
+      VVWA_SSRF_ALLOWED_HOSTS: ${VVWA_SSRF_ALLOWED_HOSTS:-minishop-cdn}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
@@ -36,6 +56,8 @@ services:
       - ./labs:/app/labs
     depends_on:
       postgres:
+        condition: service_healthy
+      internal-metadata:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]

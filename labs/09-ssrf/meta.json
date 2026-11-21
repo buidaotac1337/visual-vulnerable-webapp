@@ -1,0 +1,162 @@
+{
+  "id": "09-ssrf",
+  "title": "SSRF — Kiểm tra ảnh sản phẩm từ URL ngoài",
+  "category": "SSRF",
+  "difficulty": "Trung bình",
+  "summary": "Tính năng cập nhật ảnh sản phẩm của MiniShop nhận URL từ người dùng và dùng HTTP client phía backend tải về trực tiếp (kèm follow_redirects=True) mà không kiểm tra allowlist hay dải IP nội bộ. Kẻ tấn công có thể ép server đọc Cloud IAM Metadata, cấu hình Admin nội bộ, quét cổng loopback hoặc vượt allowlist qua HTTP 302 Redirect.",
+  "safetyPattern": "Xác thực phiên đăng nhập, chỉ cho phép http/https không chứa user:pass@, kiểm tra hostname theo allowlist, phân giải DNS và chặn mọi IP loopback/link-local/private/non-global (kể cả IPv4-mapped IPv6), tắt chuyển hướng (follow_redirects=False), và chỉ nhận ảnh có Content-Type + magic bytes hợp lệ <= 256 KiB.",
+  "actors": ["admin", "alice"],
+  "samplePayloads": [
+    {
+      "label": "Ảnh CDN hợp lệ (kb.png)",
+      "description": "Luồng bình thường: tải ảnh PNG hợp lệ từ minishop-cdn:8090 cho sản phẩm #1.",
+      "actor": "admin",
+      "data": {
+        "product_id": 1,
+        "image_url": "http://minishop-cdn:8090/cdn/kb.png"
+      }
+    },
+    {
+      "label": "Đọc IAM Metadata nội bộ",
+      "description": "Khai thác SSRF truy cập endpoint IAM credentials của sidecar nội bộ internal-metadata:8090.",
+      "actor": "admin",
+      "data": {
+        "product_id": 1,
+        "image_url": "http://internal-metadata:8090/latest/meta-data/iam-credentials"
+      }
+    },
+    {
+      "label": "Đọc cấu hình Admin nội bộ",
+      "description": "Khai thác SSRF đọc JWT signing key và DSN database từ /admin/config nội bộ.",
+      "actor": "admin",
+      "data": {
+        "product_id": 1,
+        "image_url": "http://internal-metadata:8090/admin/config"
+      }
+    },
+    {
+      "label": "Vượt allowlist bằng 302 Redirect",
+      "description": "Gửi URL trên CDN hợp lệ nhưng server CDN trả 302 Redirect sang internal-metadata:8090.",
+      "actor": "admin",
+      "data": {
+        "product_id": 1,
+        "image_url": "http://minishop-cdn:8090/cdn/redirect-to-metadata"
+      }
+    },
+    {
+      "label": "Quét cổng loopback (127.0.0.1:8000)",
+      "description": "Dò dịch vụ nội bộ đang lắng nghe trên loopback 127.0.0.1:8000/api/health từ backend.",
+      "actor": "alice",
+      "data": {
+        "product_id": 1,
+        "image_url": "http://127.0.0.1:8000/api/health"
+      }
+    }
+  ],
+  "verifyTests": [
+    {
+      "name": "Ảnh CDN hợp lệ (minishop-cdn:8090/cdn/kb.png) được tải và cập nhật an toàn",
+      "action": "fetch_product_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 1,
+        "image_url": "http://minishop-cdn:8090/cdn/kb.png"
+      },
+      "expect": {
+        "fetched": true,
+        "updated": true,
+        "blocked": false,
+        "leaked_internal": false,
+        "content_type": { "$contains": "image/png" }
+      }
+    },
+    {
+      "name": "Chặn SSRF đọc IAM Metadata nội bộ (internal-metadata:8090)",
+      "action": "fetch_product_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 1,
+        "image_url": "http://internal-metadata:8090/latest/meta-data/iam-credentials"
+      },
+      "expect": {
+        "fetched": false,
+        "blocked": true,
+        "leaked_internal": false,
+        "body_preview": null
+      }
+    },
+    {
+      "name": "Chặn SSRF đọc cấu hình Admin nội bộ (/admin/config)",
+      "action": "fetch_product_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 1,
+        "image_url": "http://internal-metadata:8090/admin/config"
+      },
+      "expect": {
+        "fetched": false,
+        "blocked": true,
+        "leaked_internal": false,
+        "body_preview": null
+      }
+    },
+    {
+      "name": "Chặn bypass allowlist qua 302 Redirect sang internal-metadata",
+      "action": "fetch_product_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 1,
+        "image_url": "http://minishop-cdn:8090/cdn/redirect-to-metadata"
+      },
+      "expect": {
+        "fetched": false,
+        "blocked": true,
+        "leaked_internal": false,
+        "body_preview": null
+      }
+    },
+    {
+      "name": "Chặn quét cổng loopback nội bộ (127.0.0.1:8000)",
+      "action": "fetch_product_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 1,
+        "image_url": "http://127.0.0.1:8000/api/health"
+      },
+      "expect": {
+        "fetched": false,
+        "blocked": true,
+        "leaked_internal": false,
+        "body_preview": null
+      }
+    },
+    {
+      "name": "Chặn URL dùng scheme không phải HTTP/HTTPS (file:///etc/passwd)",
+      "action": "fetch_product_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 1,
+        "image_url": "file:///etc/passwd"
+      },
+      "expect": {
+        "fetched": false,
+        "blocked": true,
+        "leaked_internal": false,
+        "body_preview": null
+      }
+    },
+    {
+      "name": "Chưa đăng nhập thì không thể kiểm tra ảnh sản phẩm từ URL",
+      "action": "fetch_product_image",
+      "input": {
+        "product_id": 1,
+        "image_url": "http://minishop-cdn:8090/cdn/kb.png"
+      },
+      "expect": {
+        "fetched": false,
+        "blocked": true,
+        "updated": false
+      }
+    }
+  ]
+}
