@@ -10,6 +10,7 @@ import type {
 } from '@/types';
 
 import { LabView } from '../../../../labs/03-idor/frontend/LabView';
+import { buildRenderSteps } from '../../../../labs/03-idor/frontend/orderData';
 
 const LAB_03_META: LabMetadata = {
   id: '03-idor',
@@ -38,6 +39,16 @@ function response(data: Record<string, unknown>): LabExecutionResponse {
     ok: true,
     data,
     meta: { lab_id: '03-idor', mode: 'vulnerable', outcome: 'normal' },
+    trace: [],
+  };
+}
+
+/** Envelope the engine returns when the student's handler crashes (runtime-error). */
+function errorResponse(message: string): LabExecutionResponse {
+  return {
+    ok: false,
+    data: { error: message },
+    meta: { lab_id: '03-idor', mode: 'vulnerable', outcome: 'error' },
     trace: [],
   };
 }
@@ -112,5 +123,47 @@ describe('Lab 03 IDOR LabView', () => {
     );
     expect(await screen.findByText('Không tìm thấy đơn hàng #2.')).toBeTruthy();
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('shows the user own order without a warning', async () => {
+    const own = { ...BOB_ORDER, id: 1, owner: 'alice', shipping_address: '123 Duong Le Loi' };
+    render(<LabView {...makeProps({ lastResponse: response({ found: true, order: own }) })} />);
+    expect(await screen.findByText('123 Duong Le Loi')).toBeTruthy();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('keeps the trace and the page consistent for errors and found:false', async () => {
+    expect(buildRenderSteps(errorResponse('SyntaxError: invalid syntax'), 'alice')).toEqual([]);
+
+    // A patched handler that says found:false but forgets to clear `order` must not show it.
+    const leaky = response({
+      found: false,
+      order: BOB_ORDER,
+      error: 'Không tìm thấy đơn hàng #2.',
+    });
+    expect(buildRenderSteps(leaky, 'alice')).toEqual([
+      expect.objectContaining({ status: 'info', title: 'Hiển thị "Không tìm thấy đơn hàng"' }),
+    ]);
+    render(<LabView {...makeProps({ lastResponse: leaky })} />);
+    await screen.findByText('Đơn #1');
+    expect(screen.getByText('Không tìm thấy đơn hàng #2.')).toBeTruthy();
+    expect(screen.queryByText('456 Pho Hue')).toBeNull();
+  });
+
+  it('lets the address bar be cleared and only opens whole order numbers', async () => {
+    const onPayloadChange = vi.fn();
+    const { rerender } = render(<LabView {...makeProps({ onPayloadChange })} />);
+    await screen.findByText('Đơn #1');
+    fireEvent.change(screen.getByLabelText('Mã đơn hàng trên URL'), { target: { value: '' } });
+    expect(onPayloadChange).toHaveBeenLastCalledWith({ order_id: '' });
+
+    const onExecute = vi.fn(async () => null);
+    rerender(<LabView {...makeProps({ payload: { order_id: '' }, onExecute })} />);
+    expect(screen.getByLabelText('Mã đơn hàng trên URL')).toHaveValue(null);
+    expect(screen.getByRole('button', { name: 'Mở đơn' })).toBeDisabled();
+
+    rerender(<LabView {...makeProps({ payload: { order_id: '999' }, onExecute })} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Mở đơn' }));
+    expect(onExecute).toHaveBeenCalledWith('view_order', { order_id: 999 }, expect.anything());
   });
 });

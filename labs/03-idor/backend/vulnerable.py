@@ -113,6 +113,7 @@ async def view_order(
         # @step:build-order-query
         "WHERE o.id = $1"
     )
+    # @step:fetch-order
     row = await db.fetch_one(sql, order_id)
     steps: list[dict[str, Any]] = [
         {
@@ -130,7 +131,6 @@ async def view_order(
             "detail": f"{sql} -- $1 = {order_id} (phiên: {actor.username} bị bỏ qua)",
         },
     ]
-    # @step:fetch-order
     if row is None:
         steps.append(
             {

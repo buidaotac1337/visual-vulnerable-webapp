@@ -112,6 +112,7 @@ async def view_order(
         # @step:build-order-query
         "WHERE o.id = $1 AND o.user_id = $2"
     )
+    # @step:fetch-order
     row = await db.fetch_one(sql, order_id, actor.id)
     steps: list[dict[str, Any]] = [
         {
@@ -129,14 +130,13 @@ async def view_order(
             "detail": f"{sql} -- $1 = {order_id}, $2 = {actor.id} ({actor.username})",
         },
     ]
-    # @step:fetch-order
     if row is None:
         steps.append(
             {
                 "layer": "database",
                 "tag": "fetch-order",
                 "status": "safe",
-                "title": "0 bản ghi: không phải đơn của người này",
+                "title": "0 bản ghi: không tồn tại hoặc không thuộc người này",
                 "detail": "Trả 'không tìm thấy' như đơn không tồn tại, không lộ đơn có hay không.",
             },
         )

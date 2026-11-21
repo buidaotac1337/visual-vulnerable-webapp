@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { PackageSearch, ShieldAlert } from 'lucide-react';
 
+import { visibleOrder } from './orderData';
 import type { OrderLookup } from './orderData';
 
 interface OrderDetailProps {
@@ -26,8 +27,8 @@ export function OrderDetail({ lookup, actor }: OrderDetailProps): JSX.Element {
       </p>
     );
   }
-  const order = lookup.order;
-  if (!lookup.found || !order) {
+  const order = visibleOrder(lookup);
+  if (!order) {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
         <PackageSearch className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
@@ -63,8 +64,8 @@ export function OrderDetail({ lookup, actor }: OrderDetailProps): JSX.Element {
         <dd className="font-semibold text-slate-900">{formatMoney(order.totalAmount)}</dd>
       </dl>
       <ul className="flex flex-col gap-1 border-t border-slate-200 pt-2 text-xs text-slate-700">
-        {order.items.map((item) => (
-          <li key={item.name} className="flex justify-between gap-2">
+        {order.items.map((item, index) => (
+          <li key={`${String(index)}-${item.name}`} className="flex justify-between gap-2">
             <span>
               {item.quantity} × {item.name}
             </span>

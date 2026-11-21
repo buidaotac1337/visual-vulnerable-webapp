@@ -81,6 +81,17 @@ export function readOrderLookup(data: Record<string, unknown> | undefined): Orde
 }
 
 /**
+ * Return the order the page actually shows: only when the lookup says it was found.
+ * Shared by OrderDetail and buildRenderSteps so the UI and the trace never disagree.
+ *
+ * @param lookup - Parsed view_order result.
+ * @returns The displayed order, or null for a 'not found' page.
+ */
+export function visibleOrder(lookup: OrderLookup): OrderDetailData | null {
+  return lookup.found ? lookup.order : null;
+}
+
+/**
  * Read a list_orders response.
  *
  * @param data - Response data, or undefined.
@@ -107,7 +118,11 @@ export function buildRenderSteps(
   actor: string | null,
 ): TraceStepDraft[] {
   const lookup = readOrderLookup(response.data);
-  const order = lookup?.order;
+  if (!lookup) {
+    // Not a view_order result (e.g. a runtime-error envelope): the backend trace says it all.
+    return [];
+  }
+  const order = visibleOrder(lookup);
   if (!order) {
     return [
       {
@@ -115,7 +130,7 @@ export function buildRenderSteps(
         tag: 'fe-render-order',
         status: 'info',
         title: 'Hiển thị "Không tìm thấy đơn hàng"',
-        detail: lookup?.error ?? 'Không có dữ liệu đơn hàng.',
+        detail: lookup.error ?? 'Không có dữ liệu đơn hàng.',
       },
     ];
   }

@@ -10,9 +10,18 @@ import type { OrderSummary } from './orderData';
 
 const LAB_ID = '03-idor';
 
-function readOrderId(payload: LabPayload): number {
-  const value = Number(payload.order_id);
-  return Number.isFinite(value) ? value : 1;
+/** Text shown in the address bar; kept as typed so it can be cleared while editing. */
+function readOrderIdText(payload: LabPayload): string {
+  const value = payload.order_id;
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return String(value);
+  }
+  return typeof value === 'string' ? value : '';
+}
+
+/** Order id to open, or null while the address bar does not hold a whole number. */
+function parseOrderId(text: string): number | null {
+  return /^\d+$/.test(text.trim()) ? Number(text.trim()) : null;
 }
 
 /** Load 'Đơn hàng của tôi' silently whenever the persona, mode, or database changes. */
@@ -45,7 +54,8 @@ function useMyOrders(props: LabViewProps): OrderSummary[] {
  */
 export function LabView(props: LabViewProps): JSX.Element {
   const { mode, actor, payload, onPayloadChange, inputFlashSeq, isExecuting, lastResponse } = props;
-  const orderId = readOrderId(payload);
+  const orderIdText = readOrderIdText(payload);
+  const orderId = parseOrderId(orderIdText);
   const orders = useMyOrders(props);
   const lookup = readOrderLookup(lastResponse?.data);
   const flashClass = inputFlashSeq > 0 ? 'vvwa-input-flash' : '';
@@ -76,7 +86,9 @@ export function LabView(props: LabViewProps): JSX.Element {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
-    openOrder(orderId);
+    if (orderId !== null) {
+      openOrder(orderId);
+    }
   };
 
   return (
@@ -120,16 +132,14 @@ export function LabView(props: LabViewProps): JSX.Element {
             id="idor-order-id"
             type="number"
             aria-label="Mã đơn hàng trên URL"
-            value={orderId}
-            onChange={(event) =>
-              onPayloadChange({ ...payload, order_id: Number(event.target.value) })
-            }
-            className={`w-16 bg-transparent text-slate-900 focus:outline-none ${flashClass}`}
+            value={orderIdText}
+            onChange={(event) => onPayloadChange({ ...payload, order_id: event.target.value })}
+            className={`w-20 bg-transparent text-slate-900 focus:outline-none ${flashClass}`}
           />
         </label>
         <button
           type="submit"
-          disabled={isExecuting}
+          disabled={isExecuting || orderId === null}
           className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isExecuting ? 'Đang mở...' : 'Mở đơn'}
