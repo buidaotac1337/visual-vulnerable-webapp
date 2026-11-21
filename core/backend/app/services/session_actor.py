@@ -4,6 +4,7 @@ The `X-VVWA-Actor` header plays the role of an authenticated session cookie:
 it is the trusted channel, while the JSON payload remains attacker-controlled.
 """
 
+from pathlib import Path
 from typing import Any
 
 from app.core import InvalidActorError
@@ -37,7 +38,12 @@ def normalize_actor_username(raw: str | None) -> str | None:
     return raw
 
 
-async def resolve_lab_context(db: LabDatabaseProtocol, username: str | None) -> LabContext:
+async def resolve_lab_context(
+    db: LabDatabaseProtocol,
+    username: str | None,
+    *,
+    upload_sandbox_dir: Path | None = None,
+) -> LabContext:
     """Build the trusted LabContext by looking the persona up in minishop.users.
 
     The role is read live on every call so privilege changes made by a lab
@@ -46,6 +52,7 @@ async def resolve_lab_context(db: LabDatabaseProtocol, username: str | None) -> 
     Args:
         db: Restricted lab_app_user database adapter.
         username: Persona name from the session header, or None if anonymous.
+        upload_sandbox_dir: Isolated upload sandbox directory from engine Settings.
 
     Returns:
         LabContext carrying the resolved actor, or an anonymous context.
@@ -55,12 +62,12 @@ async def resolve_lab_context(db: LabDatabaseProtocol, username: str | None) -> 
     """
     safe_name = normalize_actor_username(username)
     if safe_name is None:
-        return LabContext()
+        return LabContext(upload_sandbox_dir=upload_sandbox_dir)
     row = await db.fetch_one(_ACTOR_LOOKUP_SQL, safe_name)
     if row is None:
         msg = f"Unknown actor '{safe_name}'; press Reset DB if the seed user was removed."
         raise InvalidActorError(msg)
-    return LabContext(actor=LabActor.model_validate(row))
+    return LabContext(actor=LabActor.model_validate(row), upload_sandbox_dir=upload_sandbox_dir)
 
 
 def build_session_trace_step(ctx: LabContext) -> dict[str, Any]:

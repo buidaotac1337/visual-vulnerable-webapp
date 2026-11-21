@@ -10,6 +10,7 @@ Mỗi thư mục con là một bài lab độc lập, được backend tự phá
 | [`04-business-logic`](04-business-logic/README.md) | Business Logic — Giỏ hàng & Thanh toán MiniShop | Business Logic | Cơ bản |
 | [`05-mass-assignment`](05-mass-assignment/README.md) | Mass Assignment — Cập nhật hồ sơ khách hàng MiniShop | Access Control | Cơ bản |
 | [`06-path-traversal`](06-path-traversal/README.md) | Path Traversal — Tải hóa đơn MiniShop | File Handling | Cơ bản |
+| [`07-file-upload`](07-file-upload/README.md) | File Upload — Tải ảnh sản phẩm MiniShop | File Handling | Trung bình |
 
 ## Cấu trúc một lab
 

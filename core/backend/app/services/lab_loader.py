@@ -101,6 +101,8 @@ async def _run_handler(
     handler: Callable[..., Any],
     request: LabActionRequest,
     db: LabDatabaseProtocol,
+    *,
+    upload_sandbox_dir: Path | None = None,
 ) -> LabExecutionResponse:
     """Invoke a lab handler, injecting LabContext only when it declares `ctx`.
 
@@ -108,6 +110,7 @@ async def _run_handler(
         handler: Async lab handler function.
         request: Original lab action request carrying payload and actor.
         db: Restricted lab_app_user database adapter.
+        upload_sandbox_dir: Isolated upload sandbox directory from engine Settings.
 
     Returns:
         Normalized LabExecutionResponse or a structured runtime-error envelope.
@@ -118,7 +121,11 @@ async def _run_handler(
     engine_steps: list[dict[str, Any]] = []
     ctx: LabContext | None = None
     if _accepts_ctx(handler):
-        ctx = await resolve_lab_context(db, request.actor)
+        ctx = await resolve_lab_context(
+            db,
+            request.actor,
+            upload_sandbox_dir=upload_sandbox_dir,
+        )
         engine_steps.append(build_session_trace_step(ctx))
     try:
         if ctx is None:
@@ -134,6 +141,8 @@ async def execute_lab_action(
     labs_dir: Path,
     request: LabActionRequest,
     db: LabDatabaseProtocol,
+    *,
+    upload_sandbox_dir: Path | None = None,
 ) -> LabExecutionResponse:
     """Dynamically load and execute an async lab handler against the app DB.
 
@@ -141,6 +150,7 @@ async def execute_lab_action(
         labs_dir: Root directory containing educational labs.
         request: LabActionRequest specifying lab_id, mode, action, and payload.
         db: Restricted lab_app_user database adapter.
+        upload_sandbox_dir: Isolated upload sandbox directory from engine Settings.
 
     Returns:
         Normalized LabExecutionResponse with data, meta, and sequential trace.
@@ -167,4 +177,9 @@ async def execute_lab_action(
         msg = f"Async action '{safe_action}' not found in '{request.lab_id}/{request.mode}.py'."
         raise ActionNotFoundError(msg)
 
-    return await _run_handler(handler, request, db)
+    return await _run_handler(
+        handler,
+        request,
+        db,
+        upload_sandbox_dir=upload_sandbox_dir,
+    )

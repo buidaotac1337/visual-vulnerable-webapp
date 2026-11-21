@@ -17,13 +17,23 @@ from app.services.source_reader import (
     resolve_lab_dir,
     validate_lab_id,
 )
+from app.services.upload_sandbox import (
+    DEFAULT_WEBROOT_INDEX,
+    MAX_SANDBOX_UPLOAD_BYTES,
+    ensure_upload_sandbox,
+    reset_upload_sandbox,
+    write_within_sandbox_jail,
+)
 from app.services.verifier import verify_lab
 
 __all__ = [
     "ACTOR_HEADER",
+    "DEFAULT_WEBROOT_INDEX",
+    "MAX_SANDBOX_UPLOAD_BYTES",
     "LabActionRequest",
     "build_snippet_zip",
     "discover_labs",
+    "ensure_upload_sandbox",
     "execute_lab_action",
     "generate_unified_diff",
     "get_lab_metadata",
@@ -31,9 +41,11 @@ __all__ = [
     "normalize_actor_username",
     "parse_snippet_source",
     "read_lab_source",
+    "reset_upload_sandbox",
     "resolve_lab_context",
     "resolve_lab_dir",
     "validate_action_name",
     "validate_lab_id",
     "verify_lab",
+    "write_within_sandbox_jail",
 ]
