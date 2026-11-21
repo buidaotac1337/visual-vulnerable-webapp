@@ -1,0 +1,163 @@
+{
+  "id": "07-file-upload",
+  "title": "File Upload — Tải ảnh sản phẩm MiniShop",
+  "category": "File Handling",
+  "difficulty": "Trung bình",
+  "summary": "Trang quản lý ảnh sản phẩm của MiniShop chỉ kiểm tra header Content-Type từ trình duyệt rồi ghép thẳng tên file client gửi lên vào thư mục uploads/. Kẻ tấn công có thể giả mạo MIME để tải lên shell Python, file SVG chứa XSS, hoặc dùng '../' ghi đè index.html trong webroot.",
+  "safetyPattern": "Không tin Content-Type hay tên file của client: kiểm tra magic bytes của nội dung thật (PNG/JPEG/WebP) kèm giới hạn kích thước, tự sinh tên file ngẫu nhiên (UUID + đuôi suy ra từ magic bytes), và xác nhận đường dẫn đã resolve nằm chặt trong thư mục uploads/ (is_relative_to).",
+  "actors": ["admin", "alice"],
+  "samplePayloads": [
+    {
+      "label": "Ảnh PNG hợp lệ",
+      "description": "Luồng bình thường: tải ảnh PNG 1x1 hợp lệ cho sản phẩm #1.",
+      "actor": "admin",
+      "data": {
+        "product_id": 1,
+        "filename": "keyboard-new.png",
+        "content_type": "image/png",
+        "content_b64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGPwd3sKAAJiAXvBJn9xAAAAAElFTkSuQmCC"
+      }
+    },
+    {
+      "label": "Giả mạo MIME (shell.py)",
+      "description": "Đổi Content-Type thành image/png nhưng nội dung là mã Python thực thi.",
+      "actor": "admin",
+      "data": {
+        "product_id": 1,
+        "filename": "shell.py",
+        "content_type": "image/png",
+        "content_b64": "cHJpbnQoJ1JDRScp"
+      }
+    },
+    {
+      "label": "Stored XSS qua SVG",
+      "description": "image/svg+xml khớp tiền tố image/* nhưng chứa thẻ SVG thực thi onload.",
+      "actor": "admin",
+      "data": {
+        "product_id": 2,
+        "filename": "banner.svg",
+        "content_type": "image/svg+xml",
+        "content_b64": "PHN2ZyBvbmxvYWQ9ImFsZXJ0KDEpIj48L3N2Zz4="
+      }
+    },
+    {
+      "label": "Ghi đè webroot (../index.html)",
+      "description": "Path traversal thoát khỏi uploads/ để ghi đè trang chủ webroot/index.html.",
+      "actor": "admin",
+      "data": {
+        "product_id": 1,
+        "filename": "../index.html",
+        "content_type": "image/png",
+        "content_b64": "PGgxPkhhY2tlZCBNaW5pU2hvcDwvaDE+"
+      }
+    },
+    {
+      "label": "Traversal kèm ảnh thật (../evil.png)",
+      "description": "Kể cả khi magic bytes là PNG thật, tên file '../evil.png' vẫn thoát khỏi uploads/ nếu dùng tên client.",
+      "actor": "alice",
+      "data": {
+        "product_id": 1,
+        "filename": "../evil.png",
+        "content_type": "image/png",
+        "content_b64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGPwd3sKAAJiAXvBJn9xAAAAAElFTkSuQmCC"
+      }
+    }
+  ],
+  "verifyTests": [
+    {
+      "name": "Ảnh PNG hợp lệ được lưu an toàn trong uploads/",
+      "action": "upload_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 1,
+        "filename": "keyboard-new.png",
+        "content_type": "image/png",
+        "content_b64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGPwd3sKAAJiAXvBJn9xAAAAAElFTkSuQmCC"
+      },
+      "expect": {
+        "saved": true,
+        "escaped_uploads": false,
+        "detected_type": "png",
+        "stored_name": { "$contains": ".png" },
+        "url": { "$contains": "/uploads/" }
+      }
+    },
+    {
+      "name": "Chặn file thực thi giả mạo MIME (shell.py với image/png)",
+      "action": "upload_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 1,
+        "filename": "shell.py",
+        "content_type": "image/png",
+        "content_b64": "cHJpbnQoJ1JDRScp"
+      },
+      "expect": { "saved": false, "url": null }
+    },
+    {
+      "name": "Chặn file SVG chứa mã script (banner.svg)",
+      "action": "upload_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 2,
+        "filename": "banner.svg",
+        "content_type": "image/svg+xml",
+        "content_b64": "PHN2ZyBvbmxvYWQ9ImFsZXJ0KDEpIj48L3N2Zz4="
+      },
+      "expect": { "saved": false, "url": null }
+    },
+    {
+      "name": "Chặn ghi đè webroot qua tên file ../index.html",
+      "action": "upload_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 1,
+        "filename": "../index.html",
+        "content_type": "image/png",
+        "content_b64": "PGgxPkhhY2tlZCBNaW5pU2hvcDwvaDE+"
+      },
+      "expect": { "saved": false, "escaped_uploads": false, "url": null }
+    },
+    {
+      "name": "Tên file traversal (../evil.png) với PNG thật không thể thoát uploads/",
+      "action": "upload_image",
+      "actor": "alice",
+      "input": {
+        "product_id": 1,
+        "filename": "../evil.png",
+        "content_type": "image/png",
+        "content_b64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGPwd3sKAAJiAXvBJn9xAAAAAElFTkSuQmCC"
+      },
+      "expect": {
+        "saved": true,
+        "escaped_uploads": false,
+        "detected_type": "png",
+        "stored_name": { "$notContains": ".." },
+        "url": { "$contains": "/uploads/" }
+      }
+    },
+    {
+      "name": "Chặn file rỗng hoặc dữ liệu base64 trống",
+      "action": "upload_image",
+      "actor": "admin",
+      "input": {
+        "product_id": 1,
+        "filename": "empty.png",
+        "content_type": "image/png",
+        "content_b64": ""
+      },
+      "expect": { "saved": false, "url": null }
+    },
+    {
+      "name": "Chưa đăng nhập thì không thể upload ảnh",
+      "action": "upload_image",
+      "input": {
+        "product_id": 1,
+        "filename": "keyboard-new.png",
+        "content_type": "image/png",
+        "content_b64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGPwd3sKAAJiAXvBJn9xAAAAAElFTkSuQmCC"
+      },
+      "expect": { "saved": false, "url": null }
+    }
+  ]
+}

@@ -23,9 +23,9 @@ Trạng thái phát triển của nền tảng và danh sách bài lab trên Min
 
 - [x] **Lab 05: Mass Assignment** (Cập nhật hồ sơ khách hàng) — schema `ProfileUpdate` với `extra="forbid"`, `ctx`.
 - [x] **Lab 06: Path Traversal** (Tải hóa đơn) — tên file theo mẫu, `resolve()` + `is_relative_to()`, kiểm tra chủ sở hữu bằng `ctx`.
-- [ ] **File Upload** (Upload ảnh sản phẩm) — tách khỏi Lab 06; cần ADR cho sandbox ghi file, vì container backend mount `labs/` và `core/backend/app` với quyền ghi.
-- [ ] **Lab 07: Race Condition** (Áp mã giảm giá) — cần ADR cho test nhiều bước / đồng thời.
-- [ ] **Lab 08: SSRF** (Kiểm tra ảnh sản phẩm từ URL ngoài).
+- [x] **Lab 07: File Upload** (Tải ảnh sản phẩm MiniShop) — sandbox ghi file tách biệt có outer jail ([ADR-0007](adr/0007-file-upload-sandbox-isolation.md)), kiểm tra magic bytes, sinh tên UUID trong `uploads/`.
+- [ ] **Lab 08: Race Condition** (Áp mã giảm giá) — cần ADR cho test nhiều bước / đồng thời.
+- [ ] **Lab 09: SSRF** (Kiểm tra ảnh sản phẩm từ URL ngoài).
 
 ## Danh mục lab
 
@@ -37,6 +37,6 @@ Trạng thái phát triển của nền tảng và danh sách bài lab trên Min
 | 04 Business Logic | Giỏ hàng, thanh toán | Tin `price`, `quantity` (số âm) từ client | Tính lại giá từ DB, validate Pydantic `gt=0` | `ctx` |
 | 05 Mass Assignment | Hồ sơ khách hàng | Ghi thẳng `dict` vào DB (tự nâng `role`) | Pydantic schema giới hạn trường | `ctx` |
 | 06 Path Traversal | Tải hóa đơn | Ghép chuỗi đường dẫn | Tên file theo mẫu, `resolve()` + `is_relative_to()`, kiểm tra chủ sở hữu | `ctx` |
-| File Upload | Ảnh sản phẩm | Ghép tên file upload vào đường dẫn ghi | Tên file do server sinh, whitelist phần mở rộng | ADR sandbox ghi file |
-| 07 Race Condition | Mã giảm giá | Đọc–kiểm tra–ghi không khóa | `SELECT ... FOR UPDATE` / atomic update | `ctx`, ADR mới |
-| 08 SSRF | Ảnh sản phẩm từ URL | `httpx.get(url)` trực tiếp | Allowlist domain, chặn dải IP nội bộ | Dependency mới cần ADR |
+| 07 File Upload | Ảnh sản phẩm | Tin header `Content-Type`, ghép thẳng `filename` | Magic bytes, tên UUID, giới hạn trong `uploads/` | `ctx`, [ADR-0007](adr/0007-file-upload-sandbox-isolation.md) |
+| 08 Race Condition | Mã giảm giá | Đọc–kiểm tra–ghi không khóa | `SELECT ... FOR UPDATE` / atomic update | `ctx`, ADR mới |
+| 09 SSRF | Ảnh sản phẩm từ URL | `httpx.get(url)` trực tiếp | Allowlist domain, chặn dải IP nội bộ | Dependency mới cần ADR |

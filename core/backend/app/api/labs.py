@@ -16,6 +16,7 @@ from app.services import (
     discover_labs,
     execute_lab_action,
     read_lab_source,
+    reset_upload_sandbox,
     resolve_lab_dir,
     validate_action_name,
     validate_lab_id,
@@ -93,12 +94,18 @@ async def verify_lab_endpoint(
     """
     resolve_lab_dir(ctx.settings.labs_dir, lab_id)
     lab_db = await ctx.db_manager.get_lab_db()
-    reset_callback = ctx.db_manager.reset_database if reset_db else None
+
+    async def _reset_all() -> float:
+        duration_ms = await ctx.db_manager.reset_database()
+        reset_upload_sandbox(ctx.settings.upload_sandbox_dir)
+        return duration_ms
+
     return await verify_lab(
         labs_dir=ctx.settings.labs_dir,
         lab_id=lab_id,
         db=lab_db,
-        reset_fn=reset_callback,
+        reset_fn=_reset_all if reset_db else None,
+        upload_sandbox_dir=ctx.settings.upload_sandbox_dir,
     )
 
 
@@ -132,4 +139,9 @@ async def execute_lab_action_endpoint(
         payload=invocation.payload,
         actor=invocation.actor,
     )
-    return await execute_lab_action(ctx.settings.labs_dir, action_req, lab_db)
+    return await execute_lab_action(
+        ctx.settings.labs_dir,
+        action_req,
+        lab_db,
+        upload_sandbox_dir=ctx.settings.upload_sandbox_dir,
+    )

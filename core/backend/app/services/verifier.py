@@ -22,6 +22,8 @@ async def _run_single_test(
     lab_id: str,
     test_case: BackendVerifyTest,
     db: LabDatabaseProtocol,
+    *,
+    upload_sandbox_dir: Path | None = None,
 ) -> VerifyTestResult:
     """Execute one verification test case against a lab's vulnerable.py handler.
 
@@ -30,6 +32,7 @@ async def _run_single_test(
         lab_id: Identifier of the lab under test.
         test_case: Test assertion from meta.json verifyTests.
         db: Restricted lab_app_user database adapter.
+        upload_sandbox_dir: Isolated upload sandbox directory from engine Settings.
 
     Returns:
         VerifyTestResult describing pass/fail outcome and diagnostics.
@@ -42,7 +45,12 @@ async def _run_single_test(
         actor=test_case.actor,
     )
     try:
-        response = await execute_lab_action(labs_dir, action_req, db)
+        response = await execute_lab_action(
+            labs_dir,
+            action_req,
+            db,
+            upload_sandbox_dir=upload_sandbox_dir,
+        )
     except (ActionNotFoundError, InvalidActorError, InvalidLabIdError) as exc:
         return VerifyTestResult(
             name=test_case.name,
@@ -90,6 +98,8 @@ async def verify_lab(
     lab_id: str,
     db: LabDatabaseProtocol,
     reset_fn: Callable[[], Awaitable[float]] | None = None,
+    *,
+    upload_sandbox_dir: Path | None = None,
 ) -> VerifyLabResponse:
     """Run backend verifyTests against vulnerable.py; frontend tests run in the browser.
 
@@ -101,6 +111,7 @@ async def verify_lab(
         lab_id: Lab identifier to verify.
         db: Restricted lab_app_user database adapter.
         reset_fn: Optional async callback to reset the database before each test.
+        upload_sandbox_dir: Isolated upload sandbox directory from engine Settings.
 
     Returns:
         VerifyLabResponse summarizing aggregate pass status and per-test details.
@@ -111,7 +122,15 @@ async def verify_lab(
     for test_case in backend_tests:
         if reset_fn is not None:
             await reset_fn()
-        results.append(await _run_single_test(labs_dir, lab_id, test_case, db))
+        results.append(
+            await _run_single_test(
+                labs_dir,
+                lab_id,
+                test_case,
+                db,
+                upload_sandbox_dir=upload_sandbox_dir,
+            ),
+        )
 
     passed_count = sum(1 for item in results if item.passed)
     return VerifyLabResponse(

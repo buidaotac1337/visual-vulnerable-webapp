@@ -1,6 +1,7 @@
 """Session actor schemas injected into lab handlers that declare a `ctx` parameter (ADR-0005)."""
 
 import re
+from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
@@ -28,8 +29,10 @@ class LabContext(BaseModel):
 
     Attributes:
         actor: Logged-in persona, or None when the request is anonymous.
+        upload_sandbox_dir: Optional isolated sandbox directory for upload labs (ADR-0007).
     """
 
     model_config = ConfigDict(frozen=True)
 
     actor: LabActor | None = None
+    upload_sandbox_dir: Path | None = None
