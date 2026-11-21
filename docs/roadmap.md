@@ -19,7 +19,7 @@ Trạng thái phát triển của nền tảng và danh sách bài lab trên Min
 - [x] **Lab 03: IDOR / Broken Access Control** (Xem chi tiết đơn hàng) — kiểm tra chủ sở hữu bằng `ctx`.
 - [x] **Lab 04: Business Logic & Client-side Trust** (Giỏ hàng / Thanh toán) — tính lại giá từ DB, `quantity: int = Field(gt=0)`.
 
-## Giai đoạn 3 — Mở rộng (đang triển khai)
+## Giai đoạn 3 — Mở rộng ✅
 
 - [x] **Lab 05: Mass Assignment** (Cập nhật hồ sơ khách hàng) — schema `ProfileUpdate` với `extra="forbid"`, `ctx`.
 - [x] **Lab 06: Path Traversal** (Tải hóa đơn) — tên file theo mẫu, `resolve()` + `is_relative_to()`, kiểm tra chủ sở hữu bằng `ctx`.

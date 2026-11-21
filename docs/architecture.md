@@ -4,7 +4,7 @@ Tổng quan các service, luồng xử lý một request, module backend/fronten
 
 ## 1. Tổng quan
 
-VVWA gồm 3 service chạy bằng Docker Compose. Một backend FastAPI duy nhất vừa là engine điều phối, vừa thực thi mã của các bài lab.
+VVWA gồm 4 service chạy bằng Docker Compose. Một backend FastAPI chính vừa là engine điều phối, vừa thực thi mã của các bài lab; đi kèm một sidecar `internal-metadata` chỉ chạy trong mạng nội bộ Docker phục vụ Lab 09 SSRF.
 
 ```mermaid
 flowchart LR
@@ -12,6 +12,7 @@ flowchart LR
     FE -->|"proxy /api"| BE["backend\nFastAPI :8000"]
     BE -->|"lab_app_user"| DB[("postgres\nPostgreSQL 16 :5432")]
     BE -.->|"lab_admin_user\n(chỉ Reset DB)"| DB
+    BE -->|"HTTP nội bộ\n(Lab 09 SSRF)"| META["internal-metadata / minishop-cdn\nFastAPI :8090 (chỉ mạng nội bộ)"]
 
     Labs["labs/ trên máy host"] -. "bind mount" .-> FE
     Labs -. "bind mount" .-> BE
@@ -20,8 +21,9 @@ flowchart LR
 | Service | Vai trò | Volume mount |
 | :--- | :--- | :--- |
 | `frontend` | Workspace React, Vite dev server, proxy `/api` tới backend | `./core/frontend/src`, `./labs` |
-| `backend` | Phát hiện lab, thực thi handler, đọc mã nguồn, chấm bài, reset DB | `./core/backend/app`, `./core/postgres/seed.sql` (read-only), `./labs` |
+| `backend` | Phát hiện lab, thực thi handler, đọc mã nguồn, chấm bài, reset DB & sandbox upload | `./core/backend/app`, `./core/postgres/seed.sql` (read-only), `./labs` |
 | `postgres` | Database `minishop` | `init.sql`, `seed.sql` (read-only), volume `vvwa_pg_data` |
+| `internal-metadata` | Sidecar HTTP nội bộ cho Lab 09 SSRF (mock cloud metadata & demo `minishop-cdn`, không mở cổng host) | `./core/backend/app` |
 
 ## 2. Luồng thực thi một action
 
@@ -69,6 +71,7 @@ visual-vulnerable-webapp/
 │   │   ├── pyproject.toml           # Dependency backend (pin ==)
 │   │   ├── app/
 │   │   │   ├── main.py              # create_app(), CORS, ánh xạ lỗi miền -> HTTP
+│   │   │   ├── internal_demo.py     # Sidecar FastAPI nội bộ Lab 09 (mock metadata + CDN)
 │   │   │   ├── api/                 # Router mỏng: health, labs, system + deps
 │   │   │   ├── core/                # Settings, cây exception VvwaError
 │   │   │   ├── db/                  # LabDatabaseProtocol, AsyncpgLabDatabase, DatabaseManager
@@ -79,8 +82,8 @@ visual-vulnerable-webapp/
 │   │   ├── Dockerfile, vite.config.ts, vitest.config.ts, eslint.config.js
 │   │   └── src/
 │   │       ├── App.tsx, main.tsx
-│   │       ├── components/          # layout, sandbox, pipeline, inspector, verify
-│   │       ├── hooks/               # useLabWorkspace và các hook con
+│   │       ├── components/          # layout, sandbox, pipeline, inspector, verify, ui
+│   │       ├── hooks/               # useLabWorkspace, useWorkspaceLayout và các hook con
 │   │       ├── lib/                 # API client, trace engine, verifier, registry, highlighter
 │   │       ├── types/               # Kiểu API và workspace
 │   │       ├── styles/tokens.css    # Design tokens
@@ -104,18 +107,20 @@ Mỗi package Python trong `core/backend/app` và `scripts/quality` có `__init_
 | Module | Trách nhiệm |
 | :--- | :--- |
 | [`api/labs.py`](../core/backend/app/api/labs.py) | Endpoint danh sách, mã nguồn, tải snippet, verify và thực thi action |
-| [`api/system.py`](../core/backend/app/api/system.py) | `POST /api/system/reset-db` |
+| [`api/system.py`](../core/backend/app/api/system.py) | `POST /api/system/reset-db` (khôi phục DB và dọn sandbox upload) |
 | [`api/deps.py`](../core/backend/app/api/deps.py) | Dependency `Settings`, `DatabaseManager`; tách payload (không tin cậy) và actor (tin cậy) |
+| [`internal_demo.py`](../core/backend/app/internal_demo.py) | Sidecar HTTP nội bộ Lab 09: phân tách virtual host `minishop-cdn` (ảnh PNG, 302 redirect) và `internal-metadata` (mock IAM/config) |
 | [`services/lab_discovery.py`](../core/backend/app/services/lab_discovery.py) | Quét `labs/*/meta.json`, validate, bỏ qua lab lỗi kèm warning |
 | [`services/lab_loader.py`](../core/backend/app/services/lab_loader.py) | Nạp module lab từ đĩa, kiểm tra action, tiêm `ctx` khi handler khai báo |
 | [`services/lab_response.py`](../core/backend/app/services/lab_response.py) | Chuẩn hóa output handler thành `LabExecutionResponse`, đánh số trace, chặn tag `engine-*` |
 | [`services/session_actor.py`](../core/backend/app/services/session_actor.py) | Kiểm tra header `X-VVWA-Actor`, tra persona trong DB, sinh bước `engine-session` |
 | [`services/source_reader.py`](../core/backend/app/services/source_reader.py) | Kiểm tra `lab_id`, chống path traversal, parse `@snippet`/`@step`, tạo diff, đóng gói `.zip` |
 | [`services/frontend_sinks.py`](../core/backend/app/services/frontend_sinks.py) | Phát hiện cặp `frontend/vulnerable.tsx` + `secure.tsx` |
-| [`services/verifier.py`](../core/backend/app/services/verifier.py) | Chạy `verifyTests` tầng backend trên `vulnerable.py` |
+| [`services/upload_sandbox.py`](../core/backend/app/services/upload_sandbox.py) | Khởi tạo `webroot/` + `uploads/`, outer jail chống thoát khỏi `upload_sandbox_dir`, dọn sandbox khi reset |
+| [`services/verifier.py`](../core/backend/app/services/verifier.py) | Chạy `verifyTests` tầng backend trên `vulnerable.py` (tuần tự, hậu kiểm `checkAction`, và đồng thời `concurrency > 1`) |
 | [`services/expect_matcher.py`](../core/backend/app/services/expect_matcher.py) | So khớp `expect` (subset, toán tử `$contains`/`$notContains`) |
 | [`db/manager.py`](../core/backend/app/db/manager.py) | Pool `lab_app_user` khởi tạo lười; kết nối `lab_admin_user` ngắn hạn cho reset |
-| [`db/client.py`](../core/backend/app/db/client.py) | `LabDatabaseProtocol` cấp cho lab; chuẩn hóa `Decimal` → `float`, ngày giờ → ISO string |
+| [`db/client.py`](../core/backend/app/db/client.py) | `LabDatabaseProtocol` (kèm `db.transaction()` ghim 1 connection & savepoint); chuẩn hóa `Decimal` → `float`, ngày giờ → ISO string |
 
 Ánh xạ lỗi miền sang HTTP nằm tại [`main.py`](../core/backend/app/main.py), chi tiết xem [API Reference](api-reference.md#7-mã-lỗi).
 
@@ -129,6 +134,7 @@ Mỗi package Python trong `core/backend/app` và `scripts/quality` có `__init_
 | [`hooks/useLabActor.ts`](../core/frontend/src/hooks/useLabActor.ts) | Persona đang chọn theo từng lab |
 | [`hooks/useTracePlayback.ts`](../core/frontend/src/hooks/useTracePlayback.ts) | Máy trạng thái phát lại trace (600 ms/bước), lùi/tiến, nhảy theo tầng |
 | [`hooks/useLabVerify.ts`](../core/frontend/src/hooks/useLabVerify.ts) | Test My Fix: chạy song song test backend và frontend, gộp kết quả |
+| [`hooks/useWorkspaceLayout.ts`](../core/frontend/src/hooks/useWorkspaceLayout.ts) | Trạng thái và `localStorage` cho 3 chế độ bố cục (`split` / `code-focus` / `floating`), tỷ lệ chia `30%–70%`, thu gọn thẻ nổi |
 | [`hooks/useLabMaintenance.ts`](../core/frontend/src/hooks/useLabMaintenance.ts) | Reset DB, tải snippet |
 | [`lib/api.ts`](../core/frontend/src/lib/api.ts) | Client REST có kiểu cho mọi endpoint |
 | [`lib/labRegistry.ts`](../core/frontend/src/lib/labRegistry.ts) | Phát hiện `LabView.tsx` và cặp sink qua `import.meta.glob`, lazy-load theo `lab.id` |
@@ -137,7 +143,7 @@ Mỗi package Python trong `core/backend/app` và `scripts/quality` có `__init_
 | [`lib/domProbe.ts`](../core/frontend/src/lib/domProbe.ts) | Quét DOM tìm `script`, `on*`, `srcdoc`, URL `javascript:` |
 | [`lib/expectMatcher.ts`](../core/frontend/src/lib/expectMatcher.ts) | Bản TypeScript của matcher, cùng ngữ nghĩa với backend |
 | [`lib/highlighter.ts`](../core/frontend/src/lib/highlighter.ts) | Shiki (`python`, `tsx`, `sql`) render thành token React, không dùng `innerHTML` |
-| `components/` | `TopControlBar`, `ModeSwitch`, `LabWorkspace`, `SandboxPane`, `ActorSwitcher`, `PayloadChipBar`, `EmptyLabFallback`, `FlowPipeline`, `CodeInspector`, `GlowingCodeLine`, `TraceControls`, `UnifiedDiffView`, `VerifyModal` |
+| `components/` | `layout/` (`TopControlBar`, `ModeSwitch`, `LayoutModeSwitch`, `LabWorkspace`, `SplitDivider`), `sandbox/` (`SandboxPane`, `ActorSwitcher`, `PayloadChipBar`, `EmptyLabFallback`), `pipeline/` (`FlowPipeline`), `inspector/` (`CodeInspector`, `InspectorHeader`, `CodeSnippetView`, `GlowingCodeLine`, `TraceControls`, `UnifiedDiffView`), `verify/` (`VerifyModal`), `ui/` (`AddressBar`, `LabCard`, `PrimaryButton`, `ResultNotice`, `SubTabBar`, `TextField`, `Tooltip`) |
 
 ## 6. Lược đồ dữ liệu MiniShop
 
@@ -220,5 +226,8 @@ Reset DB mở một kết nối `lab_admin_user` ngắn hạn, chạy `seed.sql`
 | Danh tính đến từ phiên, không từ payload | Header `X-VVWA-Actor` được engine kiểm tra và tra DB; handler đọc `ctx.actor` |
 | Lab không giả mạo bước của engine | Tag bắt đầu bằng `engine-` do lab trả về bị từ chối |
 | Chấm frontend không thực thi payload | Render vào `document.implementation.createHTMLDocument`, không gắn vào trang thật |
+| Sandbox ghi file tách biệt có outer jail | `write_within_sandbox_jail()` ép đường dẫn resolve nằm trong `Settings.upload_sandbox_dir` (ngoài `labs/` và repo, trần 512 KiB); `reset_upload_sandbox()` dọn sau Reset DB và trước mỗi test verify |
+| Khóa giao dịch DB chống race condition | `db.transaction()` ghim truy vấn trên một connection duy nhất (hỗ trợ savepoint lồng nhau) để `SELECT ... FOR UPDATE` giữ lock hợp lệ dưới `lab_app_user` |
+| Sidecar SSRF nội bộ & phòng thủ 6 lớp | `internal-metadata` chỉ chạy trên mạng nội bộ Docker (không mở cổng host); `09-ssrf/secure.py` kiểm tra `ctx.actor`, scheme `http`/`https` không userinfo, hostname allowlist, lọc DNS/IP (kể cả `ipv4_mapped`), `follow_redirects=False`, `Content-Type` / magic bytes / kích thước `<= 256 KiB` |
 
-Lý do của từng quyết định: xem [ADR](adr/README.md), đặc biệt [ADR-0005](adr/0005-lab-session-actor-context.md) và [ADR-0006](adr/0006-frontend-sink-grading-and-verify-matchers.md).
+Lý do của từng quyết định: xem [ADR](adr/README.md), đặc biệt [ADR-0005](adr/0005-lab-session-actor-context.md), [ADR-0006](adr/0006-frontend-sink-grading-and-verify-matchers.md), [ADR-0007](adr/0007-file-upload-sandbox-isolation.md), [ADR-0008](adr/0008-db-transactions-and-concurrent-verify-tests.md) và [ADR-0009](adr/0009-ssrf-http-client-and-internal-target.md).

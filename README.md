@@ -12,6 +12,7 @@ Nền tảng lab bảo mật web chạy local. VVWA cho thấy từng bước th
 | Tính năng | Mô tả |
 | :--- | :--- |
 | **Chuyển chế độ tức thì** | Công tắc `Vulnerable ↔ Secure` ngay trên màn hình lab, giữ nguyên dữ liệu đã nhập để so sánh hai bản cài đặt. |
+| **Bố cục workspace (`lg+`)** | Ba chế độ màn hình desktop (`Song song` kéo thanh chia `30%–70%`, `Tập trung code`, `Sandbox nổi` có thể thu gọn), giữ nguyên dữ liệu đang nhập khi chuyển. |
 | **Live Trace** | Pipeline `MiniShop UI → FastAPI → PostgreSQL` và dòng code đang chạy phát sáng theo từng bước (đỏ: bị khai thác, xanh: đã chặn), kèm giá trị thực tế như câu SQL sau khi ghép chuỗi. |
 | **Code Inspector** | Đọc trực tiếp mã nguồn trên đĩa với các tab **Backend** / **Frontend** / **Diff**, tô màu cú pháp bằng Shiki. |
 | **Test My Fix** | Sửa `vulnerable.py` hoặc `vulnerable.tsx`, bấm một nút để chấm bằng bộ `verifyTests` khai báo trong `meta.json`. |
@@ -49,7 +50,9 @@ Cấu hình cổng, biến môi trường và xử lý sự cố: xem [Cài đ�
 | [`04-business-logic`](labs/04-business-logic/README.md) | Business Logic — Giỏ hàng & Thanh toán MiniShop | Business Logic | Cơ bản | Có sẵn |
 | [`05-mass-assignment`](labs/05-mass-assignment/README.md) | Mass Assignment — Cập nhật hồ sơ khách hàng MiniShop | Access Control | Cơ bản | Có sẵn |
 | [`06-path-traversal`](labs/06-path-traversal/README.md) | Path Traversal — Tải hóa đơn MiniShop | File Handling | Cơ bản | Có sẵn |
-| `07` | Race Condition — Áp mã giảm giá | Concurrency | — | Kế hoạch |
+| [`07-file-upload`](labs/07-file-upload/README.md) | File Upload — Tải ảnh sản phẩm MiniShop | File Handling | Trung bình | Có sẵn |
+| [`08-race-condition`](labs/08-race-condition/README.md) | Race Condition — Áp mã giảm giá MiniShop | Business Logic | Trung bình | Có sẵn |
+| [`09-ssrf`](labs/09-ssrf/README.md) | SSRF — Kiểm tra ảnh sản phẩm từ URL ngoài | SSRF | Trung bình | Có sẵn |
 
 Danh sách đầy đủ: [Lộ trình](docs/roadmap.md).
 
@@ -58,9 +61,9 @@ Danh sách đầy đủ: [Lộ trình](docs/roadmap.md).
 | Thành phần | Công nghệ |
 | :--- | :--- |
 | Frontend | React 19, TypeScript (strict), Vite 6, Tailwind CSS v4, Shiki, lucide-react, `pnpm` |
-| Backend | Python 3.12, FastAPI, Pydantic v2, `asyncpg`, `uv` workspace |
+| Backend | Python 3.12, FastAPI, Pydantic v2, `asyncpg`, `httpx`, `uv` workspace |
 | Database | PostgreSQL 16 (tách quyền `lab_app_user` / `lab_admin_user`) |
-| Môi trường chạy | Docker Compose (3 service: `frontend`, `backend`, `postgres`) |
+| Môi trường chạy | Docker Compose (4 service: `frontend`, `backend`, `postgres`, `internal-metadata` (nội bộ)) |
 | Chất lượng | Ruff, mypy `--strict`, ESLint, Prettier, Pytest, Vitest, `scripts/gates.py`, GitHub Actions |
 
 ## Cấu trúc repository
@@ -86,7 +89,7 @@ Chi tiết từng module: [Kiến trúc hệ thống](docs/architecture.md).
 | :--- | :--- |
 | [Cài đặt & Vận hành](docs/getting-started.md) | Yêu cầu hệ thống, chạy bằng Docker, cổng, biến môi trường, tài khoản seed, xử lý sự cố |
 | [Hướng dẫn sử dụng](docs/user-guide.md) | Bố cục workspace, các điều khiển, quy trình làm một bài lab, Test My Fix |
-| [Kiến trúc hệ thống](docs/architecture.md) | 3 service, luồng request, module backend/frontend, lược đồ DB, phân quyền, hot reload |
+| [Kiến trúc hệ thống](docs/architecture.md) | 4 service, luồng request, module backend/frontend, lược đồ DB, phân quyền, hot reload |
 | [API Reference](docs/api-reference.md) | Endpoint, cấu trúc response và `trace`, header phiên, mã lỗi, gói snippet |
 | [Tạo bài lab](docs/lab-authoring.md) | Cấu trúc lab, schema `meta.json`, hợp đồng handler, `@snippet`/`@step`, `LabView`, sink frontend, `verifyTests` |
 | [Design System](docs/design-system.md) | Màu ngữ nghĩa, typography, quy chuẩn component |

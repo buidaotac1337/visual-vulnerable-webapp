@@ -14,7 +14,7 @@ Schema SSOT: Pydantic trong [`core/backend/app/schemas/`](../core/backend/app/sc
 | `GET` | `/api/labs/{lab_id}/download` | Gói snippet `<lab_id>-fastapi.zip` |
 | `POST` | `/api/labs/{lab_id}/verify` | Chạy `verifyTests` tầng backend trên `vulnerable.py` |
 | `POST` | `/api/labs/{lab_id}/{mode}/{action}` | Thực thi một action của lab |
-| `POST` | `/api/system/reset-db` | Khôi phục dữ liệu MiniShop từ `seed.sql` |
+| `POST` | `/api/system/reset-db` | Khôi phục dữ liệu MiniShop từ `seed.sql` và dọn sandbox upload |
 
 Ràng buộc tham số đường dẫn:
 
@@ -34,7 +34,7 @@ Ràng buộc tham số đường dẫn:
 
 ### `POST /api/system/reset-db`
 
-Chạy lại `seed.sql` bằng `lab_admin_user` trong một transaction.
+Chạy lại `seed.sql` bằng `lab_admin_user` trong một transaction và dọn sạch thư mục sandbox upload (`reset_upload_sandbox`, [ADR-0007](adr/0007-file-upload-sandbox-isolation.md)) rồi seed lại `webroot/index.html`.
 
 ```json
 { "ok": true, "message": "MiniShop database has been reset to its clean seed state.", "duration_ms": 42.17 }
@@ -96,7 +96,7 @@ Response: `LabExecutionResponse` ([mục 4](#4-lab-execution-response--trace)).
 
 | Query | Mặc định | Ý nghĩa |
 | :--- | :--- | :--- |
-| `reset_db` | `false` | `true` để chạy lại `seed.sql` trước **mỗi** test |
+| `reset_db` | `false` | `true` để chạy lại `seed.sql` và dọn sandbox upload trước **mỗi** test |
 
 Workspace luôn gọi với `reset_db=true`. Endpoint chỉ chạy test có `layer` là `backend` (mặc định); test `frontend` do trình duyệt chạy và không có trong response.
 
