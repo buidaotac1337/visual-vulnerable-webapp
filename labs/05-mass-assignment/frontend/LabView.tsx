@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, JSX } from 'react';
 import { UserRound } from 'lucide-react';
 
-import type { LabPayload, LabViewProps } from '@/types';
+import type { LabExecutionResponse, LabPayload, LabViewProps } from '@/types';
 
 import { ExtraFields } from './ExtraFields';
 import { ProfileCard, UpdateNotice } from './ProfileCard';
@@ -17,8 +17,13 @@ function useProfile(props: LabViewProps): Profile | null {
   const [profile, setProfile] = useState<Profile | null>(null);
   const executeRef = useRef(onExecute);
   executeRef.current = onExecute;
-  // Only an applied update changes the stored profile; rejected ones need no reload.
-  const applied = readUpdate(lastResponse?.data)?.updated === true ? lastResponse : null;
+  // Only an applied update changes the stored profile. Remember the last one, so a later
+  // rejected update (or a cleared response) does not count as a change and reload again.
+  const appliedRef = useRef<LabExecutionResponse | null>(null);
+  if (readUpdate(lastResponse?.data)?.updated === true) {
+    appliedRef.current = lastResponse;
+  }
+  const applied = appliedRef.current;
 
   useEffect(() => {
     let active = true;
@@ -109,6 +114,7 @@ export function LabView(props: LabViewProps): JSX.Element {
           id="ma-email"
           type="text"
           value={readEmail(payload)}
+          disabled={isExecuting}
           onChange={(event) => onPayloadChange({ ...payload, [FORM_FIELD]: event.target.value })}
           className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-200"
         />

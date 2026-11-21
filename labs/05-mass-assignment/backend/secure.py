@@ -14,8 +14,6 @@ from app.schemas import LabContext
 
 _PROFILE_SQL = "SELECT id, username, email, role, balance FROM users WHERE id = $1"
 _EMAIL_TAKEN_SQL = "SELECT 1 FROM users WHERE email = $1 AND id <> $2"
-_UPDATE_EMAIL_SQL = "UPDATE users SET email = $1 WHERE id = $2"
-_EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
 Profile = dict[str, Any]
 Steps = list[dict[str, Any]]
@@ -73,12 +71,13 @@ def _invalid(exc: ValidationError, profile: Profile) -> dict[str, Any]:
     return _rejected(error, [step], profile, "normal")
 
 
-def _updated(before: Profile, after: Profile) -> dict[str, Any]:
+def _updated(before: Profile, after: Profile, sql: str) -> dict[str, Any]:
     """Build the trace and data of an applied email change.
 
     Args:
         before: Profile read before the update.
         after: Profile read after the update.
+        sql: UPDATE statement that was run.
 
     Returns:
         Lab execution dictionary.
@@ -96,7 +95,7 @@ def _updated(before: Profile, after: Profile) -> dict[str, Any]:
             "update-user",
             "info",
             "Cập nhật email",
-            f"{_UPDATE_EMAIL_SQL} -- email: {before['email']} -> {after['email']}",
+            f"{sql} -- email: {before['email']} -> {after['email']}",
         ),
     ]
     return {
@@ -123,7 +122,7 @@ class ProfileUpdate(BaseModel):
 
     # @step:profile-schema
     model_config = ConfigDict(extra="forbid")
-    email: str = Field(max_length=120, pattern=_EMAIL_PATTERN)
+    email: str = Field(max_length=120, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 async def update_profile(
@@ -151,10 +150,11 @@ async def update_profile(
         step = _step("database", "check-email", "info", "Email đã tồn tại", error)
         return _rejected(error, [step], before, "normal")
 
+    sql = "UPDATE users SET email = $1 WHERE id = $2"
     # @step:update-user
-    await db.execute(_UPDATE_EMAIL_SQL, changes["email"], actor.id)
+    await db.execute(sql, changes["email"], actor.id)
     after = await db.fetch_one(_PROFILE_SQL, actor.id) or {}
-    return _updated(before, after)
+    return _updated(before, after, sql)
 
 
 # @snippet:end

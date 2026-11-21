@@ -147,6 +147,12 @@ describe('Lab 04 Business Logic LabView', () => {
     expect(onExecute).toHaveBeenCalledTimes(2);
     expect(screen.getByRole('button', { name: /^Chuot/ })).toBeTruthy();
     expect(screen.getByText('$500.00')).toBeTruthy();
+
+    // A rejection right after a placed order is not a new order: no extra reload.
+    await act(async () => {
+      rerender(<LabView {...makeProps({ onExecute, lastResponse: rejected })} />);
+    });
+    expect(onExecute).toHaveBeenCalledTimes(2);
   });
 
   it('flags invalid cart fields and restarts a non-numeric quantity at 1', async () => {

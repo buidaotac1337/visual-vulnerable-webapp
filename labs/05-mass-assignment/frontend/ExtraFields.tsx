@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { JSX } from 'react';
+import type { JSX, KeyboardEvent } from 'react';
 import { Plus, X } from 'lucide-react';
 
 import type { LabPayload } from '@/types';
@@ -18,7 +18,7 @@ const INPUT_CLASS =
 function asText(value: unknown): string {
   return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
     ? String(value)
-    : JSON.stringify(value);
+    : ((JSON.stringify(value) as string | undefined) ?? '');
 }
 
 function withoutKey(payload: LabPayload, key: string): LabPayload {
@@ -45,6 +45,15 @@ export function ExtraFields({ payload, disabled, onChange }: ExtraFieldsProps): 
     onChange({ ...payload, [key]: newValue });
     setNewKey('');
     setNewValue('');
+  };
+  // These inputs sit inside the profile form: Enter adds the field instead of submitting.
+  const addOnEnter = (event: KeyboardEvent<HTMLInputElement>): void => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      if (canAdd) {
+        add();
+      }
+    }
   };
 
   return (
@@ -83,6 +92,7 @@ export function ExtraFields({ payload, disabled, onChange }: ExtraFieldsProps): 
           value={newKey}
           disabled={disabled}
           onChange={(event) => setNewKey(event.target.value)}
+          onKeyDown={addOnEnter}
           className={`${INPUT_CLASS} w-20 shrink-0`}
           style={{ fontFamily: 'var(--font-mono)' }}
         />
@@ -92,6 +102,7 @@ export function ExtraFields({ payload, disabled, onChange }: ExtraFieldsProps): 
           value={newValue}
           disabled={disabled}
           onChange={(event) => setNewValue(event.target.value)}
+          onKeyDown={addOnEnter}
           className={`${INPUT_CLASS} min-w-0 flex-1`}
         />
         <button

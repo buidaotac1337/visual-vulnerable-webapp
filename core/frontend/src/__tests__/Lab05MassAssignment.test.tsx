@@ -162,4 +162,48 @@ describe('Lab 05 Mass Assignment LabView', () => {
     expect(buildRenderSteps(crashed, readProfile(BOB))).toEqual([]);
     expect(escalations(null, readProfile(BOB))).toEqual([]);
   });
+
+  it('adds an extra field with Enter instead of submitting the profile form', async () => {
+    const props = makeProps({ payload: { email: 'bob@minishop.local' } });
+    render(<LabView {...props} />);
+    await screen.findByText('$250.00');
+    fireEvent.change(screen.getByLabelText('Tên trường mới'), { target: { value: 'role' } });
+    fireEvent.change(screen.getByLabelText('Giá trị trường mới'), { target: { value: 'admin' } });
+    fireEvent.keyDown(screen.getByLabelText('Giá trị trường mới'), { key: 'Enter' });
+    expect(props.onPayloadChange).toHaveBeenLastCalledWith({
+      email: 'bob@minishop.local',
+      role: 'admin',
+    });
+    expect(props.onExecute).not.toHaveBeenCalledWith(
+      'update_profile',
+      expect.anything(),
+      expect.anything(),
+    );
+  });
+
+  it('reloads after an applied update but not after a rejection that follows it', async () => {
+    const props = makeProps();
+    const { rerender } = render(<LabView {...props} />);
+    await screen.findByText('$250.00');
+    const applied = response({ updated: true, profile: BOB, error: null });
+    await act(async () => {
+      rerender(<LabView {...props} lastResponse={applied} />);
+    });
+    expect(props.onExecute).toHaveBeenCalledTimes(2);
+
+    const rejected = response({ updated: false, profile: BOB, error: 'Email không hợp lệ.' });
+    await act(async () => {
+      rerender(<LabView {...props} lastResponse={rejected} />);
+    });
+    expect(props.onExecute).toHaveBeenCalledTimes(2);
+  });
+
+  it('locks the form while saving and never compares profiles of two personas', async () => {
+    render(<LabView {...makeProps({ isExecuting: true })} />);
+    await screen.findByText('$250.00');
+    expect(screen.getByLabelText('Email')).toBeDisabled();
+
+    const alice = { ...BOB, id: 2, username: 'alice', email: 'alice@minishop.local', balance: 500 };
+    expect(escalations(readProfile(alice), readProfile(BOB))).toEqual([]);
+  });
 });

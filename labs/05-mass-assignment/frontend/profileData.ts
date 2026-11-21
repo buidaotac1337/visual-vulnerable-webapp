@@ -94,7 +94,8 @@ export function formatField(key: keyof Profile, profile: Profile): string {
  * @returns Lines such as 'role: customer → admin'.
  */
 export function escalations(before: Profile | null, after: Profile | null): string[] {
-  if (!before || !after) {
+  // A stale profile of another persona is not a 'before' for this one.
+  if (!before || !after || before.username !== after.username) {
     return [];
   }
   return PRIVILEGED.filter((key) => before[key] !== after[key]).map(
