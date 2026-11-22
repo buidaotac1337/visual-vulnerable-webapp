@@ -1,30 +1,98 @@
+import { useCallback, useEffect, useState } from 'react';
 import type { JSX } from 'react';
 
-import { CodeInspector, LabWorkspace, SandboxPane, TopControlBar, VerifyModal } from '@/components';
-import { useLabWorkspace, useTraceShortcuts, useWorkspaceLayout } from '@/hooks';
+import {
+  CodeInspector,
+  LabWorkspace,
+  SandboxPane,
+  TopControlBar,
+  WorkspaceModals,
+} from '@/components';
+import {
+  useLabWorkspace,
+  useLearningProgress,
+  useTraceShortcuts,
+  useWorkspaceLayout,
+} from '@/hooks';
+import type { LabWorkspaceController, LearningProgressController } from '@/hooks';
 import { computePipelineNodes, isFrontendVerifyTest } from '@/lib';
+
+function useProgressMilestoneSync(
+  ws: LabWorkspaceController,
+  progress: LearningProgressController,
+): void {
+  const { markExploredVulnerable, markComparedSecure, markViewedDiff, markPassedVerify } = progress;
+
+  useEffect(() => {
+    if (!ws.lastResponse || !ws.lastResponse.ok) {
+      return;
+    }
+    const { lab_id: labId, mode } = ws.lastResponse.meta;
+    if (mode === 'vulnerable') {
+      markExploredVulnerable(labId);
+    } else {
+      markComparedSecure(labId);
+    }
+  }, [ws.lastResponse, markExploredVulnerable, markComparedSecure]);
+
+  useEffect(() => {
+    if (ws.activeTab === 'diff' && ws.selectedLab) {
+      markViewedDiff(ws.selectedLab.id);
+    }
+  }, [ws.activeTab, ws.selectedLab, markViewedDiff]);
+
+  useEffect(() => {
+    if (ws.verifyResult?.passed) {
+      markPassedVerify(ws.verifyResult.lab_id);
+    }
+  }, [ws.verifyResult, markPassedVerify]);
+}
 
 /**
  * Root VVWA Dual-Surface Pedagogy application shell connecting the workspace
- * controller to TopControlBar, SandboxPane, CodeInspector, and VerifyModal.
+ * controller to TopControlBar, SandboxPane, CodeInspector, and WorkspaceModals.
  *
  * @returns Rendered root VVWA application element.
  */
 export function App(): JSX.Element {
   const ws = useLabWorkspace();
   const layout = useWorkspaceLayout();
+  const progress = useLearningProgress();
+  const [isCatalogOpen, setIsCatalogOpen] = useState<boolean>(false);
+  const [isGlossaryOpen, setIsGlossaryOpen] = useState<boolean>(false);
+  const [glossaryTermId, setGlossaryTermId] = useState<string | null>(null);
+
+  useProgressMilestoneSync(ws, progress);
+
+  const openGlossary = useCallback((termId?: string): void => {
+    setGlossaryTermId(termId ?? null);
+    setIsGlossaryOpen(true);
+  }, []);
+
+  const closeGlossary = useCallback((): void => {
+    setIsGlossaryOpen(false);
+    setGlossaryTermId(null);
+  }, []);
+
+  const openDiffTab = useCallback((): void => {
+    ws.setActiveTab('diff');
+  }, [ws]);
+
   useTraceShortcuts({
-    enabled: !ws.isVerifyModalOpen,
+    enabled: !(ws.isVerifyModalOpen || isCatalogOpen || isGlossaryOpen),
     hasTrace: ws.playback.trace.length > 0,
     onPrev: ws.playback.prevStep,
     onNext: ws.playback.nextStep,
     onTogglePlayPause: ws.playback.togglePlayPause,
   });
+
   const pipelineNodes = computePipelineNodes(
     ws.playback.trace,
     ws.playback.activeIndex,
     ws.playback.status !== 'idle',
   );
+  const hasFrontendTests = ws.selectedLab?.verifyTests.some(isFrontendVerifyTest) ?? false;
+  const selectedProgress = ws.selectedLab ? progress.getLabProgress(ws.selectedLab.id) : undefined;
 
   return (
     // lg:h-screen: a fixed-height root (not just min-h-screen) is what lets the two
@@ -37,12 +105,15 @@ export function App(): JSX.Element {
         selectedLab={ws.selectedLab}
         mode={ws.mode}
         layoutMode={layout.layoutMode}
+        passedLabsCount={progress.countPassedLabs(ws.labs)}
         isResettingDb={ws.isResettingDb}
         isVerifying={ws.isVerifying}
         isDownloading={ws.isDownloading}
         onSelectLab={ws.selectLab}
         onChangeMode={ws.changeMode}
         onChangeLayoutMode={layout.setLayoutMode}
+        onOpenCatalog={() => setIsCatalogOpen(true)}
+        onOpenGlossary={() => openGlossary()}
         onResetDb={() => {
           void ws.handleResetDb();
         }}
@@ -69,6 +140,8 @@ export function App(): JSX.Element {
             isLoadingLabs={ws.isLoadingLabs}
             lab={ws.selectedLab}
             mode={ws.mode}
+            activeTab={ws.activeTab}
+            hasFrontendSink={hasFrontendTests}
             actors={ws.actors}
             actor={ws.actor}
             payload={ws.payload}
@@ -82,12 +155,22 @@ export function App(): JSX.Element {
             activeTraceIndex={ws.playback.activeIndex}
             playbackStatus={ws.playback.status}
             playbackSpeed={ws.playback.speed}
+            showWelcomeBanner={!progress.onboardingDismissed && ws.selectedLab !== null}
+            labProgress={selectedProgress}
             onPayloadChange={ws.updatePayload}
             onChangeActor={ws.changeActor}
             onSelectSamplePayload={ws.applySamplePayload}
             onExecute={ws.executeAction}
             onSelectPipelineLayer={ws.selectPipelineLayer}
             onSelectPipelineStep={ws.playback.jumpToStep}
+            onDismissWelcome={progress.dismissOnboarding}
+            onOpenCatalog={() => setIsCatalogOpen(true)}
+            onOpenGlossary={openGlossary}
+            onSwitchMode={ws.changeMode}
+            onOpenDiff={openDiffTab}
+            onOpenVerify={() => {
+              void ws.handleVerify();
+            }}
           />
         }
         rightPane={
@@ -118,18 +201,16 @@ export function App(): JSX.Element {
         }
       />
 
-      <VerifyModal
-        isOpen={ws.isVerifyModalOpen}
-        labTitle={ws.selectedLab?.title ?? ''}
-        hasFrontendTests={ws.selectedLab?.verifyTests.some(isFrontendVerifyTest) ?? false}
-        mode={ws.mode}
-        isLoading={ws.isVerifying}
-        result={ws.verifyResult}
-        error={ws.verifyError}
-        onRerun={() => {
-          void ws.handleVerify();
-        }}
-        onClose={ws.closeVerifyModal}
+      <WorkspaceModals
+        ws={ws}
+        progress={progress}
+        hasFrontendTests={hasFrontendTests}
+        isCatalogOpen={isCatalogOpen}
+        isGlossaryOpen={isGlossaryOpen}
+        glossaryTermId={glossaryTermId}
+        onOpenDiff={openDiffTab}
+        onCloseCatalog={() => setIsCatalogOpen(false)}
+        onCloseGlossary={closeGlossary}
       />
     </div>
   );

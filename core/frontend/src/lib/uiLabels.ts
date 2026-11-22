@@ -95,6 +95,14 @@ export const UI_LABELS = {
     text: 'Về Song song',
     tip: 'Quay lại bố cục chia hai cột Song song.',
   },
+  labCatalog: {
+    text: 'Lộ trình',
+    tip: 'Xem danh mục các bài lab theo mức độ từ Cơ bản đến Trung bình và theo dõi tiến độ học.',
+  },
+  glossary: {
+    text: 'Từ điển',
+    tip: 'Tra cứu thuật ngữ bảo mật web và giao diện VVWA bằng ví dụ đời thường.',
+  },
 } as const satisfies Record<string, UiLabel>;
 
 /** Key of a workspace label in UI_LABELS. */

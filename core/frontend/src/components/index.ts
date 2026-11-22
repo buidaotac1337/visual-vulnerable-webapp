@@ -17,7 +17,15 @@ export type {
   TraceSpeedSwitchProps,
   TraceStepPillsProps,
 } from './inspector';
-export { LabWorkspace, LayoutModeSwitch, ModeSwitch, SplitDivider, TopControlBar } from './layout';
+export {
+  LabWorkspace,
+  LayoutModeSwitch,
+  ModeSwitch,
+  SplitDivider,
+  TopControlBar,
+  WorkspaceModals,
+} from './layout';
+export type { WorkspaceModalsProps } from './layout';
 export { FlowPipeline } from './pipeline';
 export type { FlowPipelineProps } from './pipeline';
 export {

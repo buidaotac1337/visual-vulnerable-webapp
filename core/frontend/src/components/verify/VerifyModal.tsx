@@ -4,13 +4,8 @@ import { X } from 'lucide-react';
 
 import type { LabMode, VerifyLabResponse } from '@/types';
 
-import {
-  BeginnerFixHint,
-  SecureModeNote,
-  VerifyBody,
-  VerifyFooter,
-  VerifySubtitle,
-} from './VerifyModalParts';
+import { BeginnerFixHint } from './VerifyFixHint';
+import { SecureModeNote, VerifyBody, VerifyFooter, VerifySubtitle } from './VerifyModalParts';
 
 /** Props for the Test My Fix verification modal dialog. */
 export interface VerifyModalProps {
@@ -54,8 +49,6 @@ export function VerifyModal(props: VerifyModalProps): JSX.Element | null {
 
   if (!isOpen) return null;
 
-  const showFixHint = Boolean(labId) || Boolean(result && !result.passed);
-
   return (
     <dialog
       ref={dialogRef}
@@ -88,7 +81,7 @@ export function VerifyModal(props: VerifyModalProps): JSX.Element | null {
         </button>
       </div>
       <div className="max-h-[65vh] overflow-y-auto p-5">
-        {showFixHint && <BeginnerFixHint labId={labId} hasFrontendTests={hasFrontendTests} />}
+        {labId && <BeginnerFixHint labId={labId} hasFrontendTests={hasFrontendTests} />}
         <VerifyBody isLoading={isLoading} result={result} error={error} />
       </div>
       <VerifyFooter
