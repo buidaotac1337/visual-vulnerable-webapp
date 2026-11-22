@@ -16,6 +16,7 @@ import type {
 import { CodeSnippetView } from './CodeSnippetView';
 import { InspectorHeader } from './InspectorHeader';
 import { TraceControls } from './TraceControls';
+import { TraceLegendBar } from './TraceLegendBar';
 import { UnifiedDiffView } from './UnifiedDiffView';
 import { useStepTabSwitch } from './useStepTabSwitch';
 
@@ -48,20 +49,36 @@ interface InspectorView {
   frontendFile: ResolvedFrontendFile | null;
 }
 
-function renderDiffTab(source: LabSourceResponse): JSX.Element {
+function resolveFullFilePath(lab: LabMetadata | null, view: InspectorView): string | null {
+  if (!lab || view.activeTab === 'diff') {
+    return null;
+  }
+  if (view.activeTab === 'frontend') {
+    return view.frontendFile ? `labs/${lab.id}/${view.frontendFile.label}` : null;
+  }
+  return `labs/${lab.id}/backend/${view.mode}.py`;
+}
+
+function renderDiffTab(source: LabSourceResponse, labId: string | null): JSX.Element {
+  const backendEditPath = labId ? `labs/${labId}/backend/vulnerable.py` : null;
+  const frontendEditPath = labId ? `labs/${labId}/frontend/vulnerable.tsx` : null;
   if (source.frontend_diff == null) {
-    return <UnifiedDiffView diff={source.diff} />;
+    return <UnifiedDiffView diff={source.diff} editFilePath={backendEditPath} />;
   }
   return (
     <div>
       <h3 className="px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
         Backend: vulnerable.py ↔ secure.py
       </h3>
-      <UnifiedDiffView diff={source.diff} />
+      <UnifiedDiffView diff={source.diff} editFilePath={backendEditPath} />
       <h3 className="border-t border-slate-700 px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
         Frontend: vulnerable.tsx ↔ secure.tsx
       </h3>
-      <UnifiedDiffView diff={source.frontend_diff} fileLabels={['vulnerable.tsx', 'secure.tsx']} />
+      <UnifiedDiffView
+        diff={source.frontend_diff}
+        fileLabels={['vulnerable.tsx', 'secure.tsx']}
+        editFilePath={frontendEditPath}
+      />
     </div>
   );
 }
@@ -115,6 +132,7 @@ function buildInspectorView(
 
 function renderInspectorBody(
   view: InspectorView,
+  lab: LabMetadata | null,
   source: LabSourceResponse | null,
   sourceError: string | null,
   target: StepHighlightTarget | null,
@@ -136,7 +154,7 @@ function renderInspectorBody(
     );
   }
   if (view.activeTab === 'diff') {
-    return renderDiffTab(source);
+    return renderDiffTab(source, lab ? lab.id : null);
   }
   return renderSnippetForTab(view, source, target, activeStep);
 }
@@ -204,12 +222,14 @@ export function CodeInspector({
         hasFrontendDiff={source?.frontend_diff != null}
         canRefresh={lab !== null}
         isRefreshing={isRefreshing}
+        fullFilePath={resolveFullFilePath(lab, view)}
         onSelectTab={pickTab}
         onRefreshSource={onRefreshSource}
       />
       <TabSwitchNote note={tabNote} />
+      <TraceLegendBar hasTrace={totalSteps > 0} activeTab={activeTab} mode={mode} />
       <div className="vvwa-ide-scroll min-h-0 flex-1 overflow-auto">
-        {renderInspectorBody(view, source, sourceError, target, activeStep)}
+        {renderInspectorBody(view, lab, source, sourceError, target, activeStep)}
       </div>
       <TraceControls
         totalSteps={totalSteps}

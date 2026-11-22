@@ -5,6 +5,7 @@ export {
   GlowingCodeLine,
   InspectorHeader,
   TraceControls,
+  TraceLegendBar,
   TraceSpeedSwitch,
   TraceStepPills,
   UnifiedDiffView,
@@ -12,6 +13,7 @@ export {
 export type {
   InspectorHeaderProps,
   TraceControlsProps,
+  TraceLegendBarProps,
   TraceSpeedSwitchProps,
   TraceStepPillsProps,
 } from './inspector';

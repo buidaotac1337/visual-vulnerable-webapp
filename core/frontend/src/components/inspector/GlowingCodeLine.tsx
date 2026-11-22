@@ -1,7 +1,7 @@
 import type { JSX, RefObject } from 'react';
 import { AlertOctagon, AlertTriangle, Info, ShieldCheck } from 'lucide-react';
 
-import type { CodeToken, TraceStatus, TraceStep } from '@/types';
+import type { CodeToken, TraceLayer, TraceStatus, TraceStep } from '@/types';
 
 interface GlowingCodeLineProps {
   lineNumber: number;
@@ -11,6 +11,8 @@ interface GlowingCodeLineProps {
 }
 
 interface StatusTheme {
+  label: string;
+  badge: string;
   border: string;
   bg: string;
   glow: string;
@@ -19,8 +21,16 @@ interface StatusTheme {
   icon: JSX.Element;
 }
 
+const LAYER_LABELS: Record<TraceLayer, string> = {
+  frontend: 'MiniShop UI',
+  backend: 'FastAPI Backend',
+  database: 'PostgreSQL DB',
+};
+
 const STATUS_THEMES: Record<TraceStatus, StatusTheme> = {
   danger: {
+    label: 'Lỗ hổng kích hoạt',
+    badge: 'border-danger-400/40 bg-danger-500/20 text-danger-200',
     border: 'border-l-[3px] border-l-danger-500',
     bg: 'bg-danger-soft',
     glow: 'var(--glow-danger)',
@@ -29,6 +39,8 @@ const STATUS_THEMES: Record<TraceStatus, StatusTheme> = {
     icon: <AlertOctagon className="h-4 w-4 shrink-0 text-danger-400" aria-hidden="true" />,
   },
   safe: {
+    label: 'Đã chặn an toàn',
+    badge: 'border-safe-400/40 bg-safe-500/20 text-safe-200',
     border: 'border-l-[3px] border-l-safe-500',
     bg: 'bg-safe-soft',
     glow: 'var(--glow-safe)',
@@ -37,6 +49,8 @@ const STATUS_THEMES: Record<TraceStatus, StatusTheme> = {
     icon: <ShieldCheck className="h-4 w-4 shrink-0 text-safe-400" aria-hidden="true" />,
   },
   warning: {
+    label: 'Cảnh báo rủi ro',
+    badge: 'border-warning-400/40 bg-warning-500/20 text-warning-200',
     border: 'border-l-[3px] border-l-warning-500',
     bg: 'bg-warning-soft',
     glow: 'var(--glow-warning)',
@@ -45,6 +59,8 @@ const STATUS_THEMES: Record<TraceStatus, StatusTheme> = {
     icon: <AlertTriangle className="h-4 w-4 shrink-0 text-warning-400" aria-hidden="true" />,
   },
   info: {
+    label: 'Xử lý bình thường',
+    badge: 'border-info-400/40 bg-info-500/20 text-info-200',
     border: 'border-l-[3px] border-l-info-500',
     bg: 'bg-info-soft',
     glow: 'var(--glow-info)',
@@ -96,14 +112,24 @@ export function GlowingCodeLine({
           role="note"
           className={`vvwa-callout-animate mx-4 my-2 rounded-lg border p-3 text-xs ${theme.calloutBorder} ${theme.calloutText}`}
         >
-          <div className="flex items-center gap-2 font-semibold">
-            {theme.icon}
-            <span>
-              Bước {activeStep.step}: {activeStep.title}
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-2 font-semibold">
+            <div className="flex items-center gap-2">
+              {theme.icon}
+              <span>
+                Bước {activeStep.step}: {activeStep.title}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 font-medium">
+              <span className="rounded-full border border-slate-600/70 bg-slate-900/80 px-2 py-0.5 text-[10px] text-slate-200">
+                {LAYER_LABELS[activeStep.layer]}
+              </span>
+              <span className={`rounded-full border px-2 py-0.5 text-[10px] ${theme.badge}`}>
+                {theme.label}
+              </span>
+            </div>
           </div>
           <p
-            className="mt-1.5 break-all rounded bg-slate-950/70 px-2.5 py-1.5 text-[12px] text-slate-100"
+            className="mt-1.5 whitespace-pre-wrap break-words rounded bg-slate-950/70 px-2.5 py-1.5 text-[12px] text-slate-100"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             {activeStep.detail}

@@ -5,6 +5,7 @@ import { UI_LABELS } from '@/lib';
 import type { InspectorTab, LabMode } from '@/types';
 
 import { Tooltip } from '../ui';
+import { CopyPathButton } from './CopyPathButton';
 
 /** Props for the Dark IDE inspector tab bar and refresh header. */
 export interface InspectorHeaderProps {
@@ -14,6 +15,7 @@ export interface InspectorHeaderProps {
   hasFrontendDiff: boolean;
   canRefresh: boolean;
   isRefreshing: boolean;
+  fullFilePath?: string | null;
   onSelectTab: (tab: InspectorTab) => void;
   onRefreshSource: () => void;
 }
@@ -53,6 +55,7 @@ export function InspectorHeader({
   hasFrontendDiff,
   canRefresh,
   isRefreshing,
+  fullFilePath = null,
   onSelectTab,
   onRefreshSource,
 }: InspectorHeaderProps): JSX.Element {
@@ -97,6 +100,7 @@ export function InspectorHeader({
         >
           {activeFileLabel}
         </span>
+        {fullFilePath && <CopyPathButton path={fullFilePath} />}
         <Tooltip tip={UI_LABELS.refreshSource.tip} align="end">
           <button
             type="button"
