@@ -5,6 +5,7 @@ export {
   GlowingCodeLine,
   InspectorHeader,
   TraceControls,
+  TraceLegendBar,
   TraceSpeedSwitch,
   TraceStepPills,
   UnifiedDiffView,
@@ -12,13 +13,29 @@ export {
 export type {
   InspectorHeaderProps,
   TraceControlsProps,
+  TraceLegendBarProps,
   TraceSpeedSwitchProps,
   TraceStepPillsProps,
 } from './inspector';
-export { LabWorkspace, LayoutModeSwitch, ModeSwitch, SplitDivider, TopControlBar } from './layout';
+export {
+  LabWorkspace,
+  LayoutModeSwitch,
+  ModeSwitch,
+  SplitDivider,
+  TopControlBar,
+  WorkspaceModals,
+} from './layout';
+export type { WorkspaceModalsProps } from './layout';
 export { FlowPipeline } from './pipeline';
 export type { FlowPipelineProps } from './pipeline';
-export { ActorSwitcher, EmptyLabFallback, PayloadChipBar, SandboxPane } from './sandbox';
+export {
+  ActorSwitcher,
+  EmptyLabFallback,
+  OutcomeCoachPanel,
+  PayloadChipBar,
+  SandboxPane,
+} from './sandbox';
+export type { OutcomeCoachPanelProps } from './sandbox';
 export {
   AddressBar,
   LabCard,
@@ -39,3 +56,7 @@ export type {
   TextFieldProps,
 } from './ui';
 export { VerifyModal } from './verify';
+export { GlossaryModal, LabBeginnerCard } from './guide';
+export type { GlossaryModalProps, LabBeginnerCardProps } from './guide';
+export { LabCatalogModal, LabStepperCard, WelcomeBanner } from './learning';
+export type { LabCatalogModalProps, LabStepperCardProps, WelcomeBannerProps } from './learning';

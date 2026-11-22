@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import type { JSX } from 'react';
 import { AlertOctagon, AlertTriangle, Info, ShieldCheck } from 'lucide-react';
 
-import { tokenizeCodeAsync, tokenizeCodeSyncFallback } from '@/lib';
+import { getCachedTokenLines, tokenizeCodeAsync, tokenizeCodeSyncFallback } from '@/lib';
 import type { CodeToken, HighlightLanguage, TraceStatus, TraceStep } from '@/types';
 
 import { GlowingCodeLine } from './GlowingCodeLine';
@@ -43,39 +43,45 @@ const UNMAPPED_THEMES: Record<TraceStatus, UnmappedTheme> = {
   },
 };
 
-/**
- * Render a syntax-highlighted source snippet with 1-based line numbers, smooth
- * auto-scrolling to the active @step line, and a status-themed top callout for unmapped steps.
- *
- * @param props - Source text, Shiki grammar language, resolved line number, and activeStep.
- * @returns Rendered IDE code block element.
- */
-export function CodeSnippetView({
+interface AsyncTokenState {
+  key: string;
+  lines: CodeToken[][];
+}
+
+function CodeSnippetViewInner({
   code,
   language,
   highlightedLine,
   activeStep,
 }: CodeSnippetViewProps): JSX.Element {
-  const [tokenLines, setTokenLines] = useState<CodeToken[][]>(() => tokenizeCodeSyncFallback(code));
+  const snippetKey = `${language}\0${code}`;
+  const cachedTokens = getCachedTokenLines(code, language);
+  const [asyncTokens, setAsyncTokens] = useState<AsyncTokenState | null>(null);
   const activeRowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    setTokenLines(tokenizeCodeSyncFallback(code));
+    if (getCachedTokenLines(code, language) !== null) {
+      return undefined;
+    }
     let cancelled = false;
     void tokenizeCodeAsync(code, language).then((resolved) => {
       if (!cancelled) {
-        setTokenLines(resolved);
+        setAsyncTokens({ key: snippetKey, lines: resolved });
       }
     });
     return () => {
       cancelled = true;
     };
-  }, [code, language]);
+  }, [code, language, snippetKey]);
+
+  const fallbackTokens = useMemo(() => tokenizeCodeSyncFallback(code), [code]);
+  const tokenLines =
+    cachedTokens ?? (asyncTokens?.key === snippetKey ? asyncTokens.lines : fallbackTokens);
 
   useEffect(() => {
     const node = activeRowRef.current;
     if (node && typeof node.scrollIntoView === 'function') {
-      node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      node.scrollIntoView({ behavior: 'auto', block: 'nearest' });
     }
   }, [highlightedLine, activeStep?.step]);
 
@@ -95,7 +101,7 @@ export function CodeSnippetView({
               Bước {activeStep.step}: {activeStep.title}
             </span>
           </div>
-          <p className="mt-1.5 break-all rounded bg-slate-950/70 px-2.5 py-1.5 text-[12px]">
+          <p className="mt-1.5 whitespace-pre-wrap break-words rounded bg-slate-950/70 px-2.5 py-1.5 text-[12px]">
             {activeStep.detail}
           </p>
         </div>
@@ -117,3 +123,12 @@ export function CodeSnippetView({
     </div>
   );
 }
+
+/**
+ * Render a syntax-highlighted source snippet with 1-based line numbers, zero-flash LRU
+ * Shiki caching, auto-scrolling to the active @step line, and unmapped step callouts.
+ *
+ * @param props - Source text, Shiki grammar language, resolved line number, and activeStep.
+ * @returns Memoized IDE code block element.
+ */
+export const CodeSnippetView = memo(CodeSnippetViewInner);

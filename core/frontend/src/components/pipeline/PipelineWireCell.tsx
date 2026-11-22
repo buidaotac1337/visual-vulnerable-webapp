@@ -84,8 +84,12 @@ function renderLaneRail(lane: PipelineLaneModel): JSX.Element {
       {lane.state === 'active' && (
         <span
           aria-hidden="true"
-          className={`absolute top-1/2 left-0 h-[7px] w-[7px] -translate-y-1/2 rounded-full ${PACKET_DOT_ACTIVE_CLASSES[lane.tone]} ${dotAnim}`}
-        />
+          className={`pointer-events-none absolute inset-0 flex items-center ${dotAnim}`}
+        >
+          <span
+            className={`h-[7px] w-[7px] rounded-full ${PACKET_DOT_ACTIVE_CLASSES[lane.tone]}`}
+          />
+        </span>
       )}
       <span
         aria-hidden="true"

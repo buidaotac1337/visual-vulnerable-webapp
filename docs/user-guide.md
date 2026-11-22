@@ -40,6 +40,8 @@ Workspace chia làm hai bề mặt:
 | Điều khiển | Chức năng |
 | :--- | :--- |
 | **Chọn bài lab** | Danh sách lab được backend tự phát hiện trong `labs/`. Đổi lab sẽ xóa trace và kết quả kiểm thử của lab trước. |
+| **Lộ trình (`X/9`)** | Mở hộp thoại danh mục các bài lab theo mức độ (`Cơ bản` → `Trung bình`), có tìm kiếm và thanh tiến độ số bài đã vượt qua **Test My Fix**. |
+| **Từ điển** | Mở từ điển bảo mật web tiếng Việt (giao diện VVWA, lỗ hổng, cách phòng vệ) kèm ví dụ đời thường cho người mới. |
 | **Badge API** | `API: OK (v…)` khi backend sẵn sàng; hiện thông báo lỗi khi không kết nối được. |
 | **Vulnerable / Secure** | Chọn bản cài đặt sẽ thực thi (`backend/vulnerable.py` hoặc `backend/secure.py`). Dữ liệu đã nhập được giữ nguyên khi gạt. |
 | **Bố cục workspace** (`lg+`) | Ba chế độ (lưu qua `localStorage`): **Song song** (chia hai cột, kéo thanh chia `30%`–`70%`; dùng `←`/`→` để chỉnh ±5%, nháy đúp hoặc `Home`/`End` để về `50%`), **Tập trung code** (Inspector toàn chiều rộng kèm nút **Về Song song**), và **Sandbox nổi** (thẻ nổi góc trên phải dưới thanh tab Inspector có nút **Thu gọn** / **Mở rộng** và **Về Song song**, tránh che dòng code và điều khiển trace). Dữ liệu đang nhập trong Sandbox luôn được giữ nguyên khi chuyển chế độ. |
@@ -51,12 +53,14 @@ Workspace chia làm hai bề mặt:
 
 | Khu vực | Chức năng |
 | :--- | :--- |
+| **Banner làm quen** | Chỉ hiện ở lần truy cập đầu (không chặn thao tác, ẩn vĩnh viễn khi bấm *Đã hiểu*), giới thiệu nhanh mô hình hai cột cùng lối tắt tới **Lộ trình** và **Từ điển**. |
 | **Pipeline** | Ba node `MiniShop UI → FastAPI → PostgreSQL`. Node sáng lên khi trace chạy tới tầng đó và giữ màu trạng thái nghiêm trọng nhất đã gặp. Bấm vào node để nhảy tới bước đầu tiên của tầng và dòng code tương ứng. |
-| **Thông tin lab** | Tiêu đề, nhóm lỗ hổng, mức độ và tóm tắt kịch bản. |
+| **Thông tin lab & Hiểu nhanh 30 giây** | Tiêu đề, nhóm lỗ hổng, mức độ, tóm tắt kịch bản và thẻ mở rộng giải thích bằng ví dụ đời thường, hậu quả thực tế, gợi ý thử nhanh, đường dẫn file cần sửa (sao chép 1-click) và chip mở thẳng **Từ điển**. |
+| **Checklist 4 bước học** | Tự động đánh dấu tiến độ 4 chặng (*Thử tấn công* → *So sánh bản vá* → *Xem Diff* → *Tự vá & chấm bài*) và cung cấp nút tắt chuyển chế độ/tab tương ứng (lưu trong `localStorage`). |
 | **Persona** | Chỉ hiện ở lab có khai báo `actors`. Chọn người dùng đang đăng nhập; giá trị được gửi qua header `X-VVWA-Actor`. |
 | **Giao diện lab** | Form MiniShop riêng của từng lab (`frontend/LabView.tsx`). Lab chưa có giao diện riêng dùng **generic runner**: nhập tên action và payload JSON rồi gửi. |
-| **Payload mẫu** | Chip điền sẵn dữ liệu vào form; ô nhập nháy nhẹ để báo vị trí vừa được điền. Chip có gắn persona sẽ đổi persona cùng lúc. |
-| **Phản hồi từ hệ thống** | JSON `data` trả về từ backend, kèm badge kết quả. |
+| **Payload mẫu** | Chip điền sẵn dữ liệu vào form, phân biệt trực quan giữa **Thử tấn công** và **Luồng hợp lệ**; ô nhập nháy nhẹ và nhắc người dùng bấm nút gửi. Chip có gắn persona sẽ đổi persona cùng lúc. |
+| **Phản hồi từ hệ thống** | Tóm tắt tiếng Việt *"Chuyện gì vừa xảy ra?"* kèm nút hành động gợi ý bước tiếp theo (ví dụ chuyển sang **Secure**, mở **Diff** hoặc chạy **Test My Fix**) và khối JSON `data` có thể thu gọn/mở rộng. |
 
 Badge kết quả:
 
@@ -71,11 +75,12 @@ Badge kết quả:
 
 | Thành phần | Chức năng |
 | :--- | :--- |
-| **Tab Backend (.py)** | File `backend/<mode>.py` đang chạy, chỉ hiển thị phần giữa `@snippet:start` và `@snippet:end`. |
+| **Tab Backend (.py)** | File `backend/<mode>.py` đang chạy, chỉ hiển thị phần giữa `@snippet:start` và `@snippet:end`, kèm nút sao chép nhanh đường dẫn tương đối (`labs/<id>/...`). |
 | **Tab Frontend (.tsx)** | File sink `frontend/<mode>.tsx` nếu lab có cặp sink, nếu không là `frontend/LabView.tsx`. Tab bị vô hiệu khi lab không có mã frontend. |
-| **Tab Diff** | Khác biệt giữa bản lỗi và bản vá; lab có cặp sink frontend hiển thị thêm diff `.tsx`. |
+| **Tab Diff** | Khác biệt giữa bản lỗi và bản vá kèm dải hướng dẫn đọc ký hiệu `-` (dòng lỗi cần bỏ/sửa) / `+` (dòng an toàn thay thế) và nút sao chép đường dẫn file cần sửa; lab có cặp sink frontend hiển thị thêm diff `.tsx`. |
+| **Chú giải màu trace** | Dải gọn ngay dưới thanh tab giải thích 4 màu trạng thái (`Thông tin`, `Cảnh báo`, `Lỗ hổng`, `Đã chặn`) và mẹo khởi đầu khi chưa có trace. |
 | **Làm mới** | Đọc lại mã nguồn từ đĩa. Việc này cũng tự diễn ra khi cửa sổ được focus lại. |
-| **Dòng phát sáng** | Dòng ứng với bước trace hiện tại, màu theo trạng thái, kèm **Inline Callout** hiển thị tiêu đề và giá trị thực tế của bước. Khi bước nằm ở file khác, Inspector tự chuyển tab Backend/Frontend và ghi rõ "đã chuyển tab" trên thanh tab; tab Diff không bị tự chuyển. |
+| **Dòng phát sáng** | Dòng ứng với bước trace hiện tại, màu theo trạng thái, kèm **Inline Callout** hiển thị badge tầng (`MiniShop UI` / `FastAPI Backend` / `PostgreSQL DB`), badge trạng thái, tiêu đề và giá trị thực tế của bước. Khi bước nằm ở file khác, Inspector tự chuyển tab Backend/Frontend và ghi rõ "đã chuyển tab" trên thanh tab; tab Diff không bị tự chuyển. |
 | **Điều khiển phát & tiến độ** | Thanh tiến độ ở mép trên `TraceControls`, nút **Trước**, nút chuyển trạng thái **Phát / Dừng / Phát lại**, nút **Sau** và bộ đếm `Bước X / Y`. |
 | **Tốc độ phát (`Tốc độ`)** | Bốn mức lưu qua `localStorage` (`vvwa.traceSpeed`): **Tay** (thủ công, dừng ngay ở bước 1 không tự chạy), **0.5×** (`1.2 giây/bước`), **1×** (`0.6 giây/bước`, mặc định) và **2×** (`0.3 giây/bước`). |
 | **Thanh pill bước trace** | Hàng nút số bước kèm chấm màu trạng thái; rê chuột hoặc focus để xem tiêu đề bước và bấm để nhảy thẳng tới bước đó. |

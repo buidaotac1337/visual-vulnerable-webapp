@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import type { JSX } from 'react';
 
 import { derivePipelineModel } from '@/lib';
@@ -182,7 +182,7 @@ function buildResetKey(lastRequest: LastExecutionRequest | null, traceLength: nu
  * @param props - Pipeline node models, active trace state, request/response envelopes, and callbacks.
  * @returns Rendered FlowPipeline card section.
  */
-export function FlowPipeline(props: FlowPipelineProps): JSX.Element {
+function FlowPipelineInner(props: FlowPipelineProps): JSX.Element {
   const { trace, activeIndex, playbackStatus, playbackSpeed, lastRequest, lastResponse } =
     normalizePipelineProps(props);
 
@@ -258,3 +258,8 @@ export function FlowPipeline(props: FlowPipelineProps): JSX.Element {
     </section>
   );
 }
+
+/**
+ * Memoized 3-tier Full Data Journey FlowPipeline visualizer.
+ */
+export const FlowPipeline = memo(FlowPipelineInner);

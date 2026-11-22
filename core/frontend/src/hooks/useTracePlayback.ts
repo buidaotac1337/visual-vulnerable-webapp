@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { findNextStepIndexForLayer } from '@/lib';
 import type { PlaybackStatus, TraceLayer, TracePlaybackSpeed, TraceStep } from '@/types';
@@ -65,6 +65,10 @@ export function useTracePlayback(intervalMs = TRACE_STEP_INTERVAL_MS): TracePlay
   const [speed, setSpeedState] = useState<TracePlaybackSpeed>(loadInitialTraceSpeed);
   const speedRef = useRef<TracePlaybackSpeed>(speed);
   speedRef.current = speed;
+  const activeIndexRef = useRef<number>(activeIndex);
+  activeIndexRef.current = activeIndex;
+  const traceRef = useRef<readonly TraceStep[]>(trace);
+  traceRef.current = trace;
 
   const stepDelayMs = resolveStepDelayMs(speed, intervalMs);
 
@@ -190,35 +194,51 @@ export function useTracePlayback(intervalMs = TRACE_STEP_INTERVAL_MS): TracePlay
     [trace.length],
   );
 
-  const jumpToLayer = useCallback(
-    (layer: TraceLayer): void => {
-      const targetIndex = findNextStepIndexForLayer(trace, layer, activeIndex);
-      if (targetIndex < 0) {
-        return;
-      }
-      setStatus('paused');
-      setActiveIndex(targetIndex);
-    },
-    [trace, activeIndex],
-  );
+  const jumpToLayer = useCallback((layer: TraceLayer): void => {
+    const targetIndex = findNextStepIndexForLayer(traceRef.current, layer, activeIndexRef.current);
+    if (targetIndex < 0) {
+      return;
+    }
+    setStatus('paused');
+    setActiveIndex(targetIndex);
+  }, []);
 
   const activeStep = activeIndex >= 0 ? (trace[activeIndex] ?? null) : null;
 
-  return {
-    trace,
-    activeIndex,
-    activeStep,
-    status,
-    speed,
-    startTrace,
-    clearTrace,
-    replay,
-    pause,
-    togglePlayPause,
-    setSpeed,
-    prevStep,
-    nextStep,
-    jumpToStep,
-    jumpToLayer,
-  };
+  return useMemo(
+    () => ({
+      trace,
+      activeIndex,
+      activeStep,
+      status,
+      speed,
+      startTrace,
+      clearTrace,
+      replay,
+      pause,
+      togglePlayPause,
+      setSpeed,
+      prevStep,
+      nextStep,
+      jumpToStep,
+      jumpToLayer,
+    }),
+    [
+      trace,
+      activeIndex,
+      activeStep,
+      status,
+      speed,
+      startTrace,
+      clearTrace,
+      replay,
+      pause,
+      togglePlayPause,
+      setSpeed,
+      prevStep,
+      nextStep,
+      jumpToStep,
+      jumpToLayer,
+    ],
+  );
 }

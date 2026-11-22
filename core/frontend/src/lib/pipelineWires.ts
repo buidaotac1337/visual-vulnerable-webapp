@@ -3,7 +3,9 @@ import type {
   LastExecutionRequest,
   PipelineLaneModel,
   PipelineTraceModel,
+  PipelineWireKey,
   PipelineWirePair,
+  PipelineWirePayload,
   TraceLayer,
   TraceStep,
 } from '@/types';
@@ -149,6 +151,36 @@ export function formatHopRoute(prev: TraceStep | null, active: TraceStep | null)
     : `${LAYER_SHORT[prev.layer]} → ${LAYER_SHORT[active.layer]} (trả về)`;
 }
 
+interface WirePayloadCache {
+  trace: readonly TraceStep[];
+  lastRequest: LastExecutionRequest | null;
+  lastResponse: LabExecutionResponse | null;
+  blockedBeforeDb: boolean;
+  value: Record<PipelineWireKey, PipelineWirePayload>;
+}
+
+let wirePayloadCache: WirePayloadCache | null = null;
+
+function getMemoizedWirePayloads(
+  trace: readonly TraceStep[],
+  lastRequest: LastExecutionRequest | null,
+  lastResponse: LabExecutionResponse | null,
+  blockedBeforeDb: boolean,
+): Record<PipelineWireKey, PipelineWirePayload> {
+  if (
+    wirePayloadCache &&
+    wirePayloadCache.trace === trace &&
+    wirePayloadCache.lastRequest === lastRequest &&
+    wirePayloadCache.lastResponse === lastResponse &&
+    wirePayloadCache.blockedBeforeDb === blockedBeforeDb
+  ) {
+    return wirePayloadCache.value;
+  }
+  const value = buildWirePayloads(trace, lastRequest, lastResponse, blockedBeforeDb);
+  wirePayloadCache = { trace, lastRequest, lastResponse, blockedBeforeDb, value };
+  return value;
+}
+
 /**
  * Derive dual-lane directional wire states, DB block gate status, hop badge, and real wire
  * hover payloads purely from the active trace and execution envelope.
@@ -212,6 +244,6 @@ export function derivePipelineModel(
     activeStep,
     prevStep,
     hopRoute: formatHopRoute(prevStep, activeStep),
-    wirePayloads: buildWirePayloads(trace, lastRequest, lastResponse, blockedBeforeDb),
+    wirePayloads: getMemoizedWirePayloads(trace, lastRequest, lastResponse, blockedBeforeDb),
   };
 }

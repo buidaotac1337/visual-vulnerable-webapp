@@ -123,9 +123,11 @@ Thanh điều khiển phát lại trace ở đáy Dark IDE Inspector gồm:
 * **`TraceStepPills`:** các pill số bước kèm chấm trạng thái (`bg-info-400`, `bg-warning-400`, `bg-danger-400`, `bg-safe-400`); bước đang chọn nổi bật nền sáng (`bg-slate-100 text-slate-900`, `aria-current="step"`) và bấm để nhảy thẳng tới bước đó.
 * **Phím tắt toàn cục (`useTraceShortcuts`):** `←` / `→` chuyển bước và `Space` phát/tạm dừng/phát lại khi có trace và không có modal che; tự động nhường cho ô nhập liệu (`input`, `textarea`, `select`, `contentEditable`) và widget ARIA (`radiogroup`, `tablist`, `separator`, `button`, liên kết).
 
-### `PayloadChipBar`
+### `PayloadChipBar` & Trải nghiệm người mới
 
-Chip dạng pill (`rounded-full`, `border-dashed`). Bấm chip điền dữ liệu vào form và kích hoạt hiệu ứng nháy ô nhập (`450ms`). Chip vừa chọn chuyển sang viền liền (`aria-pressed`), và mô tả của nó hiện thành dòng chữ ngay dưới hàng chip, không chỉ nằm trong tooltip.
+Chip dạng pill (`rounded-full`, `border-dashed`), phân biệt trực quan giữa **Thử tấn công** (`danger` tinh tế + icon `ShieldAlert` ẩn với screen reader) và **Luồng hợp lệ** (`safe` tinh tế + icon `CheckCircle2` ẩn với screen reader) trong khi vẫn giữ nguyên tên truy cập của chip. Bấm chip điền dữ liệu vào form, kích hoạt hiệu ứng nháy ô nhập (`450ms`), giữ viền liền (`aria-pressed`), hiển thị mô tả kèm gợi ý bấm nút gửi ngay bên dưới.
+
+Các thành phần hỗ trợ người mới (`WelcomeBanner`, `LabBeginnerCard`, `LabStepperCard`, `OutcomeCoachPanel`, `LabCatalogModal`, `GlossaryModal`, `TraceLegendBar`) đều tuân thủ cùng hệ màu ngữ nghĩa, dùng `<dialog>` chuẩn HTML, và không chặn thao tác trực tiếp trên MiniShop Sandbox.
 
 ### Primitive dùng chung (`core/frontend/src/components/ui/`)
 

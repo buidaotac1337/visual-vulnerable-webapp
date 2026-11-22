@@ -21,7 +21,7 @@ export {
   resolveFrontendFile,
 } from './sourceFiles';
 export type { ResolvedFrontendFile } from './sourceFiles';
-export { tokenizeCodeAsync, tokenizeCodeSyncFallback } from './highlighter';
+export { getCachedTokenLines, tokenizeCodeAsync, tokenizeCodeSyncFallback } from './highlighter';
 export { getLazyLabView, hasLabView, loadFrontendSinkModule } from './labRegistry';
 export { probeDom, isJavascriptUrl } from './domProbe';
 export type { DomObservation } from './domProbe';
@@ -41,3 +41,9 @@ export {
   mergeExecutionTrace,
   resolveStepTarget,
 } from './traceEngine';
+export { getLabBeginnerGuide, LAB_BEGINNER_GUIDES } from './beginnerContent';
+export type { LabBeginnerGuide } from './beginnerContent';
+export { filterGlossary, findGlossaryEntry, SECURITY_GLOSSARY } from './securityGlossary';
+export type { GlossaryCategory, GlossaryEntry } from './securityGlossary';
+export { classifySamplePayload, deriveOutcomeCoaching } from './outcomeCoach';
+export type { CoachCtaKind, OutcomeCoaching, PayloadIntent } from './outcomeCoach';

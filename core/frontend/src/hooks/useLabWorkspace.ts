@@ -107,15 +107,19 @@ export function useLabWorkspace(): LabWorkspaceController {
   const inFlightRef = useRef<number>(0);
 
   const playback = useTracePlayback();
+  const { clearTrace, jumpToLayer, startTrace } = playback;
   const { source, sourceError, isRefreshingSource, refreshSource } =
     useLabSourceSync(selectedLabId);
   const maintenance = useLabMaintenance({ selectedLabId, setDbResetSeq, setNotice });
   const verify = useLabVerify({ selectedLab, activeCtxRef, refreshSource, setDbResetSeq });
+  const { resetVerifyState } = verify;
 
   const payload = useMemo<LabPayload>(
     () => (selectedLab ? (payloadsByLab[selectedLab.id] ?? defaultPayloadForLab(selectedLab)) : {}),
     [selectedLab, payloadsByLab],
   );
+  const payloadRef = useRef<LabPayload>(payload);
+  payloadRef.current = payload;
 
   const selectLab = useCallback(
     (labId: string): void => {
@@ -124,10 +128,10 @@ export function useLabWorkspace(): LabWorkspaceController {
       setLastRequest(null);
       setLastResponse(null);
       setNotice(null);
-      verify.resetVerifyState();
-      playback.clearTrace();
+      resetVerifyState();
+      clearTrace();
     },
-    [setSelectedLabId, verify, playback],
+    [setSelectedLabId, resetVerifyState, clearTrace],
   );
 
   const changeMode = useCallback(
@@ -136,9 +140,9 @@ export function useLabWorkspace(): LabWorkspaceController {
       setLastRequest(null);
       setLastResponse(null);
       setNotice(null);
-      playback.clearTrace();
+      clearTrace();
     },
-    [playback],
+    [clearTrace],
   );
 
   const changeActor = useCallback(
@@ -150,18 +154,18 @@ export function useLabWorkspace(): LabWorkspaceController {
       setLastRequest(null);
       setLastResponse(null);
       setNotice(null);
-      playback.clearTrace();
+      clearTrace();
     },
-    [actor, actors, setActor, playback],
+    [actor, actors, setActor, clearTrace],
   );
 
   const selectPipelineLayer = useCallback(
     (layer: TraceLayer): void => {
-      playback.jumpToLayer(layer);
+      jumpToLayer(layer);
       const hasFrontend = resolveFrontendFile(source, mode) !== null;
       setActiveTab(layer === 'frontend' && hasFrontend ? 'frontend' : 'backend');
     },
-    [playback, source, mode],
+    [jumpToLayer, source, mode],
   );
 
   const updatePayload = useCallback(
@@ -201,7 +205,7 @@ export function useLabWorkspace(): LabWorkspaceController {
         mode,
         actor,
         action,
-        body: overridePayload ?? payload,
+        body: overridePayload ?? payloadRef.current,
       };
       const silent = options?.silent === true;
       inFlightRef.current += 1;
@@ -214,7 +218,7 @@ export function useLabWorkspace(): LabWorkspaceController {
         if (!silent && isSameContext(activeCtxRef.current, req)) {
           setLastRequest(req);
           setLastResponse(execResp);
-          playback.startTrace(buildMergedTrace(execResp, options));
+          startTrace(buildMergedTrace(execResp, options));
         }
         return execResp;
       } catch (error: unknown) {
@@ -227,7 +231,7 @@ export function useLabWorkspace(): LabWorkspaceController {
         setIsExecuting(inFlightRef.current > 0);
       }
     },
-    [selectedLabId, payload, mode, actor, refreshSource, playback],
+    [selectedLabId, mode, actor, refreshSource, startTrace],
   );
 
   return {

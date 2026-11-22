@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { JSX } from 'react';
 import { CheckCircle2, Download, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
 
@@ -8,6 +9,7 @@ import { Tooltip } from '../ui';
 
 import { LayoutModeSwitch } from './LayoutModeSwitch';
 import { ModeSwitch } from './ModeSwitch';
+import { ToolbarLabNav } from './ToolbarLabNav';
 
 interface TopControlBarProps {
   health: HealthResponse | null;
@@ -16,12 +18,15 @@ interface TopControlBarProps {
   selectedLab: LabMetadata | null;
   mode: LabMode;
   layoutMode?: WorkspaceLayoutMode;
+  passedLabsCount?: number;
   isResettingDb: boolean;
   isVerifying: boolean;
   isDownloading: boolean;
   onSelectLab: (labId: string) => void;
   onChangeMode: (nextMode: LabMode) => void;
   onChangeLayoutMode?: (nextMode: WorkspaceLayoutMode) => void;
+  onOpenCatalog?: () => void;
+  onOpenGlossary?: () => void;
   onResetDb: () => void;
   onVerify: () => void;
   onDownloadSnippet: () => void;
@@ -31,7 +36,7 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
   if (health) {
     return (
       <span
-        className="hidden rounded-full bg-safe-50 px-2.5 py-1 text-xs font-medium text-safe-700 xl:inline-flex"
+        className="hidden shrink-0 whitespace-nowrap rounded-full bg-safe-50 px-2.5 py-1 text-xs font-medium text-safe-700 xl:inline-flex"
         title={`${health.service} (${health.environment})`}
       >
         API: {health.status.toUpperCase()} (v{health.version})
@@ -40,13 +45,13 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
   }
   if (apiError) {
     return (
-      <span className="rounded-full bg-warning-50 px-2.5 py-1 text-xs font-medium text-warning-700">
+      <span className="shrink-0 whitespace-nowrap rounded-full bg-warning-50 px-2.5 py-1 text-xs font-medium text-warning-700">
         {apiError}
       </span>
     );
   }
   return (
-    <span className="hidden rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 xl:inline-flex">
+    <span className="hidden shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 xl:inline-flex">
       Connecting API...
     </span>
   );
@@ -58,17 +63,8 @@ interface StableLabelProps {
   isBusy: boolean;
 }
 
-/**
- * Button label that keeps the width of its longest text, so the toolbar does not shift
- * when a button switches to its busy text (works at any font size or zoom level).
- *
- * @param props - Idle text, busy text, and busy flag.
- * @returns Both texts stacked in one grid cell, only the current one visible.
- */
 function StableLabel({ label, busyLabel, isBusy }: StableLabelProps): JSX.Element {
   return (
-    // Both texts share one grid cell, so the cell is as wide as the wider text; the hidden
-    // one is also aria-hidden, so the button's accessible name is the visible text.
     <span className="grid">
       <span aria-hidden={isBusy} className={`col-start-1 row-start-1 ${isBusy ? 'invisible' : ''}`}>
         {label}
@@ -84,25 +80,28 @@ function StableLabel({ label, busyLabel, isBusy }: StableLabelProps): JSX.Elemen
 }
 
 /**
- * Render the fixed 56px top navigation bar housing lab selection, mode toggle,
- * and 1-click Reset DB / Test My Fix / Download Snippet controls.
+ * Render the fixed 56px top navigation bar housing lab selection, learning path,
+ * glossary, mode toggle, and 1-click Reset DB / Test My Fix / Download Snippet controls.
  *
  * @param props - Workspace status, labs list, and toolbar action callbacks.
  * @returns Rendered TopControlBar header element.
  */
-export function TopControlBar({
+function TopControlBarInner({
   health,
   apiError,
   labs,
   selectedLab,
   mode,
   layoutMode = 'split',
+  passedLabsCount = 0,
   isResettingDb,
   isVerifying,
   isDownloading,
   onSelectLab,
   onChangeMode,
   onChangeLayoutMode,
+  onOpenCatalog,
+  onOpenGlossary,
   onResetDb,
   onVerify,
   onDownloadSnippet,
@@ -114,7 +113,7 @@ export function TopControlBar({
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4">
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 items-center gap-2.5">
         <div className="flex shrink-0 items-center gap-2 text-base font-semibold text-slate-900">
           {isSecure ? (
             <ShieldCheck className="h-5 w-5 text-safe-500" aria-hidden="true" />
@@ -124,27 +123,14 @@ export function TopControlBar({
           <span className="tracking-tight">VVWA · MiniShop</span>
         </div>
 
-        <label className="sr-only" htmlFor="vvwa-lab-selector">
-          Chọn bài lab
-        </label>
-        <select
-          id="vvwa-lab-selector"
-          aria-label="Chọn bài lab"
-          disabled={labs.length === 0}
-          value={selectedLab?.id ?? ''}
-          onChange={(event) => onSelectLab(event.target.value)}
-          className="min-w-0 max-w-[200px] truncate rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-sm font-medium text-slate-800 focus:border-brand-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 xl:max-w-[260px] 2xl:max-w-xs"
-        >
-          {labs.length === 0 ? (
-            <option value="">Chưa có bài lab trong labs/</option>
-          ) : (
-            labs.map((lab) => (
-              <option key={lab.id} value={lab.id}>
-                {lab.title}
-              </option>
-            ))
-          )}
-        </select>
+        <ToolbarLabNav
+          labs={labs}
+          selectedLabId={selectedLab?.id ?? ''}
+          passedLabsCount={passedLabsCount}
+          onSelectLab={onSelectLab}
+          onOpenCatalog={onOpenCatalog}
+          onOpenGlossary={onOpenGlossary}
+        />
 
         {renderApiBadge(health, apiError)}
       </div>
@@ -205,3 +191,9 @@ export function TopControlBar({
     </header>
   );
 }
+
+/**
+ * Memoized 56px top navigation bar housing lab selection, learning path, glossary,
+ * mode toggle, and 1-click Reset DB / Test My Fix / Download Snippet controls.
+ */
+export const TopControlBar = memo(TopControlBarInner);

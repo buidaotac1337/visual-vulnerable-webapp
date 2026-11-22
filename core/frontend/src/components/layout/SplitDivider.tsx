@@ -16,12 +16,8 @@ function clampSplit(value: number): number {
   return Math.min(MAX_SPLIT_PERCENT, Math.max(MIN_SPLIT_PERCENT, value));
 }
 
-function computeSplitPercent(container: HTMLElement | null, clientX: number): number | null {
-  if (!container || !Number.isFinite(clientX)) {
-    return null;
-  }
-  const rect = container.getBoundingClientRect();
-  if (rect.width <= 0) {
+function computeSplitPercentFromRect(rect: DOMRect | null, clientX: number): number | null {
+  if (!rect || rect.width <= 0 || !Number.isFinite(clientX)) {
     return null;
   }
   const raw = Math.round(((clientX - rect.left) / rect.width) * 100);
@@ -51,6 +47,11 @@ export function SplitDivider({
     cleanupDragRef.current?.();
 
     const divider = event.currentTarget;
+    const container = containerRef.current ?? divider.parentElement;
+    // Measure container once on pointerdown to avoid forced synchronous layout per pointermove.
+    const cachedRect = container ? container.getBoundingClientRect() : null;
+    let lastEmitted = Math.round(splitPercent);
+
     try {
       divider.setPointerCapture?.(event.pointerId);
     } catch {
@@ -58,11 +59,9 @@ export function SplitDivider({
     }
 
     const onPointerMove = (moveEvent: globalThis.PointerEvent): void => {
-      const next = computeSplitPercent(
-        containerRef.current ?? divider.parentElement,
-        moveEvent.clientX,
-      );
-      if (next !== null) {
+      const next = computeSplitPercentFromRect(cachedRect, moveEvent.clientX);
+      if (next !== null && next !== lastEmitted) {
+        lastEmitted = next;
         onChangeSplit(next);
       }
     };

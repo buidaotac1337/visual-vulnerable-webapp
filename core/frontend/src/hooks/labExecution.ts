@@ -67,13 +67,13 @@ export function isSameContext(ctx: ActiveRequestContext, req: ExecutionRequest):
 export async function runExecutionRequest(
   req: ExecutionRequest,
   silent: boolean,
-  refreshSource: () => Promise<void>,
+  refreshSource: (silent?: boolean) => Promise<void>,
 ): Promise<LabExecutionResponse> {
   const execPromise = executeLabAction(req.labId, req.mode, req.action, req.body, req.actor);
   if (silent) {
     return execPromise;
   }
-  const [execResp] = await Promise.all([execPromise, refreshSource()]);
+  const [execResp] = await Promise.all([execPromise, refreshSource(true)]);
   return execResp;
 }
 

@@ -84,7 +84,7 @@ export function PipelineNodeCard({
       disabled={!node.hasSteps}
       aria-label={node.label}
       onClick={() => onSelectLayer(node.layer)}
-      className={`vvwa-node-btn relative flex min-w-0 cursor-pointer flex-col justify-between gap-1.5 rounded-[10px] border-[1.5px] px-2.5 py-2.5 text-left transition-all duration-150 hover:enabled:border-brand-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:cursor-default ${resolveNodeSurfaceClass(node, isSelfLoop)}`}
+      className={`vvwa-node-btn relative flex min-w-0 cursor-pointer flex-col justify-between gap-1.5 rounded-[10px] border-[1.5px] px-2.5 py-2.5 text-left transition-colors duration-150 hover:enabled:border-brand-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:cursor-default ${resolveNodeSurfaceClass(node, isSelfLoop)}`}
     >
       <div className="flex items-center justify-between gap-1.5">
         <span className="flex min-w-0 items-center gap-1.5">

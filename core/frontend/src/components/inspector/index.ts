@@ -6,6 +6,8 @@ export { InspectorHeader } from './InspectorHeader';
 export type { InspectorHeaderProps } from './InspectorHeader';
 export { TraceControls } from './TraceControls';
 export type { TraceControlsProps } from './TraceControls';
+export { TraceLegendBar } from './TraceLegendBar';
+export type { TraceLegendBarProps } from './TraceLegendBar';
 export { TraceSpeedSwitch } from './TraceSpeedSwitch';
 export type { TraceSpeedSwitchProps } from './TraceSpeedSwitch';
 export { TraceStepPills } from './TraceStepPills';
