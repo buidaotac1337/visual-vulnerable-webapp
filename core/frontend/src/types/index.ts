@@ -35,6 +35,7 @@ export type {
   PipelineVisualState,
   PlaybackStatus,
   StepHighlightTarget,
+  TracePlaybackSpeed,
   TraceStepDraft,
   WorkspaceLayoutMode,
   WorkspaceNotice,

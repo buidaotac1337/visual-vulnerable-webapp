@@ -17,7 +17,7 @@ Giao diện tách hai bề mặt tương phản để không lẫn giữa **ứn
 | :--- | :--- |
 | Styling | Tailwind CSS v4, token bằng CSS variables |
 | Control (Tabs, Switch, Dialog, Select) | HTML ngữ nghĩa + ARIA tự viết (`role="tablist"`, `radiogroup`, `<dialog>`), không dùng shadcn/ui hay Radix ([ADR-0004](adr/0004-frontend-workspace-architecture-and-lab-plugin-contract.md)) |
-| Icon | `lucide-react` (ví dụ `ShieldAlert`, `ShieldCheck`, `Bug`, `Play`, `RotateCcw`, `Download`) |
+| Icon | `lucide-react` (ví dụ `ShieldAlert`, `ShieldCheck`, `Bug`, `Play`, `Pause`, `RotateCcw`, `Download`) |
 | Tô màu cú pháp | Shiki (`shiki/core`), theme `github-dark-default`, ngôn ngữ `python`, `tsx`, `sql`; render thành `<span>` React |
 
 ## 3. Màu sắc
@@ -71,7 +71,7 @@ Font được nạp từ Google Fonts trong `core/frontend/index.html`.
 
 ### Nhãn & `Tooltip`
 
-Mọi nhãn của workspace (nút topbar, công tắc mode, nút trace, tab Inspector, tiêu đề chip payload) lấy từ một nguồn duy nhất: `UI_LABELS` trong `core/frontend/src/lib/uiLabels.ts` (import qua `@/lib`). Mỗi mục có `text` hiển thị, `tip` giải thích bằng tiếng Việt (tùy chọn với tiêu đề không focus được) và `busy` nếu nút có trạng thái đang chạy; `modeTip` và `testMyFixTip` bổ sung tên file `frontend/vulnerable.tsx` / `secure.tsx` cho lab có frontend sink. Thuật ngữ đã quen (Vulnerable, Secure, Reset DB, Test My Fix, Replay, Payload) giữ nguyên làm nhãn; phần giải thích nằm trong tooltip.
+Mọi nhãn của workspace (nút topbar, công tắc mode, nút phát/dừng/tốc độ trace, tab Inspector, tiêu đề chip payload) lấy từ một nguồn duy nhất: `UI_LABELS` trong `core/frontend/src/lib/uiLabels.ts` (import qua `@/lib`). Mỗi mục có `text` hiển thị, `tip` giải thích bằng tiếng Việt (tùy chọn với tiêu đề không focus được) và `busy` nếu nút có trạng thái đang chạy; `modeTip` và `testMyFixTip` bổ sung tên file `frontend/vulnerable.tsx` / `secure.tsx` cho lab có frontend sink. Thuật ngữ đã quen (Vulnerable, Secure, Reset DB, Test My Fix, Replay, Payload) giữ nguyên làm nhãn; phần giải thích nằm trong tooltip.
 
 `Tooltip` (`@/components`) theo mẫu WAI-ARIA tooltip: mở khi rê chuột hoặc khi focus bằng bàn phím, giữ mở khi con trỏ di chuyển sang vùng tooltip (WCAG 1.4.13), đóng bằng `Esc` (chặn lan truyền để không đóng modal bao ngoài), rời chuột, mất focus hoặc khi trigger chuyển sang `disabled`, và nối `aria-describedby` (giữ nguyên các ID đã có). Không dùng thuộc tính `title` cho giải thích (không hiện khi dùng bàn phím hay màn hình cảm ứng). Tham số `side="top"` cho control ở đáy panel, `align="start"` cho control sát mép trái và `align="end"` cho control sát mép phải.
 
@@ -112,6 +112,16 @@ Ba node `1. MiniShop UI` → `2. FastAPI` → `3. PostgreSQL`:
 | `completed` | Giữ màu trạng thái nghiêm trọng nhất đã gặp |
 
 Mỗi node bấm được để nhảy tới bước đầu tiên của tầng và dòng code tương ứng. Thứ tự nghiêm trọng: `info` < `safe` < `warning` < `danger`.
+
+### `TraceControls`, `TraceSpeedSwitch` & `TraceStepPills`
+
+Thanh điều khiển phát lại trace ở đáy Dark IDE Inspector gồm:
+
+* **Thanh tiến độ (`role="progressbar"`):** dải `h-1` sát mép trên (`bg-brand-400` trên `bg-slate-800`) hiển thị tỷ lệ bước hiện tại (`Bước X / Y`).
+* **Nút điều khiển bước:** `Trước`, nút chuyển trạng thái `Phát` (`Play`) / `Dừng` (`Pause`) / `Phát lại` (`RotateCcw`), `Sau`, và bộ đếm bước.
+* **`TraceSpeedSwitch` (`role="radiogroup"`):** công tắc 4 mức (`Tay`, `0.5×`, `1×`, `2×`) lưu vào `localStorage` (`vvwa.traceSpeed`); hỗ trợ phím mũi tên/`Home`/`End`. Chế độ `Tay` dừng ngay ở bước 1 sau khi gửi request thay vì tự chạy.
+* **`TraceStepPills`:** các pill số bước kèm chấm trạng thái (`bg-info-400`, `bg-warning-400`, `bg-danger-400`, `bg-safe-400`); bước đang chọn nổi bật nền sáng (`bg-slate-100 text-slate-900`, `aria-current="step"`) và bấm để nhảy thẳng tới bước đó.
+* **Phím tắt toàn cục (`useTraceShortcuts`):** `←` / `→` chuyển bước và `Space` phát/tạm dừng/phát lại khi có trace và không có modal che; tự động nhường cho ô nhập liệu (`input`, `textarea`, `select`, `contentEditable`) và widget ARIA (`radiogroup`, `tablist`, `separator`, `button`, liên kết).
 
 ### `PayloadChipBar`
 

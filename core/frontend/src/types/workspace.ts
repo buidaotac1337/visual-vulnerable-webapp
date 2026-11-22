@@ -9,6 +9,9 @@ export type WorkspaceLayoutMode = 'split' | 'code-focus' | 'floating';
 /** Playback lifecycle state for step-by-step live trace animation. */
 export type PlaybackStatus = 'idle' | 'playing' | 'paused' | 'completed';
 
+/** Playback cadence setting for live execution trace animation. */
+export type TracePlaybackSpeed = 'manual' | '0.5x' | '1x' | '2x';
+
 /** JSON object representing user-editable inputs inside a MiniShop sandbox form. */
 export type LabPayload = Record<string, unknown>;
 

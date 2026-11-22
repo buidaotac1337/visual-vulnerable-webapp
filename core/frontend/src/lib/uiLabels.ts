@@ -46,6 +46,34 @@ export const UI_LABELS = {
     tip: 'Phát lại toàn bộ trace từ bước đầu, mỗi bước sáng dòng code tương ứng.',
   },
   nextStep: { text: 'Sau', tip: 'Tiến tới bước trace sau.' },
+  playTrace: {
+    text: 'Phát',
+    tip: 'Tiếp tục phát tự động các bước trace (phím Space).',
+  },
+  pauseTrace: {
+    text: 'Dừng',
+    tip: 'Tạm dừng phát tự động tại bước hiện tại (phím Space).',
+  },
+  replayTrace: {
+    text: 'Phát lại',
+    tip: 'Phát lại toàn bộ trace từ bước 1 (phím Space).',
+  },
+  speedManual: {
+    text: 'Tay',
+    tip: 'Chế độ thủ công: không tự chạy, tự bấm Trước/Sau hoặc phím mũi tên để đi từng bước.',
+  },
+  speedHalf: {
+    text: '0.5×',
+    tip: 'Phát chậm (1.2 giây/bước) để dễ đọc câu SQL và chi tiết trace dài.',
+  },
+  speedNormal: {
+    text: '1×',
+    tip: 'Tốc độ mặc định (0.6 giây/bước).',
+  },
+  speedDouble: {
+    text: '2×',
+    tip: 'Phát nhanh (0.3 giây/bước) để lướt nhanh luồng thực thi.',
+  },
   payloads: { text: 'Payload mẫu (1-click điền sẵn)' },
   backendTab: { text: 'Backend (.py)', tip: 'Mã backend của chế độ đang chọn.' },
   frontendTab: { text: 'Frontend (.tsx)', tip: 'Mã giao diện React của lab.' },

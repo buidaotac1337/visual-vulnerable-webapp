@@ -73,7 +73,7 @@ function buildWorkspaceClasses(
   if (layoutMode === 'floating') {
     const sizeClass = isFloatingCollapsed
       ? 'lg:w-auto lg:max-w-[calc(100%-2rem)]'
-      : 'lg:max-h-[calc(100%-9rem)] lg:w-[440px] lg:max-w-[46vw]';
+      : 'lg:max-h-[calc(100%-13.5rem)] lg:w-[440px] lg:max-w-[46vw]';
     const bodyLgClass = isFloatingCollapsed ? 'lg:hidden' : 'lg:p-4';
     return {
       mainCols: 'lg:grid-cols-1',

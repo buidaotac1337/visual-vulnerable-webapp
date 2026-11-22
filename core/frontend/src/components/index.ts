@@ -5,9 +5,16 @@ export {
   GlowingCodeLine,
   InspectorHeader,
   TraceControls,
+  TraceSpeedSwitch,
+  TraceStepPills,
   UnifiedDiffView,
 } from './inspector';
-export type { InspectorHeaderProps } from './inspector';
+export type {
+  InspectorHeaderProps,
+  TraceControlsProps,
+  TraceSpeedSwitchProps,
+  TraceStepPillsProps,
+} from './inspector';
 export { LabWorkspace, LayoutModeSwitch, ModeSwitch, SplitDivider, TopControlBar } from './layout';
 export { FlowPipeline } from './pipeline';
 export { ActorSwitcher, EmptyLabFallback, PayloadChipBar, SandboxPane } from './sandbox';
