@@ -8,10 +8,14 @@ import type {
   LabMetadata,
   LabMode,
   LabPayload,
+  LastExecutionRequest,
   PipelineNodeModel,
+  PlaybackStatus,
   SamplePayload,
   TraceLayer,
   TraceOutcome,
+  TracePlaybackSpeed,
+  TraceStep,
 } from '@/types';
 
 import { FlowPipeline } from '../pipeline';
@@ -29,8 +33,13 @@ interface SandboxPaneProps {
   inputFlashSeq: number;
   dbResetSeq: number;
   isExecuting: boolean;
+  lastRequest: LastExecutionRequest | null;
   lastResponse: LabExecutionResponse | null;
   pipelineNodes: readonly PipelineNodeModel[];
+  trace: readonly TraceStep[];
+  activeTraceIndex: number;
+  playbackStatus: PlaybackStatus;
+  playbackSpeed: TracePlaybackSpeed;
   onPayloadChange: (next: LabPayload) => void;
   onChangeActor: (name: string) => void;
   onSelectSamplePayload: (sample: SamplePayload) => void;
@@ -40,6 +49,7 @@ interface SandboxPaneProps {
     options?: ExecuteActionOptions,
   ) => Promise<LabExecutionResponse | null>;
   onSelectPipelineLayer: (layer: TraceLayer) => void;
+  onSelectPipelineStep: (index: number) => void;
 }
 
 const OUTCOME_BADGE: Record<TraceOutcome, { label: string; className: string }> = {
@@ -96,20 +106,36 @@ export function SandboxPane({
   inputFlashSeq,
   dbResetSeq,
   isExecuting,
+  lastRequest,
   lastResponse,
   pipelineNodes,
+  trace,
+  activeTraceIndex,
+  playbackStatus,
+  playbackSpeed,
   onPayloadChange,
   onChangeActor,
   onSelectSamplePayload,
   onExecute,
   onSelectPipelineLayer,
+  onSelectPipelineStep,
 }: SandboxPaneProps): JSX.Element {
   const LazyLabView = lab ? getLazyLabView(lab.id) : null;
   const outcomeStyle = lastResponse ? OUTCOME_BADGE[lastResponse.meta.outcome] : null;
 
   return (
     <div className="flex flex-col gap-4">
-      <FlowPipeline nodes={pipelineNodes} onSelectLayer={onSelectPipelineLayer} />
+      <FlowPipeline
+        nodes={pipelineNodes}
+        trace={trace}
+        activeIndex={activeTraceIndex}
+        playbackStatus={playbackStatus}
+        playbackSpeed={playbackSpeed}
+        lastRequest={lastRequest}
+        lastResponse={lastResponse}
+        onSelectLayer={onSelectPipelineLayer}
+        onSelectStep={onSelectPipelineStep}
+      />
 
       {lab && (
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">

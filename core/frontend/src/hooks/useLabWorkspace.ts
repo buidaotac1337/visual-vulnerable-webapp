@@ -10,6 +10,7 @@ import type {
   LabMode,
   LabPayload,
   LabSourceResponse,
+  LastExecutionRequest,
   SamplePayload,
   TraceLayer,
   VerifyLabResponse,
@@ -54,6 +55,7 @@ export interface LabWorkspaceController {
   isResettingDb: boolean;
   isVerifying: boolean;
   isDownloading: boolean;
+  lastRequest: LastExecutionRequest | null;
   lastResponse: LabExecutionResponse | null;
   verifyResult: VerifyLabResponse | null;
   verifyError: string | null;
@@ -94,6 +96,7 @@ export function useLabWorkspace(): LabWorkspaceController {
   const [inputFlashSeq, setInputFlashSeq] = useState<number>(0);
   const [dbResetSeq, setDbResetSeq] = useState<number>(0);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
+  const [lastRequest, setLastRequest] = useState<LastExecutionRequest | null>(null);
   const [lastResponse, setLastResponse] = useState<LabExecutionResponse | null>(null);
   const [notice, setNotice] = useState<WorkspaceNotice | null>(null);
 
@@ -118,6 +121,7 @@ export function useLabWorkspace(): LabWorkspaceController {
     (labId: string): void => {
       setSelectedLabId(labId);
       setActiveTab('backend');
+      setLastRequest(null);
       setLastResponse(null);
       setNotice(null);
       verify.resetVerifyState();
@@ -129,6 +133,7 @@ export function useLabWorkspace(): LabWorkspaceController {
   const changeMode = useCallback(
     (nextMode: LabMode): void => {
       setMode(nextMode);
+      setLastRequest(null);
       setLastResponse(null);
       setNotice(null);
       playback.clearTrace();
@@ -142,6 +147,7 @@ export function useLabWorkspace(): LabWorkspaceController {
         return;
       }
       setActor(name);
+      setLastRequest(null);
       setLastResponse(null);
       setNotice(null);
       playback.clearTrace();
@@ -206,6 +212,7 @@ export function useLabWorkspace(): LabWorkspaceController {
       try {
         const execResp = await runExecutionRequest(req, silent, refreshSource);
         if (!silent && isSameContext(activeCtxRef.current, req)) {
+          setLastRequest(req);
           setLastResponse(execResp);
           playback.startTrace(buildMergedTrace(execResp, options));
         }
@@ -243,6 +250,7 @@ export function useLabWorkspace(): LabWorkspaceController {
     isResettingDb: maintenance.isResettingDb,
     isVerifying: verify.isVerifying,
     isDownloading: maintenance.isDownloading,
+    lastRequest,
     lastResponse,
     verifyResult: verify.verifyResult,
     verifyError: verify.verifyError,

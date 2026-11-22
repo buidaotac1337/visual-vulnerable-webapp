@@ -33,9 +33,11 @@ export {
   runFrontendVerifyTests,
 } from './frontendVerifier';
 export type { SinkModule } from './frontendVerifier';
+export { derivePipelineModel, formatHopRoute } from './pipelineWires';
 export {
   computePipelineNodes,
   findFirstStepIndexForLayer,
+  findNextStepIndexForLayer,
   mergeExecutionTrace,
   resolveStepTarget,
 } from './traceEngine';
