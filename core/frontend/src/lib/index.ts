@@ -45,3 +45,5 @@ export { getLabBeginnerGuide, LAB_BEGINNER_GUIDES } from './beginnerContent';
 export type { LabBeginnerGuide } from './beginnerContent';
 export { filterGlossary, findGlossaryEntry, SECURITY_GLOSSARY } from './securityGlossary';
 export type { GlossaryCategory, GlossaryEntry } from './securityGlossary';
+export { classifySamplePayload, deriveOutcomeCoaching } from './outcomeCoach';
+export type { CoachCtaKind, OutcomeCoaching, PayloadIntent } from './outcomeCoach';

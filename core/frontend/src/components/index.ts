@@ -20,7 +20,14 @@ export type {
 export { LabWorkspace, LayoutModeSwitch, ModeSwitch, SplitDivider, TopControlBar } from './layout';
 export { FlowPipeline } from './pipeline';
 export type { FlowPipelineProps } from './pipeline';
-export { ActorSwitcher, EmptyLabFallback, PayloadChipBar, SandboxPane } from './sandbox';
+export {
+  ActorSwitcher,
+  EmptyLabFallback,
+  OutcomeCoachPanel,
+  PayloadChipBar,
+  SandboxPane,
+} from './sandbox';
+export type { OutcomeCoachPanelProps } from './sandbox';
 export {
   AddressBar,
   LabCard,
