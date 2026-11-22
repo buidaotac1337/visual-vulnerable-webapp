@@ -17,6 +17,7 @@ export type {
 } from './inspector';
 export { LabWorkspace, LayoutModeSwitch, ModeSwitch, SplitDivider, TopControlBar } from './layout';
 export { FlowPipeline } from './pipeline';
+export type { FlowPipelineProps } from './pipeline';
 export { ActorSwitcher, EmptyLabFallback, PayloadChipBar, SandboxPane } from './sandbox';
 export {
   AddressBar,

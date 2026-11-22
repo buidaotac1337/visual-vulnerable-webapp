@@ -1,0 +1,143 @@
+/* FlowPipeline (Full Data Journey): container-responsive 5-column track & packet animations. */
+
+.vvwa-pipeline-card {
+  container-type: inline-size;
+  container-name: vvwa-pipeline;
+}
+
+.vvwa-arch-track {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 82px minmax(0, 1fr) 82px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+}
+
+.vvwa-label-narrow {
+  display: none;
+}
+
+@container vvwa-pipeline (max-width: 460px) {
+  .vvwa-arch-track {
+    grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr) 58px minmax(0, 1fr);
+  }
+
+  .vvwa-node-btn {
+    padding: 0.5rem;
+  }
+
+  .vvwa-wire-cell {
+    padding-inline: 2px;
+  }
+
+  .vvwa-wire-lane {
+    padding: 2px 1px;
+  }
+
+  .vvwa-wire-label {
+    font-size: 9.5px;
+  }
+
+  .vvwa-wire-gate {
+    padding: 1px 4px;
+    font-size: 10px;
+  }
+
+  .vvwa-label-wide {
+    display: none;
+  }
+
+  .vvwa-label-narrow {
+    display: inline;
+  }
+
+  .vvwa-pipeline-hint {
+    display: none;
+  }
+}
+
+@keyframes vvwa-packet-forward {
+  0% {
+    left: 4%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% - 10px);
+    opacity: 0;
+  }
+}
+
+@keyframes vvwa-packet-reverse {
+  0% {
+    left: calc(100% - 10px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    left: 4%;
+    opacity: 0;
+  }
+}
+
+@keyframes vvwa-dot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.55;
+  }
+}
+
+@keyframes vvwa-node-halo {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-indigo-500) 28%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px color-mix(in oklab, var(--color-indigo-500) 0%, transparent);
+  }
+}
+
+.vvwa-packet-forward {
+  animation: vvwa-packet-forward 1.05s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.vvwa-packet-reverse {
+  animation: vvwa-packet-reverse 1.05s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.vvwa-dot-pulse {
+  animation: vvwa-dot-pulse 1.2s ease-in-out infinite;
+}
+
+.vvwa-node-halo {
+  animation: vvwa-node-halo 900ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vvwa-packet-forward,
+  .vvwa-packet-reverse,
+  .vvwa-dot-pulse,
+  .vvwa-node-halo {
+    animation: none !important;
+  }
+
+  .vvwa-packet-forward,
+  .vvwa-packet-reverse {
+    opacity: 1;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}

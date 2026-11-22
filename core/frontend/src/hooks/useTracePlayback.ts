@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { findFirstStepIndexForLayer } from '@/lib';
+import { findNextStepIndexForLayer } from '@/lib';
 import type { PlaybackStatus, TraceLayer, TracePlaybackSpeed, TraceStep } from '@/types';
 
 import { readStorage, writeStorage } from './storage';
@@ -192,14 +192,14 @@ export function useTracePlayback(intervalMs = TRACE_STEP_INTERVAL_MS): TracePlay
 
   const jumpToLayer = useCallback(
     (layer: TraceLayer): void => {
-      const targetIndex = findFirstStepIndexForLayer(trace, layer);
+      const targetIndex = findNextStepIndexForLayer(trace, layer, activeIndex);
       if (targetIndex < 0) {
         return;
       }
       setStatus('paused');
       setActiveIndex(targetIndex);
     },
-    [trace],
+    [trace, activeIndex],
   );
 
   const activeStep = activeIndex >= 0 ? (trace[activeIndex] ?? null) : null;

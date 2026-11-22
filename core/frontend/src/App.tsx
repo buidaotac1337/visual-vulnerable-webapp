@@ -23,7 +23,7 @@ export function App(): JSX.Element {
   const pipelineNodes = computePipelineNodes(
     ws.playback.trace,
     ws.playback.activeIndex,
-    ws.playback.status === 'playing' || ws.playback.status === 'paused',
+    ws.playback.status !== 'idle',
   );
 
   return (
@@ -75,13 +75,19 @@ export function App(): JSX.Element {
             inputFlashSeq={ws.inputFlashSeq}
             dbResetSeq={ws.dbResetSeq}
             isExecuting={ws.isExecuting}
+            lastRequest={ws.lastRequest}
             lastResponse={ws.lastResponse}
             pipelineNodes={pipelineNodes}
+            trace={ws.playback.trace}
+            activeTraceIndex={ws.playback.activeIndex}
+            playbackStatus={ws.playback.status}
+            playbackSpeed={ws.playback.speed}
             onPayloadChange={ws.updatePayload}
             onChangeActor={ws.changeActor}
             onSelectSamplePayload={ws.applySamplePayload}
             onExecute={ws.executeAction}
             onSelectPipelineLayer={ws.selectPipelineLayer}
+            onSelectPipelineStep={ws.playback.jumpToStep}
           />
         }
         rightPane={

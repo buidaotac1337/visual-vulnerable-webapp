@@ -19,10 +19,10 @@ const STATUS_SEVERITY: Record<TraceStatus, number> = {
   danger: 4,
 };
 
-const PIPELINE_LAYERS: readonly { layer: TraceLayer; label: string }[] = [
-  { layer: 'frontend', label: '1. MiniShop UI' },
-  { layer: 'backend', label: '2. FastAPI' },
-  { layer: 'database', label: '3. PostgreSQL' },
+const PIPELINE_LAYERS: readonly { layer: TraceLayer; label: string; narrowLabel: string }[] = [
+  { layer: 'frontend', label: '1. MiniShop UI', narrowLabel: 'MiniShop UI' },
+  { layer: 'backend', label: '2. FastAPI', narrowLabel: 'FastAPI' },
+  { layer: 'database', label: '3. PostgreSQL', narrowLabel: 'PostgreSQL' },
 ];
 
 function pickHighestSeverity(statuses: readonly TraceStatus[]): TraceStatus {
@@ -91,15 +91,17 @@ export function computePipelineNodes(
   activeIndex: number,
   isPlaying: boolean,
 ): PipelineNodeModel[] {
-  return PIPELINE_LAYERS.map(({ layer, label }) => {
+  return PIPELINE_LAYERS.map(({ layer, label, narrowLabel }) => {
     const indices: number[] = [];
     const seenStatuses: TraceStatus[] = [];
+    let latestTitle: string | null = null;
 
     trace.forEach((step, idx) => {
       if (step.layer === layer) {
         indices.push(idx);
         if (idx <= activeIndex) {
           seenStatuses.push(step.status);
+          latestTitle = step.title;
         }
       }
     });
@@ -107,10 +109,13 @@ export function computePipelineNodes(
     return {
       layer,
       label,
+      narrowLabel,
       visualState: resolveNodeVisualState(indices, activeIndex, isPlaying),
       status: pickHighestSeverity(seenStatuses),
       stepCount: indices.length,
       hasSteps: indices.length > 0,
+      stepIndices: indices,
+      latestTitle,
     };
   });
 }
@@ -124,6 +129,33 @@ export function computePipelineNodes(
  */
 export function findFirstStepIndexForLayer(trace: readonly TraceStep[], layer: TraceLayer): number {
   return trace.findIndex((step) => step.layer === layer);
+}
+
+/**
+ * Find the next 0-based trace index for a layer, cycling when already focused on that layer.
+ *
+ * @param trace - Full execution trace array.
+ * @param layer - Target layer clicked in FlowPipeline.
+ * @param currentIndex - Currently active 0-based step index (-1 when idle).
+ * @returns Next 0-based step index for that layer, or -1 if none exists.
+ */
+export function findNextStepIndexForLayer(
+  trace: readonly TraceStep[],
+  layer: TraceLayer,
+  currentIndex: number,
+): number {
+  const indices: number[] = [];
+  trace.forEach((step, idx) => {
+    if (step.layer === layer) {
+      indices.push(idx);
+    }
+  });
+  if (indices.length === 0) {
+    return -1;
+  }
+  const pos = indices.indexOf(currentIndex);
+  const nextIndex = pos >= 0 ? indices[(pos + 1) % indices.length] : indices[0];
+  return nextIndex ?? -1;
 }
 
 function resolveFrontendStepTarget(

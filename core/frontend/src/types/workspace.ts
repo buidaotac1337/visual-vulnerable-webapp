@@ -1,4 +1,11 @@
-import type { LabExecutionResponse, LabMetadata, LabMode, TraceLayer, TraceStatus } from './api';
+import type {
+  LabExecutionResponse,
+  LabMetadata,
+  LabMode,
+  TraceLayer,
+  TraceStatus,
+  TraceStep,
+} from './api';
 
 /** Active tab inside the right-hand Code & Trace Inspector panel. */
 export type InspectorTab = 'backend' | 'frontend' | 'diff';
@@ -51,6 +58,15 @@ export interface LabViewProps {
   ) => Promise<LabExecutionResponse | null>;
 }
 
+/** Last non-silent lab action request sent from MiniShop Sandbox (used by FlowPipeline wire tooltips). */
+export interface LastExecutionRequest {
+  labId: string;
+  mode: LabMode;
+  actor: string | null;
+  action: string;
+  body: LabPayload;
+}
+
 /** Visual state of one architectural node inside FlowPipeline. */
 export type PipelineVisualState = 'idle' | 'active' | 'completed';
 
@@ -58,10 +74,65 @@ export type PipelineVisualState = 'idle' | 'active' | 'completed';
 export interface PipelineNodeModel {
   layer: TraceLayer;
   label: string;
+  narrowLabel: string;
   visualState: PipelineVisualState;
   status: TraceStatus;
   stepCount: number;
   hasSteps: boolean;
+  stepIndices: readonly number[];
+  latestTitle: string | null;
+}
+
+/** Stable identifier for one directional wire lane in FlowPipeline. */
+export type PipelineWireKey = 'uiBeFwd' | 'uiBeRev' | 'beDbFwd' | 'beDbRev';
+
+/** Travel direction of a FlowPipeline wire lane. */
+export type PipelineWireDirection = 'forward' | 'reverse';
+
+/** Visual lifecycle state of a single directional wire lane. */
+export type PipelineLaneState = 'idle' | 'passed' | 'active' | 'blocked' | 'muted';
+
+/** Detail density chosen inside the wire payload hover popover. */
+export type PipelineWireDetailMode = 'compact' | 'full';
+
+/** Display model for one directional lane between two architectural layers. */
+export interface PipelineLaneModel {
+  key: PipelineWireKey;
+  direction: PipelineWireDirection;
+  state: PipelineLaneState;
+  tone: TraceStatus;
+  label: string;
+  narrowLabel: string;
+  gateLabel?: string;
+  narrowGateLabel?: string;
+}
+
+/** Forward (top) and reverse (bottom) lanes connecting two adjacent nodes. */
+export interface PipelineWirePair {
+  forward: PipelineLaneModel;
+  reverse: PipelineLaneModel;
+}
+
+/** Hover payload preview shown when inspecting a FlowPipeline directional wire. */
+export interface PipelineWirePayload {
+  key: PipelineWireKey;
+  stepIndex: number | null;
+  status: TraceStatus;
+  label: string;
+  compact: string;
+  full: string;
+}
+
+/** Complete derived dual-lane wire and data-journey state for FlowPipeline. */
+export interface PipelineTraceModel {
+  uiBe: PipelineWirePair;
+  beDb: PipelineWirePair;
+  blockedBeforeDb: boolean;
+  isSelfLoop: boolean;
+  activeStep: TraceStep | null;
+  prevStep: TraceStep | null;
+  hopRoute: string;
+  wirePayloads: Record<PipelineWireKey, PipelineWirePayload>;
 }
 
 /** Which frontend file the Frontend tab shows: the sandbox LabView or the mode's sink file. */
