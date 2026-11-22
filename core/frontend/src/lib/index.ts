@@ -41,3 +41,7 @@ export {
   mergeExecutionTrace,
   resolveStepTarget,
 } from './traceEngine';
+export { getLabBeginnerGuide, LAB_BEGINNER_GUIDES } from './beginnerContent';
+export type { LabBeginnerGuide } from './beginnerContent';
+export { filterGlossary, findGlossaryEntry, SECURITY_GLOSSARY } from './securityGlossary';
+export type { GlossaryCategory, GlossaryEntry } from './securityGlossary';

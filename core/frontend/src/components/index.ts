@@ -39,3 +39,5 @@ export type {
   TextFieldProps,
 } from './ui';
 export { VerifyModal } from './verify';
+export { GlossaryModal, LabBeginnerCard } from './guide';
+export type { GlossaryModalProps, LabBeginnerCardProps } from './guide';
