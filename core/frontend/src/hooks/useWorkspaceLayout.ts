@@ -2,6 +2,8 @@ import { useCallback, useState } from 'react';
 
 import type { WorkspaceLayoutMode } from '@/types';
 
+import { readStorage, writeStorage } from './storage';
+
 const LAYOUT_MODE_STORAGE_KEY = 'vvwa.layoutMode';
 const SPLIT_PERCENT_STORAGE_KEY = 'vvwa.splitPercent';
 const DEFAULT_LAYOUT_MODE: WorkspaceLayoutMode = 'split';
@@ -29,28 +31,6 @@ function clampSplitPercent(value: number): number {
     return DEFAULT_SPLIT_PERCENT;
   }
   return Math.min(MAX_SPLIT_PERCENT, Math.max(MIN_SPLIT_PERCENT, value));
-}
-
-function readStorage(key: string): string | null {
-  try {
-    if (typeof window === 'undefined') {
-      return null;
-    }
-    return window.localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function writeStorage(key: string, value: string): void {
-  try {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    window.localStorage.setItem(key, value);
-  } catch {
-    // Ignore persistence errors in private browsing or restricted test environments.
-  }
 }
 
 function loadInitialLayoutMode(): WorkspaceLayoutMode {

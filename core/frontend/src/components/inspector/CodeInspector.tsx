@@ -9,6 +9,7 @@ import type {
   LabSourceResponse,
   PlaybackStatus,
   StepHighlightTarget,
+  TracePlaybackSpeed,
   TraceStep,
 } from '@/types';
 
@@ -29,11 +30,16 @@ interface CodeInspectorProps {
   activeIndex: number;
   activeStep: TraceStep | null;
   playbackStatus: PlaybackStatus;
+  traceSteps?: readonly TraceStep[];
+  playbackSpeed?: TracePlaybackSpeed;
   onChangeTab: (tab: InspectorTab) => void;
   onRefreshSource: () => void;
   onPrevStep: () => void;
   onReplayTrace: () => void;
+  onTogglePlayPause?: () => void;
   onNextStep: () => void;
+  onChangeSpeed?: (speed: TracePlaybackSpeed) => void;
+  onJumpToStep?: (index: number) => void;
 }
 
 interface InspectorView {
@@ -169,11 +175,16 @@ export function CodeInspector({
   activeIndex,
   activeStep,
   playbackStatus,
+  traceSteps,
+  playbackSpeed,
   onChangeTab,
   onRefreshSource,
   onPrevStep,
   onReplayTrace,
+  onTogglePlayPause,
   onNextStep,
+  onChangeSpeed,
+  onJumpToStep,
 }: CodeInspectorProps): JSX.Element {
   const target = resolveStepTarget(activeStep, source, mode);
   const { note: tabNote, pickTab } = useStepTabSwitch(
@@ -182,7 +193,6 @@ export function CodeInspector({
     activeTab,
     onChangeTab,
   );
-
   const view = buildInspectorView(activeTab, mode, source, target);
 
   return (
@@ -197,21 +207,23 @@ export function CodeInspector({
         onSelectTab={pickTab}
         onRefreshSource={onRefreshSource}
       />
-
       <TabSwitchNote note={tabNote} />
-
       <div className="vvwa-ide-scroll min-h-0 flex-1 overflow-auto">
         {renderInspectorBody(view, source, sourceError, target, activeStep)}
       </div>
-
       <TraceControls
         totalSteps={totalSteps}
         activeIndex={activeIndex}
         status={playbackStatus}
         safetyPattern={lab?.safetyPattern ?? null}
+        steps={traceSteps}
+        speed={playbackSpeed}
         onPrev={onPrevStep}
         onReplay={onReplayTrace}
+        onTogglePlayPause={onTogglePlayPause}
         onNext={onNextStep}
+        onChangeSpeed={onChangeSpeed}
+        onJumpToStep={onJumpToStep}
       />
     </div>
   );

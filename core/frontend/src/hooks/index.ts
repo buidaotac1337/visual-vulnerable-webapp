@@ -13,5 +13,7 @@ export { useLabWorkspace } from './useLabWorkspace';
 export type { LabWorkspaceController } from './useLabWorkspace';
 export { useTracePlayback } from './useTracePlayback';
 export type { TracePlaybackController } from './useTracePlayback';
+export { useTraceShortcuts } from './useTraceShortcuts';
+export type { UseTraceShortcutsOptions } from './useTraceShortcuts';
 export { useWorkspaceLayout } from './useWorkspaceLayout';
 export type { WorkspaceLayoutController } from './useWorkspaceLayout';

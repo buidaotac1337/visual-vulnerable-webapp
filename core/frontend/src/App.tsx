@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 
 import { CodeInspector, LabWorkspace, SandboxPane, TopControlBar, VerifyModal } from '@/components';
-import { useLabWorkspace, useWorkspaceLayout } from '@/hooks';
+import { useLabWorkspace, useTraceShortcuts, useWorkspaceLayout } from '@/hooks';
 import { computePipelineNodes, isFrontendVerifyTest } from '@/lib';
 
 /**
@@ -13,6 +13,13 @@ import { computePipelineNodes, isFrontendVerifyTest } from '@/lib';
 export function App(): JSX.Element {
   const ws = useLabWorkspace();
   const layout = useWorkspaceLayout();
+  useTraceShortcuts({
+    enabled: !ws.isVerifyModalOpen,
+    hasTrace: ws.playback.trace.length > 0,
+    onPrev: ws.playback.prevStep,
+    onNext: ws.playback.nextStep,
+    onTogglePlayPause: ws.playback.togglePlayPause,
+  });
   const pipelineNodes = computePipelineNodes(
     ws.playback.trace,
     ws.playback.activeIndex,
@@ -89,13 +96,18 @@ export function App(): JSX.Element {
             activeIndex={ws.playback.activeIndex}
             activeStep={ws.playback.activeStep}
             playbackStatus={ws.playback.status}
+            traceSteps={ws.playback.trace}
+            playbackSpeed={ws.playback.speed}
             onChangeTab={ws.setActiveTab}
             onRefreshSource={() => {
               void ws.refreshSource();
             }}
             onPrevStep={ws.playback.prevStep}
             onReplayTrace={ws.playback.replay}
+            onTogglePlayPause={ws.playback.togglePlayPause}
             onNextStep={ws.playback.nextStep}
+            onChangeSpeed={ws.playback.setSpeed}
+            onJumpToStep={ws.playback.jumpToStep}
           />
         }
       />

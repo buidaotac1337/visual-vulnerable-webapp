@@ -27,7 +27,7 @@ Workspace chia làm hai bề mặt:
 |  |  [ Đăng nhập ]                      |  |     |  +--------------------------------+ |
 |  +-------------------------------------+  |  11 |   row = await db.fetch_one(sql)     |
 |                                           |                                           |
-|  Payload mẫu (1-click điền sẵn):          |  [ < Trước ]  [ ▶ Replay ]  [ Sau > ]     |
+|  Payload mẫu (1-click điền sẵn):          |  [< Trước] [▶ Phát] [Sau >]  [Tay|1×|2×] |
 |  ( Bypass Admin Login ) ( Đăng nhập ... ) |  Safety Pattern: Sử dụng Parameterized... |
 |                                           |                                           |
 |  Phản hồi từ hệ thống    [BỊ KHAI THÁC]   |                                           |
@@ -76,7 +76,10 @@ Badge kết quả:
 | **Tab Diff** | Khác biệt giữa bản lỗi và bản vá; lab có cặp sink frontend hiển thị thêm diff `.tsx`. |
 | **Làm mới** | Đọc lại mã nguồn từ đĩa. Việc này cũng tự diễn ra khi cửa sổ được focus lại. |
 | **Dòng phát sáng** | Dòng ứng với bước trace hiện tại, màu theo trạng thái, kèm **Inline Callout** hiển thị tiêu đề và giá trị thực tế của bước. Khi bước nằm ở file khác, Inspector tự chuyển tab Backend/Frontend và ghi rõ "đã chuyển tab" trên thanh tab; tab Diff không bị tự chuyển. |
-| **Trước / Replay / Sau** | Lùi, phát lại từ đầu (600 ms mỗi bước) hoặc tiến từng bước. |
+| **Điều khiển phát & tiến độ** | Thanh tiến độ ở mép trên `TraceControls`, nút **Trước**, nút chuyển trạng thái **Phát / Dừng / Phát lại**, nút **Sau** và bộ đếm `Bước X / Y`. |
+| **Tốc độ phát (`Tốc độ`)** | Bốn mức lưu qua `localStorage` (`vvwa.traceSpeed`): **Tay** (thủ công, dừng ngay ở bước 1 không tự chạy), **0.5×** (`1.2 giây/bước`), **1×** (`0.6 giây/bước`, mặc định) và **2×** (`0.3 giây/bước`). |
+| **Thanh pill bước trace** | Hàng nút số bước kèm chấm màu trạng thái; rê chuột hoặc focus để xem tiêu đề bước và bấm để nhảy thẳng tới bước đó. |
+| **Phím tắt** | `←` / `→` để lùi/tiến bước, `Space` để phát/dừng/phát lại (tự bỏ qua khi đang nhập trong form, mở modal kiểm thử hoặc thao tác trên tab/công tắc/nút). |
 | **Safety Pattern** | Tóm tắt cách phòng chống của lab. |
 
 Màu trạng thái của bước trace:
