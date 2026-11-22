@@ -41,3 +41,5 @@ export type {
 export { VerifyModal } from './verify';
 export { GlossaryModal, LabBeginnerCard } from './guide';
 export type { GlossaryModalProps, LabBeginnerCardProps } from './guide';
+export { LabCatalogModal, LabStepperCard, WelcomeBanner } from './learning';
+export type { LabCatalogModalProps, LabStepperCardProps, WelcomeBannerProps } from './learning';

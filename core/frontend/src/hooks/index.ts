@@ -17,3 +17,5 @@ export { useTraceShortcuts } from './useTraceShortcuts';
 export type { UseTraceShortcutsOptions } from './useTraceShortcuts';
 export { useWorkspaceLayout } from './useWorkspaceLayout';
 export type { WorkspaceLayoutController } from './useWorkspaceLayout';
+export { useLearningProgress } from './useLearningProgress';
+export type { LabStepProgress, LearningProgressController } from './useLearningProgress';
