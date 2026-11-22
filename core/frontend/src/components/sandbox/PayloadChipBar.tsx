@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import type { JSX } from 'react';
 import { CheckCircle2, ShieldAlert, Sparkles } from 'lucide-react';
 
@@ -34,7 +34,7 @@ const CHIP_STYLE: Record<PayloadIntent, { idle: string; picked: string; iconClas
  * @param props - Sample payloads from meta.json and selection handler.
  * @returns Rendered PayloadChipBar section, or null when no sample payloads exist.
  */
-export function PayloadChipBar({ payloads, onSelect }: PayloadChipBarProps): JSX.Element | null {
+function PayloadChipBarInner({ payloads, onSelect }: PayloadChipBarProps): JSX.Element | null {
   const [picked, setPicked] = useState<string | null>(null);
   if (payloads.length === 0) {
     return null;
@@ -115,3 +115,8 @@ export function PayloadChipBar({ payloads, onSelect }: PayloadChipBarProps): JSX
     </div>
   );
 }
+
+/**
+ * Memoized 1-click sample payload chip bar visually distinguishing attacks vs normal flows.
+ */
+export const PayloadChipBar = memo(PayloadChipBarInner);

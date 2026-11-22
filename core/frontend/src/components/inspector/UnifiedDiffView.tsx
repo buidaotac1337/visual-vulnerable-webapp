@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import type { JSX } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 
@@ -27,12 +28,12 @@ const ROW_STYLES: Record<DiffRowKind, { row: string; prefix: string }> = {
  * @param props - Unified diff string, optional file labels, and optional editable file path.
  * @returns Rendered UnifiedDiffView panel.
  */
-export function UnifiedDiffView({
+function UnifiedDiffViewInner({
   diff,
   fileLabels = ['vulnerable.py', 'secure.py'],
   editFilePath = null,
 }: UnifiedDiffViewProps): JSX.Element {
-  const rows = parseUnifiedDiff(diff);
+  const rows = useMemo(() => parseUnifiedDiff(diff), [diff]);
 
   if (rows.length === 0) {
     return (
@@ -95,3 +96,8 @@ export function UnifiedDiffView({
     </div>
   );
 }
+
+/**
+ * Memoized unified diff view between a vulnerable/secure file pair with dual line gutters.
+ */
+export const UnifiedDiffView = memo(UnifiedDiffViewInner);

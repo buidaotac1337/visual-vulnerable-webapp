@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import type { JSX } from 'react';
 import {
   CheckCircle2,
@@ -19,6 +19,8 @@ export interface LabStepperCardProps {
   progress: LabStepProgress;
   mode: LabMode;
   activeTab: InspectorTab;
+  /** Whether the 4-step list starts expanded (defaults to `true`). */
+  defaultExpanded?: boolean;
   onSwitchMode: (mode: LabMode) => void;
   onOpenDiff: () => void;
   onOpenVerify: () => void;
@@ -127,16 +129,17 @@ function buildSteps(
  * @param props - Active lab title, step progress, workspace mode/tab, and quick-action callbacks.
  * @returns Collapsible 4-step progress card.
  */
-export function LabStepperCard({
+function LabStepperCardInner({
   labTitle,
   progress,
   mode,
   activeTab,
+  defaultExpanded = true,
   onSwitchMode,
   onOpenDiff,
   onOpenVerify,
 }: LabStepperCardProps): JSX.Element {
-  const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  const [isExpanded, setIsExpanded] = useState<boolean>(defaultExpanded);
   const completedCount = countCompleted(progress);
   const allDone = completedCount === 4;
   const steps = buildSteps(progress, mode, activeTab, onSwitchMode, onOpenDiff, onOpenVerify);
@@ -213,3 +216,8 @@ export function LabStepperCard({
     </section>
   );
 }
+
+/**
+ * Memoized 4-step interactive learning checklist card for the active lab.
+ */
+export const LabStepperCard = memo(LabStepperCardInner);

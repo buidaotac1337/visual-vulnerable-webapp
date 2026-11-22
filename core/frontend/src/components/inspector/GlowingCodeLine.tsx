@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { JSX, RefObject } from 'react';
 import { AlertOctagon, AlertTriangle, Info, ShieldCheck } from 'lucide-react';
 
@@ -77,7 +78,7 @@ const STATUS_THEMES: Record<TraceStatus, StatusTheme> = {
  * @param props - 1-based lineNumber, tokenized spans, optional activeStep, and scroll ref.
  * @returns Rendered code line with optional inline pedagogical callout.
  */
-export function GlowingCodeLine({
+function GlowingCodeLineInner({
   lineNumber,
   tokens,
   activeStep,
@@ -139,3 +140,9 @@ export function GlowingCodeLine({
     </div>
   );
 }
+
+/**
+ * Memoized single source code line from XSS-safe Shiki tokens, lighting up with a semantic
+ * status glow and slide-down Inline Callout Box when its @step is active.
+ */
+export const GlowingCodeLine = memo(GlowingCodeLineInner);

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import type { LabMetadata } from '@/types';
 
@@ -104,7 +104,7 @@ export function useLearningProgress(): LearningProgressController {
   );
 
   const getLabProgress = useCallback(
-    (labId: string): LabStepProgress => progressByLab[labId] ?? { ...DEFAULT_STEP_PROGRESS },
+    (labId: string): LabStepProgress => progressByLab[labId] ?? DEFAULT_STEP_PROGRESS,
     [progressByLab],
   );
 
@@ -184,19 +184,36 @@ export function useLearningProgress(): LearningProgressController {
     [progressByLab],
   );
 
-  return {
-    progressByLab,
-    onboardingDismissed,
-    getLabProgress,
-    getCompletedStepCount,
-    markExploredVulnerable,
-    markComparedSecure,
-    markViewedDiff,
-    markPassedVerify,
-    dismissOnboarding,
-    reopenOnboarding,
-    resetProgress,
-    countPassedLabs,
-    findNextRecommendedLab,
-  };
+  return useMemo(
+    () => ({
+      progressByLab,
+      onboardingDismissed,
+      getLabProgress,
+      getCompletedStepCount,
+      markExploredVulnerable,
+      markComparedSecure,
+      markViewedDiff,
+      markPassedVerify,
+      dismissOnboarding,
+      reopenOnboarding,
+      resetProgress,
+      countPassedLabs,
+      findNextRecommendedLab,
+    }),
+    [
+      progressByLab,
+      onboardingDismissed,
+      getLabProgress,
+      getCompletedStepCount,
+      markExploredVulnerable,
+      markComparedSecure,
+      markViewedDiff,
+      markPassedVerify,
+      dismissOnboarding,
+      reopenOnboarding,
+      resetProgress,
+      countPassedLabs,
+      findNextRecommendedLab,
+    ],
+  );
 }

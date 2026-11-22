@@ -57,7 +57,7 @@
 
 @keyframes vvwa-packet-forward {
   0% {
-    left: 4%;
+    transform: translate3d(4%, 0, 0);
     opacity: 0;
   }
   15% {
@@ -67,14 +67,14 @@
     opacity: 1;
   }
   100% {
-    left: calc(100% - 10px);
+    transform: translate3d(calc(100% - 10px), 0, 0);
     opacity: 0;
   }
 }
 
 @keyframes vvwa-packet-reverse {
   0% {
-    left: calc(100% - 10px);
+    transform: translate3d(calc(100% - 10px), 0, 0);
     opacity: 0;
   }
   15% {
@@ -84,7 +84,7 @@
     opacity: 1;
   }
   100% {
-    left: 4%;
+    transform: translate3d(4%, 0, 0);
     opacity: 0;
   }
 }
@@ -103,27 +103,30 @@
 
 @keyframes vvwa-node-halo {
   0% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-indigo-500) 28%, transparent);
+    opacity: 0.85;
   }
   100% {
-    box-shadow: 0 0 0 8px color-mix(in oklab, var(--color-indigo-500) 0%, transparent);
+    opacity: 1;
   }
 }
 
 .vvwa-packet-forward {
   animation: vvwa-packet-forward 1.05s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
 }
 
 .vvwa-packet-reverse {
   animation: vvwa-packet-reverse 1.05s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
 }
 
 .vvwa-dot-pulse {
   animation: vvwa-dot-pulse 1.2s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 .vvwa-node-halo {
-  animation: vvwa-node-halo 900ms ease-out;
+  animation: vvwa-node-halo 320ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -132,12 +135,12 @@
   .vvwa-dot-pulse,
   .vvwa-node-halo {
     animation: none !important;
+    will-change: auto;
   }
 
   .vvwa-packet-forward,
   .vvwa-packet-reverse {
     opacity: 1;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    justify-content: center;
   }
 }

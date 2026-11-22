@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import type { JSX, ReactNode } from 'react';
 import {
   AlertTriangle,
@@ -83,7 +83,7 @@ function FixFileRow({ filePath, copied, onCopy }: FixFileRowProps): JSX.Element 
  * @param props - Active lab metadata and glossary term click handler.
  * @returns Rendered beginner guide card.
  */
-export function LabBeginnerCard({ lab, onOpenTerm }: LabBeginnerCardProps): JSX.Element {
+function LabBeginnerCardInner({ lab, onOpenTerm }: LabBeginnerCardProps): JSX.Element {
   const [expanded, setExpanded] = useState(false);
   const [copiedPath, setCopiedPath] = useState<string | null>(null);
   const guide = getLabBeginnerGuide(lab);
@@ -187,3 +187,8 @@ export function LabBeginnerCard({ lab, onOpenTerm }: LabBeginnerCardProps): JSX.
     </section>
   );
 }
+
+/**
+ * Memoized compact collapsible card explaining a lab in plain Vietnamese for beginners.
+ */
+export const LabBeginnerCard = memo(LabBeginnerCardInner);

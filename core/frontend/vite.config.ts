@@ -75,9 +75,16 @@ export default defineConfig({
     },
     // Bind mounts from a Windows/macOS host into Docker do not deliver inotify events,
     // so HMR for core/frontend/src and labs/ needs polling inside the container.
+    // Ignore non-frontend lab files so Chokidar does not poll Python/Markdown/cache trees.
     watch: {
       usePolling: process.env.VITE_WATCH_POLLING === 'true',
-      interval: 300,
+      interval: 1000,
+      ignored: [
+        '**/__pycache__/**',
+        '**/labs/*/backend/**',
+        '**/labs/*/*.md',
+        '**/labs/*/meta.json',
+      ],
     },
     proxy: {
       '/api': {

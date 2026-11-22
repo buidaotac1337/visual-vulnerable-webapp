@@ -67,8 +67,13 @@ export function useWorkspaceLayout(): WorkspaceLayoutController {
 
   const setSplitPercent = useCallback((nextPercent: number): void => {
     const clamped = clampSplitPercent(nextPercent);
-    setSplitPercentState(clamped);
-    writeStorage(SPLIT_PERCENT_STORAGE_KEY, String(clamped));
+    setSplitPercentState((prev) => {
+      if (prev === clamped) {
+        return prev;
+      }
+      writeStorage(SPLIT_PERCENT_STORAGE_KEY, String(clamped));
+      return clamped;
+    });
   }, []);
 
   const resetSplit = useCallback((): void => {

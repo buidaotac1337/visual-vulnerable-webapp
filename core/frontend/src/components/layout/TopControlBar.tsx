@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { JSX } from 'react';
 import { CheckCircle2, Download, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
 
@@ -35,7 +36,7 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
   if (health) {
     return (
       <span
-        className="hidden rounded-full bg-safe-50 px-2.5 py-1 text-xs font-medium text-safe-700 xl:inline-flex"
+        className="hidden shrink-0 whitespace-nowrap rounded-full bg-safe-50 px-2.5 py-1 text-xs font-medium text-safe-700 xl:inline-flex"
         title={`${health.service} (${health.environment})`}
       >
         API: {health.status.toUpperCase()} (v{health.version})
@@ -44,13 +45,13 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
   }
   if (apiError) {
     return (
-      <span className="rounded-full bg-warning-50 px-2.5 py-1 text-xs font-medium text-warning-700">
+      <span className="shrink-0 whitespace-nowrap rounded-full bg-warning-50 px-2.5 py-1 text-xs font-medium text-warning-700">
         {apiError}
       </span>
     );
   }
   return (
-    <span className="hidden rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 xl:inline-flex">
+    <span className="hidden shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 xl:inline-flex">
       Connecting API...
     </span>
   );
@@ -85,7 +86,7 @@ function StableLabel({ label, busyLabel, isBusy }: StableLabelProps): JSX.Elemen
  * @param props - Workspace status, labs list, and toolbar action callbacks.
  * @returns Rendered TopControlBar header element.
  */
-export function TopControlBar({
+function TopControlBarInner({
   health,
   apiError,
   labs,
@@ -190,3 +191,9 @@ export function TopControlBar({
     </header>
   );
 }
+
+/**
+ * Memoized 56px top navigation bar housing lab selection, learning path, glossary,
+ * mode toggle, and 1-click Reset DB / Test My Fix / Download Snippet controls.
+ */
+export const TopControlBar = memo(TopControlBarInner);

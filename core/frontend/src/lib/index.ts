@@ -21,7 +21,7 @@ export {
   resolveFrontendFile,
 } from './sourceFiles';
 export type { ResolvedFrontendFile } from './sourceFiles';
-export { tokenizeCodeAsync, tokenizeCodeSyncFallback } from './highlighter';
+export { getCachedTokenLines, tokenizeCodeAsync, tokenizeCodeSyncFallback } from './highlighter';
 export { getLazyLabView, hasLabView, loadFrontendSinkModule } from './labRegistry';
 export { probeDom, isJavascriptUrl } from './domProbe';
 export type { DomObservation } from './domProbe';

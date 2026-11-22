@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import type { JSX } from 'react';
 import {
   AlertTriangle,
@@ -84,7 +84,7 @@ function resolveCtaHandler(
  * @param props - Active lab mode, execution response, and optional action callbacks.
  * @returns Rendered OutcomeCoachPanel card.
  */
-export function OutcomeCoachPanel({
+function OutcomeCoachPanelInner({
   mode,
   response,
   hasFrontendSink = false,
@@ -95,6 +95,7 @@ export function OutcomeCoachPanel({
   const [isJsonOpen, setIsJsonOpen] = useState(true);
   const coaching = deriveOutcomeCoaching(mode, response.meta.outcome, hasFrontendSink);
   const style = TONE_STYLES[coaching.tone];
+  const formattedJson = useMemo(() => JSON.stringify(response.data, null, 2), [response.data]);
   const ctaHandler = resolveCtaHandler(coaching.ctaKind, {
     onSwitchMode,
     onOpenDiff,
@@ -152,10 +153,16 @@ export function OutcomeCoachPanel({
             className="mt-2 overflow-x-auto rounded-lg bg-slate-50 p-3 text-xs text-slate-800"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            {JSON.stringify(response.data, null, 2)}
+            {formattedJson}
           </pre>
         )}
       </div>
     </div>
   );
 }
+
+/**
+ * Memoized contextual outcome panel explaining execution results in plain Vietnamese
+ * with a 1-click next-step CTA and memoized collapsible JSON output.
+ */
+export const OutcomeCoachPanel = memo(OutcomeCoachPanelInner);

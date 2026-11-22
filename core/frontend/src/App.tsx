@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { JSX } from 'react';
 
 import {
@@ -64,19 +64,32 @@ export function App(): JSX.Element {
 
   useProgressMilestoneSync(ws, progress);
 
+  const openCatalog = useCallback((): void => setIsCatalogOpen(true), []);
+  const closeCatalog = useCallback((): void => setIsCatalogOpen(false), []);
   const openGlossary = useCallback((termId?: string): void => {
     setGlossaryTermId(termId ?? null);
     setIsGlossaryOpen(true);
   }, []);
-
+  const openGlossaryRoot = useCallback((): void => openGlossary(), [openGlossary]);
   const closeGlossary = useCallback((): void => {
     setIsGlossaryOpen(false);
     setGlossaryTermId(null);
   }, []);
 
-  const openDiffTab = useCallback((): void => {
-    ws.setActiveTab('diff');
-  }, [ws]);
+  const { setActiveTab, handleResetDb, handleVerify, handleDownloadSnippet, refreshSource } = ws;
+  const openDiffTab = useCallback((): void => setActiveTab('diff'), [setActiveTab]);
+  const onResetDb = useCallback((): void => {
+    void handleResetDb();
+  }, [handleResetDb]);
+  const onVerify = useCallback((): void => {
+    void handleVerify();
+  }, [handleVerify]);
+  const onDownloadSnippet = useCallback((): void => {
+    void handleDownloadSnippet();
+  }, [handleDownloadSnippet]);
+  const onRefreshSource = useCallback((): void => {
+    void refreshSource();
+  }, [refreshSource]);
 
   useTraceShortcuts({
     enabled: !(ws.isVerifyModalOpen || isCatalogOpen || isGlossaryOpen),
@@ -86,12 +99,13 @@ export function App(): JSX.Element {
     onTogglePlayPause: ws.playback.togglePlayPause,
   });
 
-  const pipelineNodes = computePipelineNodes(
-    ws.playback.trace,
-    ws.playback.activeIndex,
-    ws.playback.status !== 'idle',
+  const { trace, activeIndex, status } = ws.playback;
+  const pipelineNodes = useMemo(
+    () => computePipelineNodes(trace, activeIndex, status !== 'idle'),
+    [trace, activeIndex, status],
   );
   const hasFrontendTests = ws.selectedLab?.verifyTests.some(isFrontendVerifyTest) ?? false;
+  const passedLabsCount = useMemo(() => progress.countPassedLabs(ws.labs), [progress, ws.labs]);
   const selectedProgress = ws.selectedLab ? progress.getLabProgress(ws.selectedLab.id) : undefined;
 
   return (
@@ -105,24 +119,18 @@ export function App(): JSX.Element {
         selectedLab={ws.selectedLab}
         mode={ws.mode}
         layoutMode={layout.layoutMode}
-        passedLabsCount={progress.countPassedLabs(ws.labs)}
+        passedLabsCount={passedLabsCount}
         isResettingDb={ws.isResettingDb}
         isVerifying={ws.isVerifying}
         isDownloading={ws.isDownloading}
         onSelectLab={ws.selectLab}
         onChangeMode={ws.changeMode}
         onChangeLayoutMode={layout.setLayoutMode}
-        onOpenCatalog={() => setIsCatalogOpen(true)}
-        onOpenGlossary={() => openGlossary()}
-        onResetDb={() => {
-          void ws.handleResetDb();
-        }}
-        onVerify={() => {
-          void ws.handleVerify();
-        }}
-        onDownloadSnippet={() => {
-          void ws.handleDownloadSnippet();
-        }}
+        onOpenCatalog={openCatalog}
+        onOpenGlossary={openGlossaryRoot}
+        onResetDb={onResetDb}
+        onVerify={onVerify}
+        onDownloadSnippet={onDownloadSnippet}
       />
 
       <LabWorkspace
@@ -164,13 +172,11 @@ export function App(): JSX.Element {
             onSelectPipelineLayer={ws.selectPipelineLayer}
             onSelectPipelineStep={ws.playback.jumpToStep}
             onDismissWelcome={progress.dismissOnboarding}
-            onOpenCatalog={() => setIsCatalogOpen(true)}
+            onOpenCatalog={openCatalog}
             onOpenGlossary={openGlossary}
             onSwitchMode={ws.changeMode}
             onOpenDiff={openDiffTab}
-            onOpenVerify={() => {
-              void ws.handleVerify();
-            }}
+            onOpenVerify={onVerify}
           />
         }
         rightPane={
@@ -188,9 +194,7 @@ export function App(): JSX.Element {
             traceSteps={ws.playback.trace}
             playbackSpeed={ws.playback.speed}
             onChangeTab={ws.setActiveTab}
-            onRefreshSource={() => {
-              void ws.refreshSource();
-            }}
+            onRefreshSource={onRefreshSource}
             onPrevStep={ws.playback.prevStep}
             onReplayTrace={ws.playback.replay}
             onTogglePlayPause={ws.playback.togglePlayPause}
@@ -209,7 +213,7 @@ export function App(): JSX.Element {
         isGlossaryOpen={isGlossaryOpen}
         glossaryTermId={glossaryTermId}
         onOpenDiff={openDiffTab}
-        onCloseCatalog={() => setIsCatalogOpen(false)}
+        onCloseCatalog={closeCatalog}
         onCloseGlossary={closeGlossary}
       />
     </div>

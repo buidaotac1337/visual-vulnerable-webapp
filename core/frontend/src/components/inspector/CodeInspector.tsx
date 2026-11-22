@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { JSX } from 'react';
 
 import { resolveFrontendFile, resolveStepTarget } from '@/lib';
@@ -182,7 +183,7 @@ function TabSwitchNote({ note }: { note: string | null }): JSX.Element {
  * @param props - Active lab, source files, playback state, and inspector callbacks.
  * @returns Rendered CodeInspector panel.
  */
-export function CodeInspector({
+function CodeInspectorInner({
   lab,
   mode,
   activeTab,
@@ -248,3 +249,9 @@ export function CodeInspector({
     </div>
   );
 }
+
+/**
+ * Memoized Dark IDE surface Code & Trace Inspector with Backend/Frontend/Diff tabs,
+ * live @step glow highlighting, manual source refresh, and step playback controls.
+ */
+export const CodeInspector = memo(CodeInspectorInner);

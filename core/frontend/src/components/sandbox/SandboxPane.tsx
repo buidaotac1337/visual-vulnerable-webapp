@@ -1,4 +1,4 @@
-import { Component, Suspense } from 'react';
+import { Component, memo, Suspense } from 'react';
 import type { JSX, ReactNode } from 'react';
 
 import type { LabStepProgress } from '@/hooks';
@@ -153,11 +153,7 @@ function renderBeginnerGuidance(props: SandboxPaneProps): JSX.Element | null {
       </div>
 
       {onOpenGlossary && (
-        <LabBeginnerCard
-          key={`guide-${lab.id}`}
-          lab={lab}
-          onOpenTerm={(termId) => onOpenGlossary(termId)}
-        />
+        <LabBeginnerCard key={`guide-${lab.id}`} lab={lab} onOpenTerm={onOpenGlossary} />
       )}
 
       {labProgress && onSwitchMode && onOpenDiff && onOpenVerify && (
@@ -167,6 +163,7 @@ function renderBeginnerGuidance(props: SandboxPaneProps): JSX.Element | null {
           progress={labProgress}
           mode={props.mode}
           activeTab={props.activeTab ?? 'backend'}
+          defaultExpanded={false}
           onSwitchMode={onSwitchMode}
           onOpenDiff={onOpenDiff}
           onOpenVerify={onOpenVerify}
@@ -184,7 +181,7 @@ function renderBeginnerGuidance(props: SandboxPaneProps): JSX.Element | null {
  * @param props - Active lab, execution state, pipeline nodes, progress, and callbacks.
  * @returns Rendered SandboxPane column content.
  */
-export function SandboxPane(props: SandboxPaneProps): JSX.Element {
+function SandboxPaneInner(props: SandboxPaneProps): JSX.Element {
   const { lab, mode, actors, actor, isExecuting, lastRequest, lastResponse } = props;
 
   return (
@@ -247,3 +244,9 @@ export function SandboxPane(props: SandboxPaneProps): JSX.Element {
     </div>
   );
 }
+
+/**
+ * Memoized MiniShop Sandbox column housing onboarding guidance, FlowPipeline,
+ * beginner lab briefing, 4-step checklist, dynamic LabView plugin, and OutcomeCoachPanel.
+ */
+export const SandboxPane = memo(SandboxPaneInner);
