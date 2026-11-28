@@ -2,7 +2,7 @@ import { Component, memo, Suspense } from 'react';
 import type { JSX, ReactNode } from 'react';
 
 import type { LabStepProgress } from '@/hooks';
-import { getLazyLabView } from '@/lib';
+import { getLazyLabView, UI_LABELS } from '@/lib';
 import type {
   ExecuteActionOptions,
   InspectorTab,
@@ -31,6 +31,8 @@ interface SandboxPaneProps {
   isLoadingLabs: boolean;
   lab: LabMetadata | null;
   mode: LabMode;
+  /** Song song view: show the run-order note and skip single-mode coaching (ADR-0010). */
+  isCompare?: boolean;
   activeTab?: InspectorTab;
   hasFrontendSink?: boolean;
   actors: readonly string[];
@@ -173,6 +175,36 @@ function renderBeginnerGuidance(props: SandboxPaneProps): JSX.Element | null {
   );
 }
 
+function renderCompareNote({ lab, isCompare }: SandboxPaneProps): JSX.Element | null {
+  if (!lab || isCompare !== true) {
+    return null;
+  }
+  return (
+    <p
+      role="note"
+      className="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs text-brand-800"
+    >
+      {UI_LABELS.compareSandboxNote.text}
+    </p>
+  );
+}
+
+function renderOutcomeCoach(props: SandboxPaneProps): JSX.Element | null {
+  if (!props.lastResponse || props.isCompare === true) {
+    return null;
+  }
+  return (
+    <OutcomeCoachPanel
+      mode={props.mode}
+      response={props.lastResponse}
+      hasFrontendSink={props.hasFrontendSink}
+      onSwitchMode={props.onSwitchMode}
+      onOpenDiff={props.onOpenDiff}
+      onOpenVerify={props.onOpenVerify}
+    />
+  );
+}
+
 /**
  * Render the Light-surface MiniShop Sandbox column housing onboarding guidance,
  * FlowPipeline, beginner lab briefing & 4-step checklist, dynamic LabView plugin,
@@ -182,7 +214,7 @@ function renderBeginnerGuidance(props: SandboxPaneProps): JSX.Element | null {
  * @returns Rendered SandboxPane column content.
  */
 function SandboxPaneInner(props: SandboxPaneProps): JSX.Element {
-  const { lab, mode, actors, actor, isExecuting, lastRequest, lastResponse } = props;
+  const { lab, actors, actor, isExecuting, lastRequest, lastResponse } = props;
 
   return (
     <div className="flex flex-col gap-4">
@@ -221,6 +253,8 @@ function SandboxPaneInner(props: SandboxPaneProps): JSX.Element {
         />
       )}
 
+      {renderCompareNote(props)}
+
       {renderLabViewSlot(props)}
 
       {lab && (
@@ -231,16 +265,7 @@ function SandboxPaneInner(props: SandboxPaneProps): JSX.Element {
         />
       )}
 
-      {lastResponse && (
-        <OutcomeCoachPanel
-          mode={mode}
-          response={lastResponse}
-          hasFrontendSink={props.hasFrontendSink}
-          onSwitchMode={props.onSwitchMode}
-          onOpenDiff={props.onOpenDiff}
-          onOpenVerify={props.onOpenVerify}
-        />
-      )}
+      {renderOutcomeCoach(props)}
     </div>
   );
 }

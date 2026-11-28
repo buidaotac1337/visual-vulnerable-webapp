@@ -4,6 +4,7 @@ import type { JSX } from 'react';
 import { resolveFrontendFile, resolveStepTarget } from '@/lib';
 import type { ResolvedFrontendFile } from '@/lib';
 import type {
+  CompareRunResult,
   InspectorTab,
   LabMetadata,
   LabMode,
@@ -15,10 +16,11 @@ import type {
 } from '@/types';
 
 import { CodeSnippetView } from './CodeSnippetView';
+import { CompareCodeView } from './CompareCodeView';
+import { InspectorDiffTab } from './InspectorDiffTab';
 import { InspectorHeader } from './InspectorHeader';
 import { TraceControls } from './TraceControls';
 import { TraceLegendBar } from './TraceLegendBar';
-import { UnifiedDiffView } from './UnifiedDiffView';
 import { useStepTabSwitch } from './useStepTabSwitch';
 
 interface CodeInspectorProps {
@@ -42,6 +44,16 @@ interface CodeInspectorProps {
   onNextStep: () => void;
   onChangeSpeed?: (speed: TracePlaybackSpeed) => void;
   onJumpToStep?: (index: number) => void;
+  /** Song song view: the Backend tab shows both files and the aligned trace (ADR-0010). */
+  isCompare?: boolean;
+  compareResult?: CompareRunResult | null;
+}
+
+interface CompareBodyProps {
+  isCompare?: boolean;
+  result?: CompareRunResult | null;
+  activeIndex: number;
+  onSelectRow?: (index: number) => void;
 }
 
 interface InspectorView {
@@ -58,30 +70,6 @@ function resolveFullFilePath(lab: LabMetadata | null, view: InspectorView): stri
     return view.frontendFile ? `labs/${lab.id}/${view.frontendFile.label}` : null;
   }
   return `labs/${lab.id}/backend/${view.mode}.py`;
-}
-
-function renderDiffTab(source: LabSourceResponse, labId: string | null): JSX.Element {
-  const backendEditPath = labId ? `labs/${labId}/backend/vulnerable.py` : null;
-  const frontendEditPath = labId ? `labs/${labId}/frontend/vulnerable.tsx` : null;
-  if (source.frontend_diff == null) {
-    return <UnifiedDiffView diff={source.diff} editFilePath={backendEditPath} />;
-  }
-  return (
-    <div>
-      <h3 className="px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Backend: vulnerable.py ↔ secure.py
-      </h3>
-      <UnifiedDiffView diff={source.diff} editFilePath={backendEditPath} />
-      <h3 className="border-t border-slate-700 px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Frontend: vulnerable.tsx ↔ secure.tsx
-      </h3>
-      <UnifiedDiffView
-        diff={source.frontend_diff}
-        fileLabels={['vulnerable.tsx', 'secure.tsx']}
-        editFilePath={frontendEditPath}
-      />
-    </div>
-  );
 }
 
 function highlightFor(
@@ -138,6 +126,7 @@ function renderInspectorBody(
   sourceError: string | null,
   target: StepHighlightTarget | null,
   activeStep: TraceStep | null,
+  compare: CompareBodyProps,
 ): JSX.Element {
   if (sourceError) {
     return (
@@ -155,7 +144,17 @@ function renderInspectorBody(
     );
   }
   if (view.activeTab === 'diff') {
-    return renderDiffTab(source, lab ? lab.id : null);
+    return <InspectorDiffTab source={source} labId={lab ? lab.id : null} />;
+  }
+  if (compare.isCompare === true && view.activeTab === 'backend') {
+    return (
+      <CompareCodeView
+        source={source}
+        result={compare.result ?? null}
+        activeIndex={compare.activeIndex}
+        onSelectRow={compare.onSelectRow}
+      />
+    );
   }
   return renderSnippetForTab(view, source, target, activeStep);
 }
@@ -204,6 +203,8 @@ function CodeInspectorInner({
   onNextStep,
   onChangeSpeed,
   onJumpToStep,
+  isCompare,
+  compareResult,
 }: CodeInspectorProps): JSX.Element {
   const target = resolveStepTarget(activeStep, source, mode);
   const { note: tabNote, pickTab } = useStepTabSwitch(
@@ -230,7 +231,12 @@ function CodeInspectorInner({
       <TabSwitchNote note={tabNote} />
       <TraceLegendBar hasTrace={totalSteps > 0} activeTab={activeTab} mode={mode} />
       <div className="vvwa-ide-scroll min-h-0 flex-1 overflow-auto">
-        {renderInspectorBody(view, lab, source, sourceError, target, activeStep)}
+        {renderInspectorBody(view, lab, source, sourceError, target, activeStep, {
+          isCompare,
+          result: compareResult,
+          activeIndex,
+          onSelectRow: onJumpToStep,
+        })}
       </div>
       <TraceControls
         totalSteps={totalSteps}

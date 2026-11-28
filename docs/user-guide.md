@@ -43,8 +43,8 @@ Workspace chia làm hai bề mặt:
 | **Lộ trình (`X/9`)** | Mở hộp thoại danh mục các bài lab theo mức độ (`Cơ bản` → `Trung bình`), có tìm kiếm và thanh tiến độ số bài đã vượt qua **Test My Fix**. |
 | **Từ điển** | Mở từ điển bảo mật web tiếng Việt (giao diện VVWA, lỗ hổng, cách phòng vệ) kèm ví dụ đời thường cho người mới. |
 | **Badge API** | `API: OK (v…)` khi backend sẵn sàng; hiện thông báo lỗi khi không kết nối được. |
-| **Vulnerable / Secure** | Chọn bản cài đặt sẽ thực thi (`backend/vulnerable.py` hoặc `backend/secure.py`). Dữ liệu đã nhập được giữ nguyên khi gạt. |
-| **Bố cục workspace** (`lg+`) | Ba chế độ (lưu qua `localStorage`): **Song song** (chia hai cột, kéo thanh chia `30%`–`70%`; dùng `←`/`→` để chỉnh ±5%, nháy đúp hoặc `Home`/`End` để về `50%`), **Tập trung code** (Inspector toàn chiều rộng kèm nút **Về Song song**), và **Sandbox nổi** (thẻ nổi góc trên phải dưới thanh tab Inspector có nút **Thu gọn** / **Mở rộng** và **Về Song song**, tránh che dòng code và điều khiển trace). Dữ liệu đang nhập trong Sandbox luôn được giữ nguyên khi chuyển chế độ. |
+| **Vulnerable / Secure / Song song** | Chọn bản cài đặt sẽ thực thi (`backend/vulnerable.py` hoặc `backend/secure.py`). Dữ liệu đã nhập được giữ nguyên khi gạt. Chấm màu trên nút Vulnerable và Secure là kết quả lần chạy gần nhất của mode đó (đỏ: bị khai thác, xanh: đã chặn, xám: bình thường, vàng: lỗi). **Song song** chạy cùng payload trên cả hai bản: xem [mục 4.1](#41-chế-độ-song-song). |
+| **Bố cục workspace** (`lg+`) | Ba chế độ (lưu qua `localStorage`): **Chia đôi** (chia hai cột, kéo thanh chia `30%`–`70%`; dùng `←`/`→` để chỉnh ±5%, nháy đúp hoặc `Home`/`End` để về `50%`), **Tập trung code** (Inspector toàn chiều rộng kèm nút **Về Chia đôi**), và **Sandbox nổi** (thẻ nổi góc trên phải dưới thanh tab Inspector có nút **Thu gọn** / **Mở rộng** và **Về Chia đôi**, tránh che dòng code và điều khiển trace). Dữ liệu đang nhập trong Sandbox luôn được giữ nguyên khi chuyển chế độ. |
 | **Reset DB** | Chạy lại `seed.sql`, đưa toàn bộ dữ liệu MiniShop về trạng thái ban đầu. |
 | **Test My Fix** | Chạy bộ `verifyTests` của lab với file `vulnerable.*` hiện tại trên đĩa (xem [mục 5](#5-test-my-fix)). |
 | **Tải Snippet** | Tải `<lab_id>-fastapi.zip` gồm bản lỗi, bản vá, diff và README của lab. |
@@ -95,6 +95,15 @@ Màu trạng thái của bước trace:
 | `warning` | Hổ phách | Dữ liệu chưa được kiểm tra, có nguy cơ |
 | `danger` | Đỏ | Lỗ hổng vừa được kích hoạt |
 | `safe` | Xanh lá | Safety pattern đã chặn payload |
+
+### 4.1. Chế độ Song song
+
+Bấm **Song song** trên thanh công cụ để so sánh hai bản cài đặt trong một lần gửi ([ADR-0010](adr/0010-song-song-compare-mode.md)):
+
+1. Mỗi lần bấm gửi trong MiniShop, VVWA chạy **Reset DB → Secure → Reset DB → Vulnerable**. Hai phía cùng bắt đầu từ dữ liệu seed. Burst nhiều request của Lab 08 vẫn chạy đủ N request trên mỗi phía.
+2. MiniShop hiện kết quả phía Vulnerable, và database sau lượt chạy mang trạng thái của phía này. Dữ liệu bạn tạo trước lượt chạy (review, đơn hàng, file upload) sẽ bị xóa.
+3. Tab **Backend** hiện badge kết quả của hai phía, bảng trace căn theo từng bước (bước chỉ một bản có thì ô bên kia để trống) và hai file `vulnerable.py` / `secure.py` cạnh nhau. Mỗi file tự sáng dòng code của bước đang phát. Bấm một hàng để nhảy tới bước đó. Các nút Trước / Phát / Sau và phím tắt điều khiển cả hai phía cùng lúc.
+4. Với lab có sink frontend (Lab 02), phía Secure không có bước render frontend vì MiniShop render bằng sink của phía Vulnerable. Khác biệt của sink xem ở tab **Diff**.
 
 ## 5. Test My Fix
 

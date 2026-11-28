@@ -11,8 +11,8 @@ Nền tảng lab bảo mật web chạy local. VVWA cho thấy từng bước th
 
 | Tính năng | Mô tả |
 | :--- | :--- |
-| **Chuyển chế độ tức thì** | Công tắc `Vulnerable ↔ Secure` ngay trên màn hình lab, giữ nguyên dữ liệu đã nhập để so sánh hai bản cài đặt. |
-| **Bố cục workspace (`lg+`)** | Ba chế độ màn hình desktop (`Song song` kéo thanh chia `30%–70%`, `Tập trung code`, `Sandbox nổi` có thể thu gọn), giữ nguyên dữ liệu đang nhập khi chuyển. |
+| **Chuyển chế độ tức thì** | Công tắc `Vulnerable · Secure · Song song` ngay trên màn hình lab, giữ nguyên dữ liệu đã nhập. **Song song** chạy cùng payload trên cả hai bản (Reset DB trước mỗi phía), đặt `vulnerable.py`, `secure.py` và trace căn theo từng bước cạnh nhau. |
+| **Bố cục workspace (`lg+`)** | Ba chế độ màn hình desktop (`Chia đôi` kéo thanh chia `30%–70%`, `Tập trung code`, `Sandbox nổi` có thể thu gọn), giữ nguyên dữ liệu đang nhập khi chuyển. |
 | **Live Trace** | Pipeline `MiniShop UI → FastAPI → PostgreSQL` và dòng code đang chạy phát sáng theo từng bước (đỏ: bị khai thác, xanh: đã chặn), kèm giá trị thực tế như câu SQL sau khi ghép chuỗi. |
 | **Code Inspector** | Đọc trực tiếp mã nguồn trên đĩa với các tab **Backend** / **Frontend** / **Diff**, tô màu cú pháp bằng Shiki. |
 | **Test My Fix** | Sửa `vulnerable.py` hoặc `vulnerable.tsx`, bấm một nút để chấm bằng bộ `verifyTests` khai báo trong `meta.json`. |

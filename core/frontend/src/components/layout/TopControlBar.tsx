@@ -1,9 +1,22 @@
 import { memo } from 'react';
 import type { JSX } from 'react';
-import { CheckCircle2, Download, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
+import {
+  CheckCircle2,
+  Columns2,
+  Download,
+  RotateCcw,
+  ShieldAlert,
+  ShieldCheck,
+} from 'lucide-react';
 
 import { isFrontendVerifyTest, testMyFixTip, UI_LABELS } from '@/lib';
-import type { HealthResponse, LabMetadata, LabMode, WorkspaceLayoutMode } from '@/types';
+import type {
+  HealthResponse,
+  LabMetadata,
+  ModeOutcomes,
+  WorkspaceLayoutMode,
+  WorkspaceMode,
+} from '@/types';
 
 import { Tooltip } from '../ui';
 
@@ -16,14 +29,15 @@ interface TopControlBarProps {
   apiError: string | null;
   labs: readonly LabMetadata[];
   selectedLab: LabMetadata | null;
-  mode: LabMode;
+  mode: WorkspaceMode;
+  modeOutcomes?: ModeOutcomes;
   layoutMode?: WorkspaceLayoutMode;
   passedLabsCount?: number;
   isResettingDb: boolean;
   isVerifying: boolean;
   isDownloading: boolean;
   onSelectLab: (labId: string) => void;
-  onChangeMode: (nextMode: LabMode) => void;
+  onChangeMode: (nextMode: WorkspaceMode) => void;
   onChangeLayoutMode?: (nextMode: WorkspaceLayoutMode) => void;
   onOpenCatalog?: () => void;
   onOpenGlossary?: () => void;
@@ -31,6 +45,13 @@ interface TopControlBarProps {
   onVerify: () => void;
   onDownloadSnippet: () => void;
 }
+
+const BRAND_ICONS = { vulnerable: ShieldAlert, secure: ShieldCheck, compare: Columns2 } as const;
+const BRAND_ICON_CLASS: Record<WorkspaceMode, string> = {
+  vulnerable: 'text-danger-500',
+  secure: 'text-safe-500',
+  compare: 'text-brand-500',
+};
 
 function renderApiBadge(health: HealthResponse | null, apiError: string | null): JSX.Element {
   if (health) {
@@ -92,6 +113,7 @@ function TopControlBarInner({
   labs,
   selectedLab,
   mode,
+  modeOutcomes,
   layoutMode = 'split',
   passedLabsCount = 0,
   isResettingDb,
@@ -106,7 +128,7 @@ function TopControlBarInner({
   onVerify,
   onDownloadSnippet,
 }: TopControlBarProps): JSX.Element {
-  const isSecure = mode === 'secure';
+  const BrandIcon = BRAND_ICONS[mode];
   const hasLab = selectedLab !== null;
   const gradesFrontend = selectedLab?.verifyTests.some(isFrontendVerifyTest) ?? false;
   const verifyTip = testMyFixTip(gradesFrontend);
@@ -115,11 +137,7 @@ function TopControlBarInner({
     <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4">
       <div className="flex min-w-0 items-center gap-2.5">
         <div className="flex shrink-0 items-center gap-2 text-base font-semibold text-slate-900">
-          {isSecure ? (
-            <ShieldCheck className="h-5 w-5 text-safe-500" aria-hidden="true" />
-          ) : (
-            <ShieldAlert className="h-5 w-5 text-danger-500" aria-hidden="true" />
-          )}
+          <BrandIcon className={`h-5 w-5 ${BRAND_ICON_CLASS[mode]}`} aria-hidden="true" />
           <span className="tracking-tight">VVWA · MiniShop</span>
         </div>
 
@@ -136,7 +154,12 @@ function TopControlBarInner({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <ModeSwitch mode={mode} hasFrontendSink={gradesFrontend} onChange={onChangeMode} />
+        <ModeSwitch
+          mode={mode}
+          hasFrontendSink={gradesFrontend}
+          outcomes={modeOutcomes}
+          onChange={onChangeMode}
+        />
 
         <LayoutModeSwitch
           mode={layoutMode}

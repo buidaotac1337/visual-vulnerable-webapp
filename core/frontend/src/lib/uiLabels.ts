@@ -1,4 +1,4 @@
-import type { LabMode } from '@/types';
+import type { LabMode, TraceOutcome } from '@/types';
 
 /** One workspace label: the text on screen and an optional Vietnamese explanation tooltip. */
 export interface UiLabel {
@@ -24,6 +24,13 @@ export const UI_LABELS = {
   secure: {
     text: 'Secure',
     tip: 'Chạy backend/secure.py: bản tham chiếu đã áp dụng safety pattern, để so sánh.',
+  },
+  compare: {
+    text: 'Song song',
+    tip: 'Chạy cùng payload trên cả hai bản (Reset DB → Secure → Reset DB → Vulnerable) rồi đặt vulnerable.py, secure.py và trace cạnh nhau.',
+  },
+  compareSandboxNote: {
+    text: 'Song song: mỗi lần gửi, VVWA Reset DB rồi chạy Secure, Reset DB lần nữa rồi chạy Vulnerable. MiniShop bên dưới hiện kết quả phía Vulnerable.',
   },
   resetDb: {
     text: 'Reset DB',
@@ -80,7 +87,7 @@ export const UI_LABELS = {
   diffTab: { text: 'Diff', tip: 'Những dòng khác nhau giữa bản lỗi và bản vá.' },
   refreshSource: { text: 'Làm mới mã nguồn', tip: 'Đọc lại mã nguồn mới nhất từ đĩa.' },
   layoutSplit: {
-    text: 'Song song',
+    text: 'Chia đôi',
     tip: 'Hiển thị đồng thời MiniShop Sandbox và Code Inspector (có thể kéo thanh chia).',
   },
   layoutCodeFocus: {
@@ -92,8 +99,8 @@ export const UI_LABELS = {
     tip: 'Giữ Code Inspector toàn màn hình và đặt MiniShop Sandbox thành thẻ nổi có thể thu gọn.',
   },
   layoutRestoreSplit: {
-    text: 'Về Song song',
-    tip: 'Quay lại bố cục chia hai cột Song song.',
+    text: 'Về Chia đôi',
+    tip: 'Quay lại bố cục chia hai cột Chia đôi.',
   },
   labCatalog: {
     text: 'Lộ trình',
@@ -104,6 +111,14 @@ export const UI_LABELS = {
     tip: 'Tra cứu thuật ngữ bảo mật web và giao diện VVWA bằng ví dụ đời thường.',
   },
 } as const satisfies Record<string, UiLabel>;
+
+/** Vietnamese name of each execution outcome (ModeSwitch dots, Song song summary). */
+export const TRACE_OUTCOME_LABELS: Record<TraceOutcome, string> = {
+  exploited: 'bị khai thác',
+  blocked: 'đã chặn',
+  normal: 'bình thường',
+  error: 'lỗi',
+};
 
 /** Key of a workspace label in UI_LABELS. */
 export type UiLabelKey = keyof typeof UI_LABELS;

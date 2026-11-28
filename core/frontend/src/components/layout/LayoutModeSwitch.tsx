@@ -58,7 +58,7 @@ function targetIndexForKey(key: string, current: number, length: number): number
 }
 
 /**
- * Render the 3-mode desktop workspace layout switcher (`Song song`, `Tập trung code`,
+ * Render the 3-mode desktop workspace layout switcher (`Chia đôi`, `Tập trung code`,
  * `Sandbox nổi`) as an accessible WAI-ARIA radiogroup hidden below the `lg` breakpoint.
  *
  * @param props - Active layout mode and change callback.
