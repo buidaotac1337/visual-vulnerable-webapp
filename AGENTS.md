@@ -32,7 +32,10 @@ visual-vulnerable-webapp/
 4. **Full Type Hinting & Docstrings:**
    * **Python:** Must pass `mypy --strict` and Ruff `ANN` (all params/returns typed) + `D` (Google-style docstrings on modules, classes, and functions).
    * **Frontend:** Must pass `tsc --noEmit` (`strict: true`, `noUncheckedIndexedAccess: true`), ESLint `explicit-function-return-type`, and JSDoc/TSDoc on exported symbols.
-5. **Exact Version Pinning:**
+5. **Design Tokens SSOT ([ADR-0012](docs/adr/0012-atlassian-style-design-tokens.md)):**
+   * Colours, type sizes and radii come only from `core/frontend/src/styles/tokens/` (purpose utilities such as `text-subtle`, `bg-danger-bold`, `border-input`; status colours via `@/lib` tones). Colour literals live only in `tokens/palette.css`.
+   * Never use Tailwind's default palette, the removed `danger/safe/warning/info/brand-50…950` scales, `white`/`black`, arbitrary colour/font-size/spacing values, or inline `fontFamily`; ESLint and the `design-tokens` check in the `frontend` gate block them.
+6. **Exact Version Pinning:**
    * **Python (`uv`):** Pin exact versions (`==`) in `pyproject.toml` and update `uv.lock` via `uv lock`.
    * **Frontend (`pnpm`):** Use exact versions (no `^` or `~`) with `pnpm-lock.yaml`.
    * **Docker & CI:** Pin explicit version tags; never use `:latest`.

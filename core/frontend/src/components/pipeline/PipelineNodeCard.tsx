@@ -121,7 +121,7 @@ export function PipelineNodeCard({
 
       <div className="flex items-center justify-between gap-1.5 text-micro text-subtlest">
         <span>{String(node.stepCount)} bước</span>
-        <span className="inline-flex items-center gap-[3px]" aria-hidden="true">
+        <span className="inline-flex items-center gap-0.75" aria-hidden="true">
           {node.stepIndices.map((stepIdx) => {
             const step = trace[stepIdx];
             const isSeen = stepIdx <= activeIndex;

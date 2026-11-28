@@ -335,6 +335,7 @@ Lab chỉ **pass** khi mọi test của cả hai tầng đều pass.
 ## 8. Ranh giới bảo mật
 
 * Lỗ hổng có chủ đích **chỉ** được đặt trong `backend/vulnerable.py` và `frontend/vulnerable.tsx`.
+* Màu, cỡ chữ và spacing dùng design token ([ADR-0012](adr/0012-atlassian-style-design-tokens.md)). ESLint báo lỗi ngay khi lab dùng palette thô (`bg-red-500`, `text-slate-600`), thang cũ (`bg-danger-50`), `text-white`, giá trị arbitrary (`text-[11px]`, `px-[3px]`, `bg-[#fff]`) hoặc `style={{ fontFamily }}`, kể cả trong `vulnerable.tsx`.
 * `LabView.tsx`, `secure.*` và toàn bộ `core/` không chứa sink. ESLint chặn `dangerouslySetInnerHTML`, gán `innerHTML`/`outerHTML` và `insertAdjacentHTML` ở mọi file frontend trừ `labs/*/frontend/vulnerable.tsx`.
 * Ruff chỉ miễn các cảnh báo bảo mật có chủ đích (`S608`, `S105`, `S106`, `S324`, `S501`) cho `labs/*/backend/vulnerable.py`.
 * Mọi file lab tuân thủ cùng chuẩn chất lượng với `core/`: tối đa 350 dòng, type hint, docstring/JSDoc.

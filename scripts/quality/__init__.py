@@ -1,6 +1,7 @@
 """Public barrel exports for VVWA repository quality checkers and gate runners."""
 
 from scripts.quality.check_barrels import check_barrels
+from scripts.quality.check_design_tokens import check_design_tokens
 from scripts.quality.check_docs import check_docs
 from scripts.quality.check_file_limits import check_file_limits
 from scripts.quality.check_git_rules import validate_branch_name, validate_commit_message
@@ -14,6 +15,7 @@ __all__ = [
     "GateName",
     "QualityConfig",
     "check_barrels",
+    "check_design_tokens",
     "check_docs",
     "check_file_limits",
     "classify_changed_files",

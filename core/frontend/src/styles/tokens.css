@@ -6,7 +6,6 @@
  *   foundations.css   font families, derived glows/flash
  *   tailwind-theme.css  utilities (text-*, bg-*, border-*, shadow-*, rounded-*, type scale)
  *   fonts.css         self-hosted fonts (offline)
- *   legacy.css        old scales kept until every component is migrated (deleted in step 5)
  */
 @import 'tailwindcss';
 @import './tokens/fonts.css';
@@ -15,9 +14,19 @@
 @import './tokens/theme-dark.css';
 @import './tokens/foundations.css';
 @import './tokens/tailwind-theme.css';
-@import './tokens/legacy.css';
 /* Only lab UI files: other files under labs/ (e.g. backend/*.py) would make Tailwind full-reload the page on save. */
 @source '../../../../labs/*/frontend/**/*.{ts,tsx}';
+
+/* Default border colour follows the theme (Tailwind's preflight would use currentColor). */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--vv-border);
+  }
+}
 
 body {
   margin: 0;

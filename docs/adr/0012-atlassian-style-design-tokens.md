@@ -78,4 +78,6 @@ Atlassian Design System (`@atlaskit/tokens` 20.15.0) có mô hình token theo m�
   * mọi class trong `lib/tones.ts` đều có utility tương ứng;
   * `index.html` không có URL ngoài, và dùng đúng key cùng giá trị mặc định của `useColorMode`.
 * `src/__tests__/useColorMode.test.ts`: logic resolve, lưu vào `localStorage`, theo dõi khi hệ thống đổi theme.
-* Giai đoạn 5 thêm ESLint và gate `scripts/quality/check_design_tokens.py`.
+* ESLint `no-restricted-syntax` (`core/frontend/eslint.config.js`) chặn palette mặc định có sắc độ, thang cũ `danger/safe/warning/info/brand-50…950` và `*-soft`, `white`/`black`, giá trị arbitrary cho màu, cỡ chữ, line-height và spacing, và `style={{ fontFamily }}`. `src/__tests__/sinkLintGuard.test.ts` kiểm tra từng loại.
+* Gate `design-tokens` (`scripts/quality/check_design_tokens.py`, chạy trong gate `frontend`, test ở `scripts/tests/test_design_tokens_gate.py`) chặn mã màu ngoài `palette.css`, token lệch giữa light và dark, `var(--vv-*)` chưa khai báo và URL ngoài trong `index.html` / CSS.
+* Theme Tailwind ghi đè `--color-*: initial`, nên class palette thô không sinh ra CSS.

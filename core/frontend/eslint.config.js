@@ -34,21 +34,38 @@ const SINK_RESTRICTIONS = [
 ];
 
 /**
- * Design system SSOT: colours come from the semantic roles in src/styles/tokens.css
- * (danger, safe, warning, info, brand). The raw palettes behind those roles are banned in
- * class strings so a role can be recoloured in one place.
+ * Design tokens SSOT (ADR-0012): colours, type sizes and spacing come from the --vv-* tokens in
+ * src/styles/tokens/ (text-subtle, bg-danger-bold, border-default, text-body-small...). Tailwind's
+ * default palette is removed from the theme, so these rules catch classes that would otherwise
+ * silently render nothing, plus inline values that bypass the tokens.
  */
-const RAW_PALETTE = '/-(red|emerald|amber|blue|indigo)-(50|[1-9]00|950)\\b/';
-const PALETTE_RESTRICTIONS = [
+const TOKEN_DOC = 'Use the design tokens instead (docs/design-system.md, ADR-0012).';
+const CLASS_PATTERNS = [
   {
-    selector: `Literal[value=${RAW_PALETTE}]`,
-    message:
-      'Use semantic colour tokens (danger/safe/warning/info/brand) instead of raw red/emerald/amber/blue/indigo (docs/design-system.md).',
+    regex: String.raw`/-(slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(50|[1-9]00|950)\b/`,
+    message: `Tailwind's default palette is not part of the theme. ${TOKEN_DOC}`,
   },
   {
-    selector: `TemplateElement[value.raw=${RAW_PALETTE}]`,
-    message:
-      'Use semantic colour tokens (danger/safe/warning/info/brand) instead of raw red/emerald/amber/blue/indigo (docs/design-system.md).',
+    regex: String.raw`/-(danger|safe|warning|info|brand)-(50|[1-9]00|950|soft)\b/`,
+    message: `The danger/safe/warning/info/brand shade scales were removed; use purpose tokens such as text-danger, bg-danger-bold, border-success-subtle. ${TOKEN_DOC}`,
+  },
+  {
+    regex: String.raw`/(^|[\s:])(bg|text|border|ring|fill|stroke|divide|outline|from|via|to)-(white|black)\b/`,
+    message: `Use text-inverse, bg-surface-raised or another token instead of white/black. ${TOKEN_DOC}`,
+  },
+  {
+    regex: String.raw`/(^|[\s:])-?(([a-z]+-)+\[(#|rgb|hsl|oklch|color-mix|var\()|(text|leading)-\[\d|(p[xytrblse]?|m[xytrblse]?|gap(-[xy])?|space-[xy])-\[)/`,
+    message: `Arbitrary colour, font-size, line-height or spacing values bypass the tokens. ${TOKEN_DOC}`,
+  },
+];
+const PALETTE_RESTRICTIONS = [
+  ...CLASS_PATTERNS.flatMap(({ regex, message }) => [
+    { selector: `Literal[value=${regex}]`, message },
+    { selector: `TemplateElement[value.raw=${regex}]`, message },
+  ]),
+  {
+    selector: "JSXAttribute[name.name='style'] Property[key.name='fontFamily']",
+    message: `Use the font-mono / font-sans classes instead of an inline fontFamily. ${TOKEN_DOC}`,
   },
 ];
 
