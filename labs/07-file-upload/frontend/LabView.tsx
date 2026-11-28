@@ -17,7 +17,7 @@ import type { ProductSummary, UploadCatalog } from './uploadData';
 
 const LAB_ID = '07-file-upload';
 const SELECT_CLASS =
-  'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-50';
+  'rounded-large border border-input bg-input px-3 py-2 text-sm text-default focus:border-focused focus:outline-none disabled:cursor-not-allowed disabled:bg-disabled';
 const DEFAULT_PRODUCTS: readonly ProductSummary[] = [1, 2, 3].map((id) => ({
   id,
   name: `Sản phẩm #${String(id)}`,
@@ -133,11 +133,11 @@ export function LabView(props: LabViewProps): JSX.Element {
     <LabCard
       title="MiniShop · Ảnh sản phẩm"
       icon={<ImagePlus className="h-4 w-4" aria-hidden="true" />}
-      headerRight={<span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
+      headerRight={<span className="text-xs text-subtlest">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
     >
       <form onSubmit={uploadFile} className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <label htmlFor="fu-product" className="text-xs font-medium text-slate-700">
+          <label htmlFor="fu-product" className="text-xs font-medium text-subtle">
             Sản phẩm cần cập nhật ảnh
           </label>
           <select
@@ -154,14 +154,14 @@ export function LabView(props: LabViewProps): JSX.Element {
             ))}
           </select>
           {selectedProduct?.imageUrl ? (
-            <p className="text-xs text-slate-500">
-              Ảnh hiện tại: <code className="text-slate-700">{selectedProduct.imageUrl}</code>
+            <p className="text-xs text-subtlest">
+              Ảnh hiện tại: <code className="text-subtle">{selectedProduct.imageUrl}</code>
             </p>
           ) : null}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="fu-file" className="text-xs font-medium text-slate-700">
+          <label htmlFor="fu-file" className="text-xs font-medium text-subtle">
             Chọn file từ máy (tùy chọn — tự điền Base64)
           </label>
           <input
@@ -169,9 +169,9 @@ export function LabView(props: LabViewProps): JSX.Element {
             type="file"
             disabled={isExecuting}
             onChange={handleFilePick}
-            className="block w-full cursor-pointer rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-700 file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-brand-50 file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-brand-700 hover:file:bg-brand-100 disabled:cursor-not-allowed"
+            className="block w-full cursor-pointer rounded-large border border-dashed border-input bg-surface-sunken px-3 py-2 text-xs text-subtle file:mr-3 file:cursor-pointer file:rounded-medium file:border-0 file:bg-brand-subtlest file:px-2.5 file:py-1 file:text-xs file:font-semibold file:text-brand hover:file:bg-brand-subtlest-hovered disabled:cursor-not-allowed"
           />
-          {fileError ? <p className="text-xs text-danger-700">{fileError}</p> : null}
+          {fileError ? <p className="text-xs text-danger">{fileError}</p> : null}
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -205,8 +205,8 @@ export function LabView(props: LabViewProps): JSX.Element {
             flashSeq={inputFlashSeq}
             onChange={(value) => update({ content_b64: value })}
           />
-          <p className="truncate text-xs text-slate-500">
-            Giải mã: <code className="text-slate-700">{decodeBase64Preview(contentB64)}</code>
+          <p className="truncate text-xs text-subtlest">
+            Giải mã: <code className="text-subtle">{decodeBase64Preview(contentB64)}</code>
           </p>
         </div>
 

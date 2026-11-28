@@ -59,7 +59,7 @@ function renderStatusNotice(summary: BurstResult): JSX.Element {
   return (
     <ResultNotice
       tone="neutral"
-      icon={<ShieldBan className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />}
+      icon={<ShieldBan className="h-4 w-4 shrink-0 text-subtlest" aria-hidden="true" />}
     >
       {summary.firstError ?? 'Không thể áp mã giảm giá.'}
     </ResultNotice>
@@ -75,7 +75,7 @@ function renderStatusNotice(summary: BurstResult): JSX.Element {
 export function BurstSummary({ summary }: BurstSummaryProps): JSX.Element {
   if (!summary) {
     return (
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-subtlest">
         Chọn mã giảm giá và số lượng request đồng thời, sau đó bấm <strong>Áp mã</strong> hoặc dùng
         payload mẫu.
       </p>
@@ -87,25 +87,25 @@ export function BurstSummary({ summary }: BurstSummaryProps): JSX.Element {
       {summary.total > 1 ? (
         <dl
           aria-label="Thống kê batch request"
-          className="grid grid-cols-3 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-center text-xs"
+          className="grid grid-cols-3 gap-2 rounded-large border border-default bg-surface-sunken p-2.5 text-center text-xs"
         >
           <div>
-            <dt className="text-slate-500">Tổng request</dt>
-            <dd className="mt-0.5 text-sm font-semibold text-slate-900">{summary.total}</dd>
+            <dt className="text-subtlest">Tổng request</dt>
+            <dd className="mt-0.5 text-sm font-semibold text-default">{summary.total}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Thành công</dt>
+            <dt className="text-subtlest">Thành công</dt>
             <dd
               className={`mt-0.5 text-sm font-semibold ${
-                summary.overLimit ? 'text-danger-700' : 'text-safe-700'
+                summary.overLimit ? 'text-danger' : 'text-success'
               }`}
             >
               {summary.succeeded}
             </dd>
           </div>
           <div>
-            <dt className="text-slate-500">Bị chặn</dt>
-            <dd className="mt-0.5 text-sm font-semibold text-slate-700">{summary.blocked}</dd>
+            <dt className="text-subtlest">Bị chặn</dt>
+            <dd className="mt-0.5 text-sm font-semibold text-subtle">{summary.blocked}</dd>
           </div>
         </dl>
       ) : null}

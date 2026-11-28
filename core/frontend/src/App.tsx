@@ -9,6 +9,7 @@ import {
   WorkspaceModals,
 } from '@/components';
 import {
+  useColorMode,
   useLabWorkspace,
   useLearningProgress,
   useTraceShortcuts,
@@ -90,6 +91,7 @@ function useProgressMilestoneSync(
  */
 export function App(): JSX.Element {
   const ws = useLabWorkspace();
+  const colorMode = useColorMode();
   const layout = useWorkspaceLayout();
   const progress = useLearningProgress();
   const [isCatalogOpen, setIsCatalogOpen] = useState<boolean>(false);
@@ -154,6 +156,8 @@ export function App(): JSX.Element {
         selectedLab={ws.selectedLab}
         mode={ws.viewMode}
         modeOutcomes={ws.modeOutcomes}
+        colorMode={colorMode.preference}
+        onChangeColorMode={colorMode.setPreference}
         layoutMode={layout.layoutMode}
         passedLabsCount={passedLabsCount}
         isResettingDb={ws.isResettingDb}

@@ -12,7 +12,7 @@
     <script>
       (function () {
         try {
-          var pref = window.localStorage.getItem('vvwa.colorMode') || 'light';
+          var pref = window.localStorage.getItem('vvwa.colorMode') || 'auto';
           var dark =
             pref === 'dark' ||
             (pref === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);

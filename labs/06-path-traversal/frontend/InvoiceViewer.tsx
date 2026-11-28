@@ -20,7 +20,7 @@ interface InvoiceViewerProps {
 export function InvoiceViewer({ result, invoices }: InvoiceViewerProps): JSX.Element {
   if (!result) {
     return (
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-subtlest">
         Chọn một hóa đơn trong danh sách hoặc nhập tên file trên thanh địa chỉ.
       </p>
     );
@@ -30,7 +30,7 @@ export function InvoiceViewer({ result, invoices }: InvoiceViewerProps): JSX.Ele
     return (
       <ResultNotice
         tone="neutral"
-        icon={<FileSearch className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />}
+        icon={<FileSearch className="h-4 w-4 shrink-0 text-subtlest" aria-hidden="true" />}
       >
         {result.error ?? 'Không có file.'}
       </ResultNotice>
@@ -40,10 +40,10 @@ export function InvoiceViewer({ result, invoices }: InvoiceViewerProps): JSX.Ele
   return (
     <article
       aria-label={`Nội dung ${result.file}`}
-      className={`flex flex-col gap-2 rounded-lg border p-3 ${foreign ? 'border-danger-300 bg-danger-50/40' : 'border-slate-200 bg-slate-50'}`}
+      className={`flex flex-col gap-2 rounded-large border p-3 ${foreign ? 'border-danger-subtle bg-danger' : 'border-default bg-surface-sunken'}`}
     >
-      <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-900">
-        <FileText className="h-4 w-4 shrink-0 text-brand-600" aria-hidden="true" />
+      <p className="flex items-center gap-1.5 text-xs font-semibold text-default">
+        <FileText className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
         <span className="break-all">{result.file}</span>
       </p>
       {foreign && (
@@ -52,10 +52,7 @@ export function InvoiceViewer({ result, invoices }: InvoiceViewerProps): JSX.Ele
           gửi lên.
         </ResultNotice>
       )}
-      <pre
-        className="max-h-56 overflow-auto rounded border border-slate-200 bg-white p-2 text-xs whitespace-pre-wrap break-all text-slate-800"
-        style={{ fontFamily: 'var(--font-mono)' }}
-      >
+      <pre className="max-h-56 overflow-auto rounded-small border border-default bg-surface-raised p-2 text-xs whitespace-pre-wrap break-all text-default font-mono">
         {content}
       </pre>
     </article>

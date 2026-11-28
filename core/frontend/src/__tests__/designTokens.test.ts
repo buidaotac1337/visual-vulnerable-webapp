@@ -102,6 +102,7 @@ describe('Design tokens SSOT (ADR-0012)', () => {
   it('keeps index.html offline and in sync with the colour-mode hook', () => {
     expect(indexHtml).not.toMatch(/https?:\/\//);
     expect(indexHtml).toContain(`getItem('${COLOR_MODE_STORAGE_KEY}') || '${DEFAULT_COLOR_MODE}'`);
-    expect(indexHtml).toContain(`data-color-mode="${DEFAULT_COLOR_MODE}"`);
+    // Static no-JS fallback; the pre-paint script resolves the saved or default preference.
+    expect(indexHtml).toContain('<html lang="vi" data-color-mode="light">');
   });
 });

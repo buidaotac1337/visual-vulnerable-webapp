@@ -11,7 +11,7 @@ import type { ProductSummary } from './ssrfData';
 
 const LAB_ID = '09-ssrf';
 const SELECT_CLASS =
-  'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-50';
+  'rounded-large border border-input bg-input px-3 py-2 text-sm text-default focus:border-focused focus:outline-none disabled:cursor-not-allowed disabled:bg-disabled';
 const DEFAULT_PRODUCTS: readonly ProductSummary[] = [1, 2, 3].map((id) => ({
   id,
   name: `Sản phẩm #${String(id)}`,
@@ -90,10 +90,10 @@ export function LabView(props: LabViewProps): JSX.Element {
     <LabCard
       title="MiniShop · Nhập ảnh sản phẩm từ URL"
       icon={<Globe className="h-4 w-4" aria-hidden="true" />}
-      headerRight={<span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
+      headerRight={<span className="text-xs text-subtlest">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
     >
-      <div className="flex items-start gap-2 rounded-lg border border-info-200 bg-info-50 px-3 py-2 text-xs text-info-900">
-        <Server className="mt-0.5 h-3.5 w-3.5 shrink-0 text-info-600" aria-hidden="true" />
+      <div className="flex items-start gap-2 rounded-large border border-information-subtle bg-information px-3 py-2 text-xs text-information-bolder">
+        <Server className="mt-0.5 h-3.5 w-3.5 shrink-0 text-information" aria-hidden="true" />
         <p className="leading-relaxed">
           Mạng nội bộ demo: CDN ảnh hợp lệ tại <code>http://minishop-cdn:8090/cdn/kb.png</code> (hỗ
           trợ <code>kb.png</code>, <code>mouse.png</code>, <code>headset.png</code>), còn dịch vụ
@@ -103,7 +103,7 @@ export function LabView(props: LabViewProps): JSX.Element {
 
       <form onSubmit={fetchImage} className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <label htmlFor="ssrf-product" className="text-xs font-medium text-slate-700">
+          <label htmlFor="ssrf-product" className="text-xs font-medium text-subtle">
             Sản phẩm cần cập nhật ảnh
           </label>
           <select
@@ -120,8 +120,8 @@ export function LabView(props: LabViewProps): JSX.Element {
             ))}
           </select>
           {selectedProduct?.imageUrl ? (
-            <p className="truncate text-xs text-slate-500">
-              Ảnh hiện tại: <code className="text-slate-700">{selectedProduct.imageUrl}</code>
+            <p className="truncate text-xs text-subtlest">
+              Ảnh hiện tại: <code className="text-subtle">{selectedProduct.imageUrl}</code>
             </p>
           ) : null}
         </div>

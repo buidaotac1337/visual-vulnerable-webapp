@@ -51,7 +51,7 @@ Atlassian Design System (`@atlaskit/tokens` 20.15.0) có mô hình token theo m�
    1. Nền tảng: token, font, hook dark mode. Giai đoạn này giữ `legacy.css` để app chưa đổi giao diện.
    2. Primitive và khung workspace.
    3. Pipeline và Inspector.
-   4. Labs, cùng nút Sáng/Tối/Theo hệ thống. Đổi giá trị mặc định từ `light` sang `auto`.
+   4. Labs, cùng nút Sáng/Tối/Theo hệ thống (`ColorModeSwitch`, xoay vòng trong một nút icon để không chiếm thêm chỗ trên toolbar). Đổi giá trị mặc định từ `light` sang `auto` ở cả `DEFAULT_COLOR_MODE` lẫn script pre-paint; thuộc tính tĩnh `data-color-mode="light"` của `<html>` chỉ là fallback khi không có JavaScript.
    5. Khóa lại: xóa `legacy.css`, ghi đè bảng màu mặc định của Tailwind, ESLint chặn palette thô và giá trị arbitrary, thêm gate `check_design_tokens`.
 
 ## Consequences

@@ -16,7 +16,7 @@ interface CartTableProps {
 }
 
 const INPUT_CLASS =
-  'w-16 rounded border bg-white px-1.5 py-1 text-right text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-200';
+  'w-16 rounded-small border bg-input px-1.5 py-1 text-right text-xs text-default focus:outline-none focus:ring-2 focus:ring-focused';
 
 /**
  * Editable cart of the MiniShop checkout page.
@@ -29,9 +29,7 @@ const INPUT_CLASS =
  */
 export function CartTable({ lines, products, disabled, onChange }: CartTableProps): JSX.Element {
   if (lines.length === 0) {
-    return (
-      <p className="text-xs text-slate-500">Giỏ hàng trống. Thêm sản phẩm ở danh sách trên.</p>
-    );
+    return <p className="text-xs text-subtlest">Giỏ hàng trống. Thêm sản phẩm ở danh sách trên.</p>;
   }
   const update = (index: number, patch: Partial<CartLine>): void => {
     onChange(lines.map((line, i) => (i === index ? { ...line, ...patch } : line)));
@@ -41,9 +39,9 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
   };
 
   return (
-    <table className="w-full text-xs text-slate-700">
+    <table className="w-full text-xs text-subtle">
       <thead>
-        <tr className="text-left text-slate-500">
+        <tr className="text-left text-subtlest">
           <th className="py-1 font-medium">Sản phẩm</th>
           <th className="py-1 text-right font-medium">
             <span className="inline-flex items-center justify-end gap-1">
@@ -52,7 +50,7 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
                 <button
                   type="button"
                   aria-label="Giải thích đơn giá gửi lên"
-                  className="inline-flex cursor-pointer items-center rounded text-slate-400 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                  className="inline-flex cursor-pointer items-center rounded-small text-subtlest hover:text-subtle focus:outline-none focus:ring-2 focus:ring-focused"
                 >
                   <Info className="h-3 w-3" aria-hidden="true" />
                 </button>
@@ -73,12 +71,12 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
           return (
             <tr
               key={`${String(index)}-${String(line.productId)}`}
-              className="border-t border-slate-100"
+              className="border-t border-default"
             >
               <td className="py-1.5 pr-2">
-                <span className="block text-slate-900">{name}</span>
+                <span className="block text-default">{name}</span>
                 {flags.listedPrice !== null && (
-                  <span className="text-xs text-danger-600">
+                  <span className="text-xs text-danger">
                     Niêm yết {formatMoney(flags.listedPrice)}
                   </span>
                 )}
@@ -91,7 +89,7 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
                   value={line.price}
                   disabled={disabled}
                   onChange={(event) => update(index, { price: event.target.value })}
-                  className={`${INPUT_CLASS} ${flags.priceBad ? 'border-danger-400' : 'border-slate-300'}`}
+                  className={`${INPUT_CLASS} ${flags.priceBad ? 'border-danger' : 'border-input'}`}
                 />
               </td>
               <td className="py-1.5 text-right">
@@ -101,10 +99,10 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
                   value={line.quantity}
                   disabled={disabled}
                   onChange={(event) => update(index, { quantity: event.target.value })}
-                  className={`${INPUT_CLASS} ${flags.quantityBad ? 'border-danger-400' : 'border-slate-300'}`}
+                  className={`${INPUT_CLASS} ${flags.quantityBad ? 'border-danger' : 'border-input'}`}
                 />
               </td>
-              <td className="py-1.5 text-right font-semibold text-slate-900">
+              <td className="py-1.5 text-right font-semibold text-default">
                 {total === null ? '—' : formatMoney(total)}
               </td>
               <td className="py-1.5 text-right">
@@ -113,7 +111,7 @@ export function CartTable({ lines, products, disabled, onChange }: CartTableProp
                   aria-label={`Xóa ${name}`}
                   disabled={disabled}
                   onClick={() => remove(index)}
-                  className="cursor-pointer text-slate-400 hover:text-danger-600 disabled:cursor-not-allowed"
+                  className="cursor-pointer text-subtlest hover:text-danger disabled:cursor-not-allowed"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>

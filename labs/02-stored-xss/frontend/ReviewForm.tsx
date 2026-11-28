@@ -5,7 +5,7 @@ import { PrimaryButton, ResultNotice, TextField } from '@/components';
 import type { LabPayload } from '@/types';
 
 const TEXTAREA_CLASS =
-  'rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none';
+  'rounded-large border border-input px-3 py-2 text-sm text-default focus:border-focused focus:outline-none';
 
 interface WriteReviewFormProps {
   rating: number;
@@ -42,7 +42,7 @@ export function WriteReviewForm(props: WriteReviewFormProps): JSX.Element {
         inputClassName="w-24"
       />
       <div className="flex flex-col gap-1">
-        <label htmlFor="xss-content" className="text-xs font-medium text-slate-700">
+        <label htmlFor="xss-content" className="text-xs font-medium text-subtle">
           Nội dung đánh giá
         </label>
         <textarea
@@ -53,8 +53,7 @@ export function WriteReviewForm(props: WriteReviewFormProps): JSX.Element {
           value={content}
           onChange={(event) => onChange({ content: event.target.value })}
           placeholder='Ví dụ: Gõ rất êm! hoặc <img src=x onerror="...">'
-          className={`${TEXTAREA_CLASS} ${flashClass}`}
-          style={{ fontFamily: 'var(--font-mono)' }}
+          className={`${TEXTAREA_CLASS} ${flashClass} font-mono`}
         />
       </div>
       <PrimaryButton

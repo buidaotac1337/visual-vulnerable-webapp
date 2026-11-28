@@ -226,7 +226,7 @@ export function LabView({ mode, payload, onPayloadChange, onExecute }: LabViewPr
 | `frontendStepsAfter` | Hàm nhận response, trả về bước trace chèn sau trace backend |
 | `silent` | Không phát trace, không ghi đè `lastResponse`; dùng cho các lần đọc dữ liệu ban đầu |
 
-`LabView` được mount theo `lab.id`, không theo `mode`, nên state cục bộ không mất khi đổi mode. Màu trong giao diện lab dùng vai trò ngữ nghĩa của design system (`danger`, `safe`, `warning`, `info`, `brand`, ví dụ `text-danger-700`, `bg-safe-50`); ESLint chặn `red-*`, `emerald-*`, `amber-*`, `blue-*`, `indigo-*` (xem [Design System §3](design-system.md#3-màu-sắc)). Import qua barrel (`@/types`, `@/lib`, `@/components`…); package npm được resolve từ `core/frontend/node_modules`.
+`LabView` được mount theo `lab.id`, không theo `mode`, nên state cục bộ không mất khi đổi mode. Màu trong giao diện lab dùng **token chọn theo mục đích** ([ADR-0012](adr/0012-atlassian-style-design-tokens.md)), không dùng thang sắc độ: chữ `text-default` / `text-subtle` / `text-danger`, nền `bg-surface-raised` / `bg-danger` / `bg-danger-bold`, viền `border-default` / `border-danger`, input `bg-input border-input focus:border-focused`. Màu theo trạng thái trace hoặc outcome lấy từ `statusToneClasses()` / `TONE_CLASSES` trong `@/lib`, không tự viết bảng map. Code dùng class `font-mono`, không gắn `style={{ fontFamily }}`. Giao diện lab phải đọc được ở cả theme Sáng lẫn Tối: dùng đúng token là đủ, không cần viết class riêng cho dark (xem [Design System](design-system.md)). Import qua barrel (`@/types`, `@/lib`, `@/components`…); package npm được resolve từ `core/frontend/node_modules`.
 
 #### Primitive tái sử dụng từ `@/components`
 

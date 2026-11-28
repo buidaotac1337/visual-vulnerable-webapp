@@ -11,8 +11,8 @@ export type ResolvedColorMode = 'light' | 'dark';
 /** `localStorage` key; the pre-paint script in index.html reads the same key (ADR-0012). */
 export const COLOR_MODE_STORAGE_KEY = 'vvwa.colorMode';
 
-/** Preference used until one is saved; index.html's pre-paint script uses the same default. */
-export const DEFAULT_COLOR_MODE: ColorModePreference = 'light';
+/** Preference used until one is saved (follow the OS); index.html's pre-paint script uses the same default. */
+export const DEFAULT_COLOR_MODE: ColorModePreference = 'auto';
 
 const DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)';
 

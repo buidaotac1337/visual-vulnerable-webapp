@@ -16,6 +16,6 @@ export interface ReviewContentProps {
  */
 export function ReviewContent({ content }: ReviewContentProps): JSX.Element {
   // @step:fe-render-review
-  return <p className="text-sm whitespace-pre-line text-slate-700">{content}</p>;
+  return <p className="text-sm whitespace-pre-line text-subtle">{content}</p>;
 }
 // @snippet:end

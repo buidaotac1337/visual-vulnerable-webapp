@@ -17,7 +17,7 @@ export interface ReviewContentProps {
 export function ReviewContent({ content }: ReviewContentProps): JSX.Element {
   return (
     <p
-      className="text-sm whitespace-pre-line text-slate-700"
+      className="text-sm whitespace-pre-line text-subtle"
       // @step:fe-render-review
       dangerouslySetInnerHTML={{ __html: content }}
     />

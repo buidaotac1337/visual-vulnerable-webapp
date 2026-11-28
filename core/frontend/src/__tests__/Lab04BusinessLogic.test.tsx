@@ -165,7 +165,7 @@ describe('Lab 04 Business Logic LabView', () => {
     };
     render(<LabView {...makeProps({ payload, onPayloadChange })} />);
     await screen.findByText('$500.00');
-    expect(screen.getByLabelText('Số lượng Ban phim')).toHaveClass('border-danger-400');
+    expect(screen.getByLabelText('Số lượng Ban phim')).toHaveClass('border-danger');
     expect(screen.getAllByText('—')).toHaveLength(2);
     expect(screen.getByText('$1.00')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Thanh toán' })).toBeDisabled();

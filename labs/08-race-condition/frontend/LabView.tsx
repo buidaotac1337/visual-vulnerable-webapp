@@ -19,7 +19,7 @@ import type { BurstResult, CouponCatalog, CouponSummary } from './couponData';
 const LAB_ID = '08-race-condition';
 const BURST_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 const SELECT_CLASS =
-  'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-50';
+  'rounded-large border border-input bg-input px-3 py-2 text-sm text-default focus:border-focused focus:outline-none disabled:cursor-not-allowed disabled:bg-disabled';
 
 function couponBadge(coupon: CouponSummary): {
   label: string;
@@ -29,21 +29,21 @@ function couponBadge(coupon: CouponSummary): {
   if (coupon.usedCount > coupon.maxUses) {
     return {
       label: 'Vượt giới hạn!',
-      badgeClass: 'bg-danger-100 text-danger-800',
-      boxClass: 'border-danger-300 bg-danger-50 text-danger-900',
+      badgeClass: 'bg-danger-subtler text-danger-bolder',
+      boxClass: 'border-danger-subtle bg-danger text-danger-bolder',
     };
   }
   if (coupon.usedCount >= coupon.maxUses) {
     return {
       label: 'Hết lượt',
-      badgeClass: 'bg-slate-200 text-slate-700',
-      boxClass: 'border-slate-200 bg-slate-50 text-slate-600',
+      badgeClass: 'bg-neutral-hovered text-subtle',
+      boxClass: 'border-default bg-surface-sunken text-subtle',
     };
   }
   return {
     label: 'Còn lượt',
-    badgeClass: 'bg-safe-50 text-safe-700',
-    boxClass: 'border-slate-200 bg-white text-slate-800 hover:border-brand-300',
+    badgeClass: 'bg-success text-success',
+    boxClass: 'border-default bg-surface-raised text-default hover:border-brand-subtle',
   };
 }
 
@@ -127,9 +127,9 @@ export function LabView(props: LabViewProps): JSX.Element {
       title="MiniShop · Mã giảm giá"
       icon={<TicketPercent className="h-4 w-4" aria-hidden="true" />}
       headerRight={
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-subtlest">
           {actor ?? 'ẩn danh'} · Số dư:{' '}
-          <strong className="text-slate-900">
+          <strong className="text-default">
             {catalog.balance === null ? '—' : formatMoney(catalog.balance)}
           </strong>
         </span>
@@ -144,7 +144,7 @@ export function LabView(props: LabViewProps): JSX.Element {
               type="button"
               disabled={isExecuting}
               onClick={() => update({ code: coupon.code })}
-              className={`flex cursor-pointer flex-col gap-1 rounded-lg border px-3 py-2 text-left text-xs disabled:cursor-not-allowed ${style.boxClass}`}
+              className={`flex cursor-pointer flex-col gap-1 rounded-large border px-3 py-2 text-left text-xs disabled:cursor-not-allowed ${style.boxClass}`}
             >
               <div className="flex items-center justify-between gap-2">
                 <code className="font-semibold">{coupon.code}</code>
@@ -154,7 +154,7 @@ export function LabView(props: LabViewProps): JSX.Element {
                   {style.label}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-slate-600">
+              <div className="flex items-center justify-between text-subtle">
                 <span>
                   -{coupon.discountPercent}% (+{formatMoney(coupon.discountPercent)})
                 </span>
@@ -181,7 +181,7 @@ export function LabView(props: LabViewProps): JSX.Element {
           />
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="rc-burst" className="text-xs font-medium text-slate-700">
+            <label htmlFor="rc-burst" className="text-xs font-medium text-subtle">
               Số request đồng thời
             </label>
             <select
