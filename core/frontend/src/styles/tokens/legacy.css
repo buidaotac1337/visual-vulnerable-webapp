@@ -1,0 +1,113 @@
+/*
+ * LEGACY tokens kept only while components migrate to the --vv-* tokens (ADR-0012).
+ * Do not use in new code; this file is deleted in step 5 of the migration.
+ */
+
+/*
+ * Semantic colour tokens: the only colour families components may use (docs/design-system.md).
+ * Each role is a full scale aliased to a Tailwind palette, so `bg-danger-50`, `text-safe-700`,
+ * `border-warning-300`... exist, and changing a role here recolours the whole app.
+ * Raw `red-*`, `emerald-*`, `amber-*`, `blue-*`, `indigo-*` classes are blocked by ESLint.
+ *
+ * Note: `@theme inline` inlines utility values at build time and does NOT emit `--color-danger*`
+ * (or `--color-safe*`, `--color-warning*`, `--color-info*`, `--color-brand*`) as runtime `:root`
+ * custom properties. Any CSS variable referenced at runtime (in `:root` shadows or `@keyframes`)
+ * must reference the emitted Tailwind palette variables (`--color-red-500`, etc.) or resolve via
+ * Tailwind utilities at build time.
+ */
+@theme inline {
+  /* danger = red */
+  --color-danger: var(--color-red-500);
+  --color-danger-soft: color-mix(in oklab, var(--color-red-500) 16%, transparent);
+  --color-danger-50: var(--color-red-50);
+  --color-danger-100: var(--color-red-100);
+  --color-danger-200: var(--color-red-200);
+  --color-danger-300: var(--color-red-300);
+  --color-danger-400: var(--color-red-400);
+  --color-danger-500: var(--color-red-500);
+  --color-danger-600: var(--color-red-600);
+  --color-danger-700: var(--color-red-700);
+  --color-danger-800: var(--color-red-800);
+  --color-danger-900: var(--color-red-900);
+  --color-danger-950: var(--color-red-950);
+  /* safe = emerald */
+  --color-safe: var(--color-emerald-500);
+  --color-safe-soft: color-mix(in oklab, var(--color-emerald-500) 16%, transparent);
+  --color-safe-50: var(--color-emerald-50);
+  --color-safe-100: var(--color-emerald-100);
+  --color-safe-200: var(--color-emerald-200);
+  --color-safe-300: var(--color-emerald-300);
+  --color-safe-400: var(--color-emerald-400);
+  --color-safe-500: var(--color-emerald-500);
+  --color-safe-600: var(--color-emerald-600);
+  --color-safe-700: var(--color-emerald-700);
+  --color-safe-800: var(--color-emerald-800);
+  --color-safe-900: var(--color-emerald-900);
+  --color-safe-950: var(--color-emerald-950);
+  /* warning = amber */
+  --color-warning: var(--color-amber-500);
+  --color-warning-soft: color-mix(in oklab, var(--color-amber-500) 16%, transparent);
+  --color-warning-50: var(--color-amber-50);
+  --color-warning-100: var(--color-amber-100);
+  --color-warning-200: var(--color-amber-200);
+  --color-warning-300: var(--color-amber-300);
+  --color-warning-400: var(--color-amber-400);
+  --color-warning-500: var(--color-amber-500);
+  --color-warning-600: var(--color-amber-600);
+  --color-warning-700: var(--color-amber-700);
+  --color-warning-800: var(--color-amber-800);
+  --color-warning-900: var(--color-amber-900);
+  --color-warning-950: var(--color-amber-950);
+  /* info = blue */
+  --color-info: var(--color-blue-500);
+  --color-info-soft: color-mix(in oklab, var(--color-blue-500) 16%, transparent);
+  --color-info-50: var(--color-blue-50);
+  --color-info-100: var(--color-blue-100);
+  --color-info-200: var(--color-blue-200);
+  --color-info-300: var(--color-blue-300);
+  --color-info-400: var(--color-blue-400);
+  --color-info-500: var(--color-blue-500);
+  --color-info-600: var(--color-blue-600);
+  --color-info-700: var(--color-blue-700);
+  --color-info-800: var(--color-blue-800);
+  --color-info-900: var(--color-blue-900);
+  --color-info-950: var(--color-blue-950);
+  /* brand = indigo */
+  --color-brand: var(--color-indigo-600);
+  --color-brand-soft: color-mix(in oklab, var(--color-indigo-600) 10%, transparent);
+  --color-brand-50: var(--color-indigo-50);
+  --color-brand-100: var(--color-indigo-100);
+  --color-brand-200: var(--color-indigo-200);
+  --color-brand-300: var(--color-indigo-300);
+  --color-brand-400: var(--color-indigo-400);
+  --color-brand-500: var(--color-indigo-500);
+  --color-brand-600: var(--color-indigo-600);
+  --color-brand-700: var(--color-indigo-700);
+  --color-brand-800: var(--color-indigo-800);
+  --color-brand-900: var(--color-indigo-900);
+  --color-brand-950: var(--color-indigo-950);
+}
+
+:root {
+  /* Dual-Surface Pedagogy Tokens */
+  --bg-sandbox: #f8fafc;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-muted: #64748b;
+  --bg-ide: #0f172a;
+  --bg-ide-header: #1e293b;
+  --border-ide: #334155;
+
+  /* Active-line glows & input flash (reference base palette vars emitted on :root) */
+  --glow-danger: inset 0 0 12px color-mix(in oklab, var(--color-red-500) 22%, transparent);
+  --glow-safe: inset 0 0 12px color-mix(in oklab, var(--color-emerald-500) 22%, transparent);
+  --glow-warning: inset 0 0 12px color-mix(in oklab, var(--color-amber-500) 22%, transparent);
+  --glow-info: inset 0 0 12px color-mix(in oklab, var(--color-blue-500) 22%, transparent);
+  --flash-brand-start: 0 0 0 0 color-mix(in oklab, var(--color-indigo-600) 45%, transparent);
+  --flash-brand-mid: 0 0 0 4px color-mix(in oklab, var(--color-indigo-600) 20%, transparent);
+  --flash-brand-end: 0 0 0 0 color-mix(in oklab, var(--color-indigo-600) 0%, transparent);
+
+  /* Typography */
+  --font-sans: var(--vv-font-family-body);
+  --font-mono: var(--vv-font-family-code);
+}

@@ -19,6 +19,14 @@ export {
   sideIndexAtRow,
 } from './compareTrace';
 export { parseUnifiedDiff } from './diffParser';
+export {
+  TONE_CLASSES,
+  toneClasses,
+  TRACE_OUTCOME_TONE,
+  TRACE_STATUS_TONE,
+  WORKSPACE_MODE_TONE,
+} from './tones';
+export type { Tone, ToneClasses } from './tones';
 export { modeTip, testMyFixTip, TRACE_OUTCOME_LABELS, UI_LABELS } from './uiLabels';
 export type { UiLabel, UiLabelKey } from './uiLabels';
 export {

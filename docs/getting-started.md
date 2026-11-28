@@ -121,6 +121,7 @@ Code Inspector tự đọc lại mã nguồn khi cửa sổ trình duyệt đư�
 | API trả `503` | Backend không kết nối được PostgreSQL | Kiểm tra `docker compose ps` và log `postgres` |
 | API trả `400 Unknown actor '…'` | Persona đã bị xóa hoặc đổi tên trong DB | Bấm **Reset DB** |
 | Sửa file frontend nhưng giao diện không cập nhật | Watcher không nhận sự kiện thay đổi file qua bind mount | Giữ `VITE_WATCH_POLLING=true` (mặc định), rồi `docker compose up -d frontend` |
+| Sau `git pull`, frontend báo lỗi `Failed to resolve import "@fontsource/…"` hoặc thiếu package | Dependency mới nằm trong image cũ chưa được build lại | `docker compose up -d --build frontend` |
 | Lab không xuất hiện trong danh sách | `meta.json` sai schema hoặc `id` không khớp tên thư mục | Xem warning `Skipping invalid lab` trong log backend |
 | Đổi `init.sql` nhưng DB không đổi | Volume đã được khởi tạo từ trước | `docker compose down -v` rồi chạy lại |
 | Dữ liệu lab bị sửa sau khi thử payload | Hành vi bình thường của lab ghi dữ liệu | Bấm **Reset DB** |

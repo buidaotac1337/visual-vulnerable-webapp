@@ -15,7 +15,7 @@ Tài liệu thiết kế ban đầu (`01-architecture.md`, `04-lab-authoring-and
 
 * Bắt lỗi sai hợp đồng API ngay tại compile-time (`tsc --noEmit`) trước khi chạy trình duyệt.
 * Đảm bảo mọi AI agent hiểu rõ cấu trúc props, API payload và barrel exports.
-* Giữ nguyên stack React + Vite + Tailwind CSS v4 + Design System "Dual-Surface Pedagogy".
+* Giữ nguyên stack React + Vite + Tailwind CSS v4 + Design System "Dual-Surface Pedagogy". *(Token màu, font và type scale của design system được thay theo [ADR-0012](0012-atlassian-style-design-tokens.md).)*
 
 ## Decision
 

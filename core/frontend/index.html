@@ -1,15 +1,27 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" data-color-mode="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VVWA · MiniShop Security Lab</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <!--
+      Apply the saved colour mode before first paint (no light/dark flash, ADR-0012).
+      Mirrors resolveColorMode() and COLOR_MODE_STORAGE_KEY in src/hooks/useColorMode.ts;
+      a unit test keeps the key in sync. Fonts are self-hosted: no external requests.
+    -->
+    <script>
+      (function () {
+        try {
+          var pref = window.localStorage.getItem('vvwa.colorMode') || 'light';
+          var dark =
+            pref === 'dark' ||
+            (pref === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.setAttribute('data-color-mode', dark ? 'dark' : 'light');
+        } catch (error) {
+          document.documentElement.setAttribute('data-color-mode', 'light');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

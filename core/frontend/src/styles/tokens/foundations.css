@@ -1,0 +1,26 @@
+/*
+ * Foundations (ADR-0012): font families and VVWA-specific tokens derived from semantic colours.
+ *
+ * Derived tokens are re-declared on every colour-mode scope (`[data-color-mode]`), because a
+ * custom property resolves `var()` where it is declared: declared only on :root, the Inspector's
+ * dark subtree would inherit glows computed from the light colours.
+ */
+:root {
+  --vv-font-family-body: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  --vv-font-family-code: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+:root,
+[data-color-mode] {
+  /* Active code-line glow per trace status (GlowingCodeLine). */
+  --vv-glow-danger: inset 0 0 12px color-mix(in oklab, var(--vv-border-danger) 22%, transparent);
+  --vv-glow-warning: inset 0 0 12px color-mix(in oklab, var(--vv-border-warning) 22%, transparent);
+  --vv-glow-success: inset 0 0 12px color-mix(in oklab, var(--vv-border-success) 22%, transparent);
+  --vv-glow-information: inset 0 0 12px
+    color-mix(in oklab, var(--vv-border-information) 22%, transparent);
+
+  /* Input flash after a sample payload chip is applied. */
+  --vv-flash-brand-start: 0 0 0 0 color-mix(in oklab, var(--vv-border-focused) 45%, transparent);
+  --vv-flash-brand-mid: 0 0 0 4px color-mix(in oklab, var(--vv-border-focused) 20%, transparent);
+  --vv-flash-brand-end: 0 0 0 0 color-mix(in oklab, var(--vv-border-focused) 0%, transparent);
+}

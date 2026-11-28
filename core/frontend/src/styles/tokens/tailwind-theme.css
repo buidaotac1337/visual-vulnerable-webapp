@@ -1,0 +1,204 @@
+/*
+ * Tailwind v4 utilities for the --vv-* tokens (ADR-0012). Colours are chosen by PURPOSE:
+ * `text-danger`, `bg-danger`, `border-danger` map to different tokens through Tailwind's
+ * per-property namespaces (--text-color-*, --background-color-*, --border-color-*...).
+ * `inline` makes utilities emit `var(--vv-*)`, so switching data-color-mode recolours at runtime.
+ */
+@theme inline {
+  /* Text: text-default, text-subtle, text-danger, text-link... */
+  --text-color-default: var(--vv-text);
+  --text-color-subtle: var(--vv-text-subtle);
+  --text-color-subtlest: var(--vv-text-subtlest);
+  --text-color-disabled: var(--vv-text-disabled);
+  --text-color-inverse: var(--vv-text-inverse);
+  --text-color-brand: var(--vv-text-brand);
+  --text-color-selected: var(--vv-text-selected);
+  --text-color-warning-inverse: var(--vv-text-warning-inverse);
+  --text-color-link: var(--vv-link);
+  --text-color-link-pressed: var(--vv-link-pressed);
+  --text-color-danger: var(--vv-text-danger);
+  --text-color-danger-bolder: var(--vv-text-danger-bolder);
+  --text-color-warning: var(--vv-text-warning);
+  --text-color-warning-bolder: var(--vv-text-warning-bolder);
+  --text-color-success: var(--vv-text-success);
+  --text-color-success-bolder: var(--vv-text-success-bolder);
+  --text-color-information: var(--vv-text-information);
+  --text-color-information-bolder: var(--vv-text-information-bolder);
+  --text-color-discovery: var(--vv-text-discovery);
+  --text-color-discovery-bolder: var(--vv-text-discovery-bolder);
+  --text-color-accent-blue: var(--vv-text-accent-blue);
+  --text-color-accent-purple: var(--vv-text-accent-purple);
+  --text-color-accent-yellow: var(--vv-text-accent-yellow);
+
+  /* Icons (lucide uses currentColor): text-icon, text-icon-danger... */
+  --text-color-icon: var(--vv-icon);
+  --text-color-icon-subtle: var(--vv-icon-subtle);
+  --text-color-icon-subtlest: var(--vv-icon-subtlest);
+  --text-color-icon-inverse: var(--vv-icon-inverse);
+  --text-color-icon-disabled: var(--vv-icon-disabled);
+  --text-color-icon-brand: var(--vv-icon-brand);
+  --text-color-icon-danger: var(--vv-icon-danger);
+  --text-color-icon-warning: var(--vv-icon-warning);
+  --text-color-icon-success: var(--vv-icon-success);
+  --text-color-icon-information: var(--vv-icon-information);
+  --text-color-icon-discovery: var(--vv-icon-discovery);
+  --text-color-icon-accent-blue: var(--vv-icon-accent-blue);
+  --text-color-icon-accent-purple: var(--vv-icon-accent-purple);
+  --text-color-icon-accent-yellow: var(--vv-icon-accent-yellow);
+
+  /* Backgrounds and elevation surfaces: bg-surface-raised, bg-danger-bold, bg-neutral... */
+  --background-color-neutral: var(--vv-background-neutral);
+  --background-color-neutral-hovered: var(--vv-background-neutral-hovered);
+  --background-color-neutral-pressed: var(--vv-background-neutral-pressed);
+  --background-color-neutral-subtle: var(--vv-background-neutral-subtle);
+  --background-color-neutral-subtle-hovered: var(--vv-background-neutral-subtle-hovered);
+  --background-color-neutral-subtle-pressed: var(--vv-background-neutral-subtle-pressed);
+  --background-color-neutral-bold: var(--vv-background-neutral-bold);
+  --background-color-neutral-bold-hovered: var(--vv-background-neutral-bold-hovered);
+  --background-color-neutral-bold-pressed: var(--vv-background-neutral-bold-pressed);
+  --background-color-brand-subtlest: var(--vv-background-brand-subtlest);
+  --background-color-brand-subtlest-hovered: var(--vv-background-brand-subtlest-hovered);
+  --background-color-brand-bold: var(--vv-background-brand-bold);
+  --background-color-brand-bold-hovered: var(--vv-background-brand-bold-hovered);
+  --background-color-brand-bold-pressed: var(--vv-background-brand-bold-pressed);
+  --background-color-selected: var(--vv-background-selected);
+  --background-color-selected-hovered: var(--vv-background-selected-hovered);
+  --background-color-input: var(--vv-background-input);
+  --background-color-input-hovered: var(--vv-background-input-hovered);
+  --background-color-disabled: var(--vv-background-disabled);
+  --background-color-danger: var(--vv-background-danger);
+  --background-color-danger-hovered: var(--vv-background-danger-hovered);
+  --background-color-danger-subtler: var(--vv-background-danger-subtler);
+  --background-color-danger-bold: var(--vv-background-danger-bold);
+  --background-color-danger-bold-hovered: var(--vv-background-danger-bold-hovered);
+  --background-color-danger-bold-pressed: var(--vv-background-danger-bold-pressed);
+  --background-color-warning: var(--vv-background-warning);
+  --background-color-warning-hovered: var(--vv-background-warning-hovered);
+  --background-color-warning-subtler: var(--vv-background-warning-subtler);
+  --background-color-warning-bold: var(--vv-background-warning-bold);
+  --background-color-warning-bold-hovered: var(--vv-background-warning-bold-hovered);
+  --background-color-warning-bold-pressed: var(--vv-background-warning-bold-pressed);
+  --background-color-success: var(--vv-background-success);
+  --background-color-success-hovered: var(--vv-background-success-hovered);
+  --background-color-success-subtler: var(--vv-background-success-subtler);
+  --background-color-success-bold: var(--vv-background-success-bold);
+  --background-color-success-bold-hovered: var(--vv-background-success-bold-hovered);
+  --background-color-success-bold-pressed: var(--vv-background-success-bold-pressed);
+  --background-color-information: var(--vv-background-information);
+  --background-color-information-hovered: var(--vv-background-information-hovered);
+  --background-color-information-subtler: var(--vv-background-information-subtler);
+  --background-color-information-bold: var(--vv-background-information-bold);
+  --background-color-information-bold-hovered: var(--vv-background-information-bold-hovered);
+  --background-color-information-bold-pressed: var(--vv-background-information-bold-pressed);
+  --background-color-discovery: var(--vv-background-discovery);
+  --background-color-discovery-hovered: var(--vv-background-discovery-hovered);
+  --background-color-discovery-subtler: var(--vv-background-discovery-subtler);
+  --background-color-discovery-bold: var(--vv-background-discovery-bold);
+  --background-color-discovery-bold-hovered: var(--vv-background-discovery-bold-hovered);
+  --background-color-discovery-bold-pressed: var(--vv-background-discovery-bold-pressed);
+  --background-color-accent-blue-subtlest: var(--vv-background-accent-blue-subtlest);
+  --background-color-accent-blue-subtler: var(--vv-background-accent-blue-subtler);
+  --background-color-accent-purple-subtlest: var(--vv-background-accent-purple-subtlest);
+  --background-color-accent-purple-subtler: var(--vv-background-accent-purple-subtler);
+  --background-color-accent-yellow-subtlest: var(--vv-background-accent-yellow-subtlest);
+  --background-color-accent-yellow-subtler: var(--vv-background-accent-yellow-subtler);
+  --background-color-surface: var(--vv-surface);
+  --background-color-surface-sunken: var(--vv-surface-sunken);
+  --background-color-surface-raised: var(--vv-surface-raised);
+  --background-color-surface-overlay: var(--vv-surface-overlay);
+  --background-color-surface-hovered: var(--vv-surface-hovered);
+  --background-color-surface-pressed: var(--vv-surface-pressed);
+  --background-color-blanket: var(--vv-blanket);
+
+  /* Borders: border-default, border-input, border-danger... */
+  --border-color-default: var(--vv-border);
+  --border-color-bold: var(--vv-border-bold);
+  --border-color-input: var(--vv-border-input);
+  --border-color-focused: var(--vv-border-focused);
+  --border-color-brand: var(--vv-border-brand);
+  --border-color-selected: var(--vv-border-selected);
+  --border-color-disabled: var(--vv-border-disabled);
+  --border-color-inverse: var(--vv-border-inverse);
+  --border-color-danger: var(--vv-border-danger);
+  --border-color-danger-subtle: var(--vv-border-danger-subtle);
+  --border-color-warning: var(--vv-border-warning);
+  --border-color-warning-subtle: var(--vv-border-warning-subtle);
+  --border-color-success: var(--vv-border-success);
+  --border-color-success-subtle: var(--vv-border-success-subtle);
+  --border-color-information: var(--vv-border-information);
+  --border-color-information-subtle: var(--vv-border-information-subtle);
+  --border-color-discovery: var(--vv-border-discovery);
+  --border-color-discovery-subtle: var(--vv-border-discovery-subtle);
+  --divide-color-default: var(--vv-border);
+  --divide-color-bold: var(--vv-border-bold);
+
+  /* Focus and emphasis rings / outlines */
+  --ring-color-focused: var(--vv-border-focused);
+  --outline-color-focused: var(--vv-border-focused);
+  --ring-color-brand: var(--vv-border-brand);
+  --outline-color-brand: var(--vv-border-brand);
+  --ring-color-danger: var(--vv-border-danger);
+  --outline-color-danger: var(--vv-border-danger);
+  --ring-color-warning: var(--vv-border-warning);
+  --outline-color-warning: var(--vv-border-warning);
+  --ring-color-success: var(--vv-border-success);
+  --outline-color-success: var(--vv-border-success);
+  --ring-color-information: var(--vv-border-information);
+  --outline-color-information: var(--vv-border-information);
+
+  /* Elevation shadows: shadow-raised, shadow-overlay, shadow-overflow */
+  --shadow-raised: var(--vv-shadow-raised);
+  --shadow-overlay: var(--vv-shadow-overlay);
+  --shadow-overflow: var(--vv-shadow-overflow);
+
+  /* Font families */
+  --font-sans: var(--vv-font-family-body);
+  --font-mono: var(--vv-font-family-code);
+}
+
+/*
+ * Type scale (Atlassian sizes; body line-heights +2px for stacked Vietnamese diacritics) and
+ * radius. Names never collide with the --text-color-* names above.
+ */
+@theme {
+  --text-heading-xxlarge: 2rem;
+  --text-heading-xxlarge--line-height: 2.25rem;
+  --text-heading-xxlarge--font-weight: 600;
+  --text-heading-xlarge: 1.75rem;
+  --text-heading-xlarge--line-height: 2rem;
+  --text-heading-xlarge--font-weight: 600;
+  --text-heading-large: 1.5rem;
+  --text-heading-large--line-height: 1.75rem;
+  --text-heading-large--font-weight: 600;
+  --text-heading-medium: 1.25rem;
+  --text-heading-medium--line-height: 1.5rem;
+  --text-heading-medium--font-weight: 600;
+  --text-heading-small: 1rem;
+  --text-heading-small--line-height: 1.25rem;
+  --text-heading-small--font-weight: 600;
+  --text-heading-xsmall: 0.875rem;
+  --text-heading-xsmall--line-height: 1.25rem;
+  --text-heading-xsmall--font-weight: 600;
+  --text-heading-xxsmall: 0.75rem;
+  --text-heading-xxsmall--line-height: 1rem;
+  --text-heading-xxsmall--font-weight: 600;
+  --text-body-large: 1rem;
+  --text-body-large--line-height: 1.5rem;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.375rem;
+  --text-body-small: 0.75rem;
+  --text-body-small--line-height: 1.125rem;
+  /* VVWA extension: dense FlowPipeline wire labels only. */
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1rem;
+  /* Code in the Inspector: 13px / 22px. */
+  --text-code: 0.8125rem;
+  --text-code--line-height: 1.375rem;
+
+  --radius-xsmall: 0.125rem;
+  --radius-small: 0.25rem;
+  --radius-medium: 0.375rem;
+  --radius-large: 0.5rem;
+  --radius-xlarge: 0.75rem;
+  --radius-xxlarge: 1rem;
+}

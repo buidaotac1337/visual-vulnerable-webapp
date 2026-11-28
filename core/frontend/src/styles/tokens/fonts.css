@@ -1,0 +1,12 @@
+/*
+ * Self-hosted fonts (ADR-0012): bundled by Vite, no network or CDN at runtime.
+ * Per-weight files declare `unicode-range`, so browsers fetch only the subsets a page uses
+ * (latin, latin-ext, vietnamese). Both families are SIL OFL 1.1 (@fontsource 5.3.0).
+ */
+@import '@fontsource/be-vietnam-pro/400.css';
+@import '@fontsource/be-vietnam-pro/500.css';
+@import '@fontsource/be-vietnam-pro/600.css';
+@import '@fontsource/be-vietnam-pro/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/600.css';
