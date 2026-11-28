@@ -57,7 +57,7 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
   if (health) {
     return (
       <span
-        className="hidden shrink-0 whitespace-nowrap rounded-full bg-safe-50 px-2.5 py-1 text-xs font-medium text-safe-700 xl:inline-flex"
+        className="hidden shrink-0 whitespace-nowrap rounded-full bg-safe-50 px-2.5 py-1 text-xs font-medium text-safe-700 2xl:inline-flex"
         title={`${health.service} (${health.environment})`}
       >
         API: {health.status.toUpperCase()} (v{health.version})
@@ -72,7 +72,7 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
     );
   }
   return (
-    <span className="hidden shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 xl:inline-flex">
+    <span className="hidden shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 2xl:inline-flex">
       Connecting API...
     </span>
   );
@@ -138,7 +138,9 @@ function TopControlBarInner({
       <div className="flex min-w-0 items-center gap-2.5">
         <div className="flex shrink-0 items-center gap-2 text-base font-semibold text-slate-900">
           <BrandIcon className={`h-5 w-5 ${BRAND_ICON_CLASS[mode]}`} aria-hidden="true" />
-          <span className="tracking-tight">VVWA · MiniShop</span>
+          <span className="tracking-tight">
+            VVWA<span className="hidden xl:inline"> · MiniShop</span>
+          </span>
         </div>
 
         <ToolbarLabNav
@@ -174,11 +176,13 @@ function TopControlBarInner({
             className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-            <StableLabel
-              label={UI_LABELS.resetDb.text}
-              busyLabel={UI_LABELS.resetDb.busy}
-              isBusy={isResettingDb}
-            />
+            <span className="sr-only 2xl:not-sr-only">
+              <StableLabel
+                label={UI_LABELS.resetDb.text}
+                busyLabel={UI_LABELS.resetDb.busy}
+                isBusy={isResettingDb}
+              />
+            </span>
           </button>
         </Tooltip>
 
@@ -207,7 +211,7 @@ function TopControlBarInner({
             className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="hidden sm:inline">{UI_LABELS.downloadSnippet.text}</span>
+            <span className="hidden 2xl:inline">{UI_LABELS.downloadSnippet.text}</span>
           </button>
         </Tooltip>
       </div>

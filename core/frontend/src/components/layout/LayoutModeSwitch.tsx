@@ -110,7 +110,7 @@ export function LayoutModeSwitch({ mode, onChange }: LayoutModeSwitchProps): JSX
               }`}
             >
               <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              <span className="hidden 2xl:inline">{label}</span>
+              <span className="hidden min-[112.5rem]:inline">{label}</span>
             </button>
           </Tooltip>
         );

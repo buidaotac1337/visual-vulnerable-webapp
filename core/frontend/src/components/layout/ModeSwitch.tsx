@@ -94,7 +94,7 @@ export function ModeSwitch({
               }`}
             >
               <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>{segmentText(id)}</span>
+              <span className="sr-only xl:not-sr-only">{segmentText(id)}</span>
               {id !== 'compare' && <OutcomeDot outcome={outcomes[id]} />}
             </button>
           </Tooltip>
