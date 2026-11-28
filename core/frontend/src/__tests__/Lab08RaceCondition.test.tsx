@@ -147,7 +147,8 @@ describe('Lab 08 Race Condition LabView', () => {
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Phát hiện Race Condition');
     expect(alert).toHaveTextContent('5/5 request áp mã WELCOME10 đã thành công đồng thời');
-    expect(screen.getByText('Vượt giới hạn!')).toBeTruthy();
+    // The badge comes from the coupon reload that follows the burst, so wait for it.
+    expect(await screen.findByText('Vượt giới hạn!')).toBeTruthy();
 
     const applyCalls = vi.mocked(onExecute).mock.calls.filter(([a]) => a === 'apply_coupon');
     expect(applyCalls).toHaveLength(5);
