@@ -16,6 +16,9 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/testSetup.ts'],
+    // Vitest empties CSS imports by default, even `?raw`; token files must stay readable for the
+    // design-token SSOT tests (ADR-0012).
+    css: { include: [/src[\\/]styles[\\/]tokens[\\/]/] },
     // Node 25+ ships its own global `localStorage` (undefined without --localstorage-file),
     // which shadows jsdom's Storage; turn it off in test workers (ADR-0011).
     pool: 'forks',

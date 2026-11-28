@@ -1,4 +1,11 @@
 /** Public barrel exports for VVWA workspace and trace playback hooks. */
+export {
+  COLOR_MODE_STORAGE_KEY,
+  DEFAULT_COLOR_MODE,
+  resolveColorMode,
+  useColorMode,
+} from './useColorMode';
+export type { ColorModeController, ColorModePreference, ResolvedColorMode } from './useColorMode';
 export { useLabActor } from './useLabActor';
 export type { LabActorState } from './useLabActor';
 export { useLabCatalog } from './useLabCatalog';

@@ -1,6 +1,20 @@
 # Design System
 
-Quy chuẩn giao diện của VVWA: bề mặt, màu ngữ nghĩa, typography, component đặc thù và khoảng cách. Token SSOT nằm tại [`core/frontend/src/styles/tokens.css`](../core/frontend/src/styles/tokens.css).
+Quy chuẩn giao diện của VVWA: bề mặt, màu ngữ nghĩa, typography, component đặc thù và khoảng cách. Token SSOT nằm tại [`core/frontend/src/styles/tokens/`](../core/frontend/src/styles/tokens.css) (entry: `tokens.css`).
+
+> [!NOTE]
+> **Đang migrate sang token kiểu Atlassian ([ADR-0012](adr/0012-atlassian-style-design-tokens.md)).** Code mới dùng token chọn theo mục đích, **không** dùng thang `danger-50…950` hay `slate-*`:
+>
+> | Nhóm | Ví dụ utility | Token |
+> | :--- | :--- | :--- |
+> | Chữ | `text-default`, `text-subtle`, `text-subtlest`, `text-danger`, `text-success`, `text-inverse`, `text-link` | `--vv-text*`, `--vv-link` |
+> | Icon | `text-icon`, `text-icon-danger`, `text-icon-success` | `--vv-icon*` |
+> | Nền | `bg-surface`, `bg-surface-sunken`, `bg-surface-raised`, `bg-neutral`, `bg-danger`, `bg-danger-bold`, `bg-brand-bold`, `bg-input` | `--vv-background-*`, `--vv-surface*` |
+> | Viền | `border-default`, `border-input`, `border-danger`, `outline-focused`, `ring-focused` | `--vv-border*` |
+> | Đổ bóng / bo góc | `shadow-raised`, `shadow-overlay`, `rounded-large`, `rounded-xlarge` | `--vv-shadow-*`, `--radius-*` |
+> | Cỡ chữ | `text-heading-small`, `text-body`, `text-body-small`, `text-micro`, `text-code` | `--text-*` |
+>
+> Màu theo trạng thái (`TraceStatus`, `TraceOutcome`, mode) lấy từ `TONE_CLASSES` / `TRACE_STATUS_TONE` trong `@/lib` (`lib/tones.ts`), không tự viết bảng map riêng. Theme light/dark đổi qua `data-color-mode` (`useColorMode`). Các bảng bên dưới mô tả token cũ (`tokens/legacy.css`), sẽ bị xóa khi migrate xong.
 
 ## 1. Nguyên tắc: hai bề mặt
 
@@ -57,7 +71,7 @@ ESLint chặn các class màu gốc `red-*`, `emerald-*`, `amber-*`, `blue-*`, `
 | Giao diện | `Be Vietnam Pro` (fallback `Inter, system-ui, sans-serif`) — hiển thị dấu tiếng Việt rõ ở cỡ nhỏ | `--font-sans` |
 | Code & payload | `JetBrains Mono` — phân biệt rõ `'` `"` `` ` `` `1` `l` `I` `0` `O` | `--font-mono` |
 
-Font được nạp từ Google Fonts trong `core/frontend/index.html`.
+Font được tự host qua `@fontsource/be-vietnam-pro` và `@fontsource/jetbrains-mono` (OFL, `tokens/fonts.css`): Vite bundle file `woff2` vào app, không có request ra ngoài, chạy được offline ([ADR-0012](adr/0012-atlassian-style-design-tokens.md)).
 
 | Cấp | Font | Size / Line-height | Weight | Dùng cho |
 | :--- | :--- | :--- | :--- | :--- |
