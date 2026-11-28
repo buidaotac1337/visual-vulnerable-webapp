@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts.quality import (
+    CheckResult,
     QualityConfig,
     check_barrels,
     check_docs,
@@ -213,6 +214,11 @@ def test_frontend_gate_passes_resolved_pnpm_binary_path(tmp_path: Path) -> None:
     with (
         patch("scripts.quality.runners.shutil.which", return_value=r"C:\tools\pnpm.CMD"),
         patch("scripts.quality.runners.run_command", side_effect=_fake_run),
+        # The token SSOT has its own tests; this one only covers pnpm path resolution.
+        patch(
+            "scripts.quality.runners.check_design_tokens",
+            return_value=CheckResult(name="design-tokens"),
+        ),
     ):
         assert execute_gate("frontend", tmp_path, allow_main=False)
 

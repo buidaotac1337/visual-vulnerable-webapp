@@ -122,7 +122,7 @@ function LaneButton({
       onMouseLeave={onLeaveWire}
       onBlur={(event) => onBlurWire(event.relatedTarget)}
       onClick={(event) => onClickWire(event.currentTarget, lane.key)}
-      className={`vvwa-wire-lane flex w-full min-w-0 cursor-pointer flex-col items-center gap-0.5 rounded-medium border border-transparent px-[3px] py-[2px] transition-colors hover:border-default hover:bg-neutral-subtle-hovered focus-visible:border-brand focus-visible:bg-neutral focus-visible:outline-none ${
+      className={`vvwa-wire-lane flex w-full min-w-0 cursor-pointer flex-col items-center gap-0.5 rounded-medium border border-transparent px-0.75 py-0.5 transition-colors hover:border-default hover:bg-neutral-subtle-hovered focus-visible:border-brand focus-visible:bg-neutral focus-visible:outline-none ${
         lane.state === 'muted' ? 'opacity-45' : ''
       }`}
     >
@@ -156,7 +156,7 @@ export function PipelineWireCell({
   onClickWire,
 }: PipelineWireCellProps): JSX.Element {
   return (
-    <div className="vvwa-wire-cell flex min-w-0 flex-col justify-center gap-1.5 px-[5px]">
+    <div className="vvwa-wire-cell flex min-w-0 flex-col justify-center gap-1.5 px-1.25">
       <LaneButton
         lane={wire.forward}
         onHoverWire={onHoverWire}

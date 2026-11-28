@@ -4,6 +4,14 @@
  * per-property namespaces (--text-color-*, --background-color-*, --border-color-*...).
  * `inline` makes utilities emit `var(--vv-*)`, so switching data-color-mode recolours at runtime.
  */
+/*
+ * Drop Tailwind's default palette (slate-*, red-*, white, black...): only the purpose tokens below
+ * generate colour utilities, so a raw palette class produces no CSS at all (ADR-0012).
+ */
+@theme {
+  --color-*: initial;
+}
+
 @theme inline {
   /* Text: text-default, text-subtle, text-danger, text-link... */
   --text-color-default: var(--vv-text);

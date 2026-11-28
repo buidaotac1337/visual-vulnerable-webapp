@@ -63,35 +63,43 @@ describe('ADR-0006 sink lint guard', () => {
   });
 });
 
-describe('Design system colour guard', () => {
-  // Built at run time so this test file itself does not contain a raw palette class.
-  const [red, emerald, amber] = [
-    ['text', 'red', '600'],
-    ['bg', 'emerald', '50'],
-    ['bg', 'amber', '500'],
-  ].map((p) => p.join('-'));
-  const rawTemplate = `export const A = () => <p className={\`p-2 \${'${red}'} ${emerald}\`} />;\n`;
-  const rawJsxAttr = `export const A = () => <p className="${amber}" />;\n`;
-  const allowed =
-    'export const A = () => <p className={`p-2 ${\'text-danger-600\'} bg-safe-50 bg-slate-500 text-sky-100 border-violet-800 text-yellow-400`} data-id="order-red-1" data-sku="shirt-blue-2" />;\n';
+describe('Design token lint guard (ADR-0012)', () => {
+  // Bad classes are assembled at run time so this file does not trip the rules itself.
+  const join = (...parts: string[]): string => parts.join('-');
+  const BLOCKED: Record<string, string> = {
+    defaultPalette: join('text', 'red', '600'),
+    neutralPalette: join('bg', 'slate', '50'),
+    removedRoleScale: join('bg', 'danger', '50'),
+    removedSafeScale: join('text', 'safe', '700'),
+    removedSoftTint: join('bg', 'info', 'soft'),
+    white: join('text', 'white'),
+    arbitraryColour: join('bg', '[#fff]'),
+    arbitraryVar: join('border', '[var(--x)]'),
+    arbitraryFontSize: join('text', '[11px]'),
+    arbitrarySpacing: join('px', '[3px]'),
+  };
 
-  it('blocks raw palette colours in literals, template chunks, and JSX attributes everywhere', async () => {
-    expect(await restrictedSyntaxErrors(rawTemplate, 'core/frontend/src/components/Bad.tsx')).toBe(
-      2,
-    );
-    expect(await restrictedSyntaxErrors(rawTemplate, 'labs/99-demo/frontend/vulnerable.tsx')).toBe(
-      2,
-    );
+  it.each(Object.entries(BLOCKED))(
+    'blocks %s in core, LabView and the vulnerable sink',
+    async (_name, cls) => {
+      const attr = `export const A = () => <p className="p-2 ${cls}" />;\n`;
+      const template = `export const A = (x: string) => <p className={\`p-2 \${x} ${cls}\`} />;\n`;
+      expect(await restrictedSyntaxErrors(attr, 'core/frontend/src/components/Bad.tsx')).toBe(1);
+      expect(await restrictedSyntaxErrors(template, 'labs/99-demo/frontend/LabView.tsx')).toBe(1);
+      expect(await restrictedSyntaxErrors(attr, 'labs/99-demo/frontend/vulnerable.tsx')).toBe(1);
+    },
+  );
 
-    const jsxMessages = await restrictedSyntaxMessages(
-      rawJsxAttr,
-      'core/frontend/src/components/Bad.tsx',
-    );
-    expect(jsxMessages).toHaveLength(1);
-    expect(jsxMessages[0]).toContain('Use semantic colour tokens');
+  it('blocks inline fontFamily styles', async () => {
+    const code = "export const A = () => <p style={{ fontFamily: 'monospace' }} />;\n";
+    const messages = await restrictedSyntaxMessages(code, 'core/frontend/src/components/Bad.tsx');
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toContain('font-mono');
   });
 
-  it('allows semantic roles, neutral/secondary palettes, and non-Tailwind ID strings', async () => {
+  it('allows purpose tokens, layout arbitrary values, and non-Tailwind ID strings', async () => {
+    const allowed =
+      'export const A = () => <p className="text-subtle bg-danger-bold border-success-subtle text-micro font-mono px-0.75 max-w-[190px] min-[112.5rem]:inline bg-transparent text-icon-accent-yellow" data-id="order-red-1" data-sku="shirt-blue-2" />;\n';
     expect(await restrictedSyntaxErrors(allowed, 'labs/99-demo/frontend/LabView.tsx')).toBe(0);
   });
 });

@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 
 from scripts.quality.check_barrels import check_barrels
+from scripts.quality.check_design_tokens import check_design_tokens
 from scripts.quality.check_docs import check_docs
 from scripts.quality.check_file_limits import check_file_limits
 from scripts.quality.check_git_rules import validate_branch_name
@@ -111,6 +112,8 @@ def _run_frontend_gate(repo_root: Path) -> bool:
     if not print_result(check_file_limits(repo_root, config)):
         return False
     if not print_result(check_barrels(repo_root, config)):
+        return False
+    if not print_result(check_design_tokens(repo_root)):
         return False
 
     frontend_dir = repo_root / "core" / "frontend"
