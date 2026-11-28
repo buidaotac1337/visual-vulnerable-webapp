@@ -27,9 +27,7 @@ function readSqlError(response: LabExecutionResponse | null): string | null {
 function renderSqlErrorBanner(message: string): JSX.Element {
   return (
     <ResultNotice tone="warning" title="Lỗi cú pháp SQL (Error-based SQLi)">
-      <p className="break-all text-xs" style={{ fontFamily: 'var(--font-mono)' }}>
-        {message}
-      </p>
+      <p className="break-all text-xs font-mono">{message}</p>
     </ResultNotice>
   );
 }
@@ -102,24 +100,24 @@ export function LoginResultCard({
   // said separately, in words, when the login was a bypass.
   return (
     <div className="flex flex-col gap-2">
-      <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-800">
+      <div className="rounded-large border border-default bg-surface-raised p-3 text-xs text-default">
         <div className="flex items-center justify-between gap-2 font-semibold">
           <span className="inline-flex items-center gap-1.5">
-            <UserCheck className="h-4 w-4 text-safe-600" aria-hidden="true" />
+            <UserCheck className="h-4 w-4 text-success" aria-hidden="true" />
             Chào mừng {user.username}!
           </span>
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold uppercase">
+          <span className="rounded-full bg-neutral px-2 py-0.5 text-xs font-bold uppercase">
             {user.role}
           </span>
         </div>
-        <p className="mt-1 text-xs text-slate-600">
+        <p className="mt-1 text-xs text-subtle">
           Email: {user.email} · Số dư ví MiniShop: ${user.balance.toFixed(2)}
         </p>
       </div>
       {isExploited && (
         <ResultNotice
           tone="danger"
-          icon={<AlertTriangle className="h-4 w-4 shrink-0 text-danger-600" aria-hidden="true" />}
+          icon={<AlertTriangle className="h-4 w-4 shrink-0 text-danger" aria-hidden="true" />}
         >
           Đăng nhập vào tài khoản {user.username} mà không cần mật khẩu đúng: payload đã thay đổi
           điều kiện WHERE của câu truy vấn đăng nhập.
@@ -157,7 +155,7 @@ export function SearchResultList({
       {leaked.size > 0 && (
         <ResultNotice
           tone="danger"
-          icon={<AlertTriangle className="h-4 w-4 shrink-0 text-danger-600" aria-hidden="true" />}
+          icon={<AlertTriangle className="h-4 w-4 shrink-0 text-danger" aria-hidden="true" />}
         >
           {leaked.size} dòng bên dưới không phải sản phẩm: dữ liệu từ bảng hoặc truy vấn khác bị kéo
           ra qua UNION SELECT.
@@ -168,10 +166,10 @@ export function SearchResultList({
         return (
           <div
             key={`${idx}-${item.id}-${item.name}`}
-            className={`rounded-lg border p-2.5 text-xs ${
+            className={`rounded-large border p-2.5 text-xs ${
               isLeakedRow
-                ? 'border-danger-300 bg-danger-50 text-danger-900'
-                : 'border-slate-200 bg-slate-50 text-slate-800'
+                ? 'border-danger-subtle bg-danger text-danger-bolder'
+                : 'border-default bg-surface-sunken text-default'
             }`}
           >
             <div className="flex items-center justify-between gap-2 font-semibold">
@@ -179,8 +177,7 @@ export function SearchResultList({
               <span>${item.price.toFixed(2)}</span>
             </div>
             <p
-              className={`mt-0.5 break-all text-xs ${isLeakedRow ? 'text-danger-800' : 'text-slate-600'}`}
-              style={{ fontFamily: isLeakedRow ? 'var(--font-mono)' : undefined }}
+              className={`mt-0.5 break-all text-xs ${isLeakedRow ? 'font-mono text-danger-bolder' : 'text-subtle'}`}
             >
               {item.description}
             </p>

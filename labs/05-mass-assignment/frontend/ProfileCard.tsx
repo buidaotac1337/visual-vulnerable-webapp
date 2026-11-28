@@ -23,25 +23,25 @@ interface UpdateNoticeProps {
  */
 export function ProfileCard({ profile }: ProfileCardProps): JSX.Element {
   if (!profile) {
-    return <p className="text-xs text-slate-500">Đăng nhập để xem hồ sơ.</p>;
+    return <p className="text-xs text-subtlest">Đăng nhập để xem hồ sơ.</p>;
   }
   const admin = profile.role === 'admin';
   return (
-    <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs">
-      <dt className="text-slate-500">Tài khoản</dt>
-      <dd className="font-semibold text-slate-900">{profile.username}</dd>
-      <dt className="text-slate-500">Email</dt>
-      <dd className="text-slate-900">{profile.email}</dd>
-      <dt className="text-slate-500">Vai trò</dt>
+    <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 rounded-large border border-default bg-surface-sunken p-3 text-xs">
+      <dt className="text-subtlest">Tài khoản</dt>
+      <dd className="font-semibold text-default">{profile.username}</dd>
+      <dt className="text-subtlest">Email</dt>
+      <dd className="text-default">{profile.email}</dd>
+      <dt className="text-subtlest">Vai trò</dt>
       <dd>
         <span
-          className={`rounded px-1.5 py-0.5 font-semibold ${admin ? 'bg-danger-100 text-danger-700' : 'bg-slate-200 text-slate-700'}`}
+          className={`rounded-small px-1.5 py-0.5 font-semibold ${admin ? 'bg-danger-subtler text-danger' : 'bg-neutral-hovered text-subtle'}`}
         >
           {profile.role}
         </span>
       </dd>
-      <dt className="text-slate-500">Số dư</dt>
-      <dd className="text-slate-900">{formatField('balance', profile)}</dd>
+      <dt className="text-subtlest">Số dư</dt>
+      <dd className="text-default">{formatField('balance', profile)}</dd>
     </dl>
   );
 }
@@ -60,7 +60,7 @@ export function UpdateNotice({ result, before }: UpdateNoticeProps): JSX.Element
     return (
       <ResultNotice
         tone="neutral"
-        icon={<CircleX className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />}
+        icon={<CircleX className="h-4 w-4 shrink-0 text-subtlest" aria-hidden="true" />}
       >
         {result.error ?? 'Hồ sơ không thay đổi.'}
       </ResultNotice>

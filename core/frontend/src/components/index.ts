@@ -18,6 +18,7 @@ export type {
   TraceStepPillsProps,
 } from './inspector';
 export {
+  ColorModeSwitch,
   LabWorkspace,
   LayoutModeSwitch,
   ModeSwitch,
@@ -25,7 +26,7 @@ export {
   TopControlBar,
   WorkspaceModals,
 } from './layout';
-export type { WorkspaceModalsProps } from './layout';
+export type { ColorModeSwitchProps, WorkspaceModalsProps } from './layout';
 export { FlowPipeline } from './pipeline';
 export type { FlowPipelineProps } from './pipeline';
 export {

@@ -85,17 +85,17 @@ export function LabView(props: LabViewProps): JSX.Element {
     <LabCard
       title="MiniShop · Hóa đơn của tôi"
       icon={<FileDown className="h-4 w-4" aria-hidden="true" />}
-      headerRight={<span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
+      headerRight={<span className="text-xs text-subtlest">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
     >
       <section aria-label="Hóa đơn của tôi" className="flex flex-col gap-1.5">
-        {invoices.length === 0 && <p className="text-xs text-slate-500">Chưa có hóa đơn nào.</p>}
+        {invoices.length === 0 && <p className="text-xs text-subtlest">Chưa có hóa đơn nào.</p>}
         {invoices.map((invoice) => (
           <button
             key={invoice.file}
             type="button"
             disabled={isExecuting}
             onClick={() => download(invoice.file)}
-            className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 disabled:cursor-not-allowed"
+            className="flex cursor-pointer items-center justify-between rounded-large border border-default px-3 py-2 text-xs text-subtle hover:border-brand-subtle hover:bg-brand-subtlest disabled:cursor-not-allowed"
           >
             <span className="font-semibold">{invoice.file}</span>
             <span>

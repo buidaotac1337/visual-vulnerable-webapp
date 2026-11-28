@@ -95,14 +95,14 @@ export function LabView(props: LabViewProps): JSX.Element {
     <LabCard
       title="MiniShop · Hồ sơ của tôi"
       icon={<UserRound className="h-4 w-4" aria-hidden="true" />}
-      headerRight={<span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
+      headerRight={<span className="text-xs text-subtlest">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
     >
       <ProfileCard profile={profile} />
 
       <form
         key={`f-${String(inputFlashSeq)}`}
         onSubmit={handleSubmit}
-        className={`flex flex-col gap-2 rounded-lg ${flashClass}`}
+        className={`flex flex-col gap-2 rounded-large ${flashClass}`}
       >
         <TextField
           id="ma-email"

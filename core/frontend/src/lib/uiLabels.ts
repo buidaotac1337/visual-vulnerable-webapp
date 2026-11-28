@@ -32,6 +32,18 @@ export const UI_LABELS = {
   compareSandboxNote: {
     text: 'Song song: mỗi lần gửi, VVWA Reset DB rồi chạy Secure, Reset DB lần nữa rồi chạy Vulnerable. MiniShop bên dưới hiện kết quả phía Vulnerable.',
   },
+  colorModeLight: {
+    text: 'Sáng',
+    tip: 'Giao diện sáng (Code Inspector luôn tối). Bấm để chuyển sang Tối.',
+  },
+  colorModeDark: {
+    text: 'Tối',
+    tip: 'Giao diện tối. Bấm để theo cài đặt sáng/tối của hệ điều hành.',
+  },
+  colorModeAuto: {
+    text: 'Theo hệ thống',
+    tip: 'Tự theo cài đặt sáng/tối của hệ điều hành. Bấm để chuyển sang Sáng.',
+  },
   resetDb: {
     text: 'Reset DB',
     busy: 'Đang reset...',

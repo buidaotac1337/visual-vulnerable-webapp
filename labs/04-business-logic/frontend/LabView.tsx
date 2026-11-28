@@ -104,9 +104,9 @@ export function LabView(props: LabViewProps): JSX.Element {
       title="MiniShop · Giỏ hàng"
       icon={<ShoppingCart className="h-4 w-4" aria-hidden="true" />}
       headerRight={
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-subtlest">
           {actor ?? 'ẩn danh'} · Số dư:{' '}
-          <strong className="text-slate-900">
+          <strong className="text-default">
             {shop.balance === null ? '—' : formatMoney(shop.balance)}
           </strong>
         </span>
@@ -119,9 +119,9 @@ export function LabView(props: LabViewProps): JSX.Element {
             type="button"
             disabled={isExecuting}
             onClick={() => setLines(addToCart(lines, product))}
-            className="flex cursor-pointer flex-col items-start rounded-lg border border-slate-200 px-3 py-2 text-left text-xs text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 disabled:cursor-not-allowed"
+            className="flex cursor-pointer flex-col items-start rounded-large border border-default px-3 py-2 text-left text-xs text-subtle hover:border-brand-subtle hover:bg-brand-subtlest disabled:cursor-not-allowed"
           >
-            <span className="font-semibold text-slate-900">{product.name}</span>
+            <span className="font-semibold text-default">{product.name}</span>
             <span>
               {formatMoney(product.price)} · còn {product.stock} · + Thêm
             </span>
@@ -132,7 +132,7 @@ export function LabView(props: LabViewProps): JSX.Element {
       <section
         key={`cart-${String(inputFlashSeq)}`}
         aria-label="Giỏ hàng"
-        className={`flex flex-col gap-2 rounded-lg ${inputFlashSeq > 0 ? 'vvwa-input-flash' : ''}`}
+        className={`flex flex-col gap-2 rounded-large ${inputFlashSeq > 0 ? 'vvwa-input-flash' : ''}`}
       >
         <CartTable
           lines={lines}
@@ -140,10 +140,10 @@ export function LabView(props: LabViewProps): JSX.Element {
           disabled={isExecuting}
           onChange={setLines}
         />
-        <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-2">
-          <span className="text-xs text-slate-500">
+        <div className="flex items-center justify-between gap-2 border-t border-default pt-2">
+          <span className="text-xs text-subtlest">
             Tạm tính (trình duyệt):{' '}
-            <strong className="text-slate-900">
+            <strong className="text-default">
               {items ? formatMoney(clientSubtotal(items)) : '—'}
             </strong>
           </span>

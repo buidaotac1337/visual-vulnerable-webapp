@@ -23,7 +23,7 @@ type SubTab = 'view' | 'write';
 
 const LAB_ID = '02-stored-xss';
 const SELECT_CLASS =
-  'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none';
+  'rounded-large border border-input bg-input px-3 py-2 text-sm text-default focus:border-focused focus:outline-none';
 const DEFAULT_PRODUCTS: readonly ProductOption[] = [1, 2, 3].map((id) => ({
   id,
   name: `Sản phẩm #${String(id)}`,
@@ -177,7 +177,7 @@ export function LabView(props: LabViewProps): JSX.Element {
       }
     >
       <div className="flex flex-col gap-1">
-        <label htmlFor="xss-product" className="text-xs font-medium text-slate-700">
+        <label htmlFor="xss-product" className="text-xs font-medium text-subtle">
           Sản phẩm
         </label>
         <select

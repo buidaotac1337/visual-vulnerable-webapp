@@ -41,18 +41,18 @@ describe('useColorMode (ADR-0012)', () => {
     expect(resolveColorMode('light', true)).toBe('light');
   });
 
-  it('defaults to light, applies data-color-mode, and persists a new preference', () => {
+  it('defaults to the system scheme, applies data-color-mode, and persists a new preference', () => {
     stubSystemScheme(true);
     const { result } = renderHook(() => useColorMode());
 
-    expect(result.current.preference).toBe('light');
-    expect(document.documentElement.getAttribute('data-color-mode')).toBe('light');
-
-    act(() => result.current.setPreference('dark'));
-
-    expect(result.current.resolved).toBe('dark');
+    expect(result.current.preference).toBe('auto');
     expect(document.documentElement.getAttribute('data-color-mode')).toBe('dark');
-    expect(window.localStorage.getItem(COLOR_MODE_STORAGE_KEY)).toBe('dark');
+
+    act(() => result.current.setPreference('light'));
+
+    expect(result.current.resolved).toBe('light');
+    expect(document.documentElement.getAttribute('data-color-mode')).toBe('light');
+    expect(window.localStorage.getItem(COLOR_MODE_STORAGE_KEY)).toBe('light');
   });
 
   it('follows system changes while the preference is auto and ignores invalid storage', () => {
@@ -67,6 +67,6 @@ describe('useColorMode (ADR-0012)', () => {
 
     window.localStorage.setItem(COLOR_MODE_STORAGE_KEY, 'sepia');
     const { result: fresh } = renderHook(() => useColorMode());
-    expect(fresh.current.preference).toBe('light');
+    expect(fresh.current.preference).toBe('auto');
   });
 });

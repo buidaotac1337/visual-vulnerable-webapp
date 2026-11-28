@@ -13,7 +13,7 @@ interface ExtraFieldsProps {
 }
 
 const INPUT_CLASS =
-  'rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-200';
+  'rounded-small border border-input bg-input px-2 py-1 text-xs text-default focus:outline-none focus:ring-2 focus:ring-focused';
 
 function asText(value: unknown): string {
   return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
@@ -57,16 +57,16 @@ export function ExtraFields({ payload, disabled, onChange }: ExtraFieldsProps): 
   };
 
   return (
-    <fieldset className="flex flex-col gap-1.5 rounded-lg border border-dashed border-warning-300 bg-warning-50/40 p-2.5">
-      <legend className="px-1 text-xs font-semibold text-warning-700">
+    <fieldset className="flex flex-col gap-1.5 rounded-large border border-dashed border-warning-subtle bg-warning p-2.5">
+      <legend className="px-1 text-xs font-semibold text-warning">
         Trường thêm vào request (ngoài form)
       </legend>
       {keys.length === 0 && (
-        <p className="text-xs text-slate-500">Form chỉ gửi email. Chưa có trường nào khác.</p>
+        <p className="text-xs text-subtlest">Form chỉ gửi email. Chưa có trường nào khác.</p>
       )}
       {keys.map((name) => (
         <div key={name} className="flex items-center gap-1.5">
-          <code className="w-20 shrink-0 truncate text-xs text-warning-800">{name}</code>
+          <code className="w-20 shrink-0 truncate text-xs text-warning-bolder">{name}</code>
           <input
             aria-label={`Giá trị trường ${name}`}
             value={asText(payload[name])}
@@ -79,7 +79,7 @@ export function ExtraFields({ payload, disabled, onChange }: ExtraFieldsProps): 
             aria-label={`Bỏ trường ${name}`}
             disabled={disabled}
             onClick={() => onChange(withoutKey(payload, name))}
-            className="cursor-pointer text-slate-400 hover:text-danger-600 disabled:cursor-not-allowed"
+            className="cursor-pointer text-subtlest hover:text-danger disabled:cursor-not-allowed"
           >
             <X className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
@@ -93,8 +93,7 @@ export function ExtraFields({ payload, disabled, onChange }: ExtraFieldsProps): 
           disabled={disabled}
           onChange={(event) => setNewKey(event.target.value)}
           onKeyDown={addOnEnter}
-          className={`${INPUT_CLASS} w-20 shrink-0`}
-          style={{ fontFamily: 'var(--font-mono)' }}
+          className={`${INPUT_CLASS} w-20 shrink-0 font-mono`}
         />
         <input
           aria-label="Giá trị trường mới"
@@ -110,7 +109,7 @@ export function ExtraFields({ payload, disabled, onChange }: ExtraFieldsProps): 
           aria-label="Thêm trường"
           disabled={!canAdd}
           onClick={add}
-          className="cursor-pointer rounded border border-warning-300 p-1 text-warning-700 hover:bg-warning-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-small border border-warning-subtle p-1 text-warning hover:bg-warning-subtler disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Plus className="h-3.5 w-3.5" aria-hidden="true" />
         </button>

@@ -36,7 +36,7 @@ function renderStatusNotice(result: SsrfFetchResult): JSX.Element {
       <ResultNotice
         tone="safe"
         title="Đã chặn yêu cầu URL không hợp lệ"
-        icon={<ShieldCheck className="h-4 w-4 shrink-0 text-safe-600" aria-hidden="true" />}
+        icon={<ShieldCheck className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />}
       >
         <p>{result.error ?? 'URL bị từ chối bởi chính sách chống SSRF.'}</p>
       </ResultNotice>
@@ -62,7 +62,7 @@ function hasMetadata(result: SsrfFetchResult): boolean {
 export function PreviewCard({ result }: PreviewCardProps): JSX.Element {
   if (!result) {
     return (
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-subtlest">
         Chọn sản phẩm và nhập URL ảnh hoặc bấm payload mẫu, sau đó bấm{' '}
         <strong>Kiểm tra &amp; Cập nhật ảnh</strong>.
       </p>
@@ -76,24 +76,21 @@ export function PreviewCard({ result }: PreviewCardProps): JSX.Element {
       {hasMetadata(result) ? (
         <dl
           aria-label="Thông số phản hồi HTTP"
-          className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs sm:grid-cols-2"
+          className="grid gap-2 rounded-large border border-default bg-surface-sunken p-3 text-xs sm:grid-cols-2"
         >
           <div>
-            <dt className="text-slate-500">HTTP Status</dt>
-            <dd className="mt-0.5 font-semibold text-slate-900">{result.statusCode ?? '—'}</dd>
+            <dt className="text-subtlest">HTTP Status</dt>
+            <dd className="mt-0.5 font-semibold text-default">{result.statusCode ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Content-Type / Kích thước</dt>
-            <dd className="mt-0.5 font-semibold text-slate-900">
+            <dt className="text-subtlest">Content-Type / Kích thước</dt>
+            <dd className="mt-0.5 font-semibold text-default">
               {result.contentType ?? '—'} ({result.sizeBytes} B)
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-slate-500">Final URL</dt>
-            <dd
-              className="mt-0.5 break-all text-slate-800"
-              style={{ fontFamily: 'var(--font-mono)' }}
-            >
+            <dt className="text-subtlest">Final URL</dt>
+            <dd className="mt-0.5 break-all text-default font-mono">
               {result.finalUrl ?? result.requestedUrl}
             </dd>
           </div>
@@ -101,8 +98,8 @@ export function PreviewCard({ result }: PreviewCardProps): JSX.Element {
       ) : null}
 
       {result.updated ? (
-        <div className="flex items-center gap-2 rounded-lg border border-safe-200 bg-safe-50 px-3 py-2 text-xs text-safe-800">
-          <FileImage className="h-4 w-4 shrink-0 text-safe-600" aria-hidden="true" />
+        <div className="flex items-center gap-2 rounded-large border border-success-subtle bg-success px-3 py-2 text-xs text-success-bolder">
+          <FileImage className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
           <span>
             Đã xác thực magic bytes <strong>{result.detectedType?.toUpperCase()}</strong> — an toàn
             để lưu vào danh mục MiniShop.
@@ -113,16 +110,13 @@ export function PreviewCard({ result }: PreviewCardProps): JSX.Element {
       {result.leakedInternal ? (
         <section
           aria-label="Dữ liệu nội bộ bị rò rỉ"
-          className="flex flex-col gap-1.5 rounded-lg border border-danger-300 bg-danger-50 p-3"
+          className="flex flex-col gap-1.5 rounded-large border border-danger-subtle bg-danger p-3"
         >
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-danger-800">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-danger-600" aria-hidden="true" />
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-danger-bolder">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-danger" aria-hidden="true" />
             <span>Nội dung phản hồi nội bộ bị lộ (body_preview)</span>
           </div>
-          <pre
-            className="max-h-48 overflow-auto rounded-md border border-danger-200 bg-white p-2.5 text-xs text-danger-900"
-            style={{ fontFamily: 'var(--font-mono)' }}
-          >
+          <pre className="max-h-48 overflow-auto rounded-medium border border-danger-subtle bg-surface-raised p-2.5 text-xs text-danger-bolder font-mono">
             {result.bodyPreview ?? '(Phản hồi trống)'}
           </pre>
         </section>

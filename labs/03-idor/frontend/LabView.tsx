@@ -88,17 +88,17 @@ export function LabView(props: LabViewProps): JSX.Element {
     <LabCard
       title="MiniShop · Đơn hàng của tôi"
       icon={<Receipt className="h-4 w-4" aria-hidden="true" />}
-      headerRight={<span className="text-xs text-slate-500">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
+      headerRight={<span className="text-xs text-subtlest">Đăng nhập: {actor ?? 'ẩn danh'}</span>}
     >
       <section aria-label="Đơn hàng của tôi" className="flex flex-col gap-1.5">
-        {orders.length === 0 && <p className="text-xs text-slate-500">Chưa có đơn hàng nào.</p>}
+        {orders.length === 0 && <p className="text-xs text-subtlest">Chưa có đơn hàng nào.</p>}
         {orders.map((order) => (
           <button
             key={order.id}
             type="button"
             disabled={isExecuting}
             onClick={() => openOrder(order.id)}
-            className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 disabled:cursor-not-allowed"
+            className="flex cursor-pointer items-center justify-between rounded-large border border-default px-3 py-2 text-xs text-subtle hover:border-brand-subtle hover:bg-brand-subtlest disabled:cursor-not-allowed"
           >
             <span className="font-semibold">Đơn #{order.id}</span>
             <span>

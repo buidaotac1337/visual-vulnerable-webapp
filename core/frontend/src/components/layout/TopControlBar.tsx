@@ -9,6 +9,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
+import type { ColorModePreference } from '@/hooks';
 import {
   isFrontendVerifyTest,
   testMyFixTip,
@@ -26,6 +27,7 @@ import type {
 
 import { Tooltip } from '../ui';
 
+import { ColorModeSwitch } from './ColorModeSwitch';
 import { LayoutModeSwitch } from './LayoutModeSwitch';
 import { ModeSwitch } from './ModeSwitch';
 import { ToolbarLabNav } from './ToolbarLabNav';
@@ -37,6 +39,9 @@ interface TopControlBarProps {
   selectedLab: LabMetadata | null;
   mode: WorkspaceMode;
   modeOutcomes?: ModeOutcomes;
+  /** Saved light/dark/system preference; the switch is hidden when omitted. */
+  colorMode?: ColorModePreference;
+  onChangeColorMode?: (next: ColorModePreference) => void;
   layoutMode?: WorkspaceLayoutMode;
   passedLabsCount?: number;
   isResettingDb: boolean;
@@ -79,6 +84,15 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
   );
 }
 
+function renderColorModeSwitch(
+  colorMode: ColorModePreference | undefined,
+  onChange: ((next: ColorModePreference) => void) | undefined,
+): JSX.Element | null {
+  return colorMode && onChange ? (
+    <ColorModeSwitch preference={colorMode} onChange={onChange} />
+  ) : null;
+}
+
 interface StableLabelProps {
   label: string;
   busyLabel: string;
@@ -115,6 +129,8 @@ function TopControlBarInner({
   selectedLab,
   mode,
   modeOutcomes,
+  colorMode,
+  onChangeColorMode,
   layoutMode = 'split',
   passedLabsCount = 0,
   isResettingDb,
@@ -171,6 +187,8 @@ function TopControlBarInner({
           mode={layoutMode}
           onChange={(nextMode) => onChangeLayoutMode?.(nextMode)}
         />
+
+        {renderColorModeSwitch(colorMode, onChangeColorMode)}
 
         <Tooltip tip={UI_LABELS.resetDb.tip}>
           <button

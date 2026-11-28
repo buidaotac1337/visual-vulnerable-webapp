@@ -17,7 +17,7 @@ function Stars({ rating }: { rating: number }): JSX.Element {
       {[1, 2, 3, 4, 5].map((value) => (
         <Star
           key={value}
-          className={`h-3 w-3 ${value <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'}`}
+          className={`h-3 w-3 ${value <= rating ? 'fill-current text-icon-accent-yellow' : 'text-icon-subtlest'}`}
           aria-hidden="true"
         />
       ))}
@@ -33,25 +33,25 @@ function Stars({ rating }: { rating: number }): JSX.Element {
  */
 export function ReviewList({ page, ReviewBody, findingsById }: ReviewListProps): JSX.Element {
   if (!page) {
-    return <p className="text-xs text-slate-500">Đang tải đánh giá...</p>;
+    return <p className="text-xs text-subtlest">Đang tải đánh giá...</p>;
   }
   const product = page.products.find((item) => item.id === page.productId);
   return (
     <section aria-label="Đánh giá sản phẩm" className="flex flex-col gap-2">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-subtlest">
         Đánh giá cho {product?.name ?? `sản phẩm #${String(page.productId)}`} (
         {String(page.reviews.length)})
       </h3>
-      {page.reviews.length === 0 && <p className="text-xs text-slate-500">Chưa có đánh giá nào.</p>}
+      {page.reviews.length === 0 && <p className="text-xs text-subtlest">Chưa có đánh giá nào.</p>}
       {page.reviews.map((review) => {
         const findings = findingsById.get(review.id) ?? [];
         return (
           <article
             key={review.id}
-            className={`rounded-lg border p-3 ${findings.length > 0 ? 'border-danger-300 bg-danger-50/40' : 'border-slate-200 bg-slate-50'}`}
+            className={`rounded-large border p-3 ${findings.length > 0 ? 'border-danger-subtle bg-danger' : 'border-default bg-surface-sunken'}`}
           >
             <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-semibold text-slate-800">{review.username}</span>
+              <span className="text-xs font-semibold text-default">{review.username}</span>
               <Stars rating={review.rating} />
             </div>
             <ReviewBody content={review.content} />

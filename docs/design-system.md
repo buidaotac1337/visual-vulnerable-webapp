@@ -3,7 +3,7 @@
 Quy chuẩn giao diện của VVWA: bề mặt, màu ngữ nghĩa, typography, component đặc thù và khoảng cách. Token SSOT nằm tại [`core/frontend/src/styles/tokens/`](../core/frontend/src/styles/tokens.css) (entry: `tokens.css`).
 
 > [!NOTE]
-> **Đang migrate sang token kiểu Atlassian ([ADR-0012](adr/0012-atlassian-style-design-tokens.md)).** Code mới dùng token chọn theo mục đích, **không** dùng thang `danger-50…950` hay `slate-*`:
+> **Token kiểu Atlassian ([ADR-0012](adr/0012-atlassian-style-design-tokens.md)).** Toàn bộ `core/` và `labs/` dùng token chọn theo mục đích, **không** dùng thang `danger-50…950` hay `slate-*`:
 >
 > | Nhóm | Ví dụ utility | Token |
 > | :--- | :--- | :--- |
@@ -16,7 +16,7 @@ Quy chuẩn giao diện của VVWA: bề mặt, màu ngữ nghĩa, typography, c
 >
 > Token mở rộng VVWA (không có trong Atlassian): `text-micro`, `border-brand-subtle` (viền mềm của card tô màu brand), `leading-code` (nhịp 22px của dòng code) và `ring-*-subtle` (ring nhấn mềm). Inspector, code-focus banner và `PipelinePopover` là phạm vi `data-color-mode="dark"` cố định: bên trong chúng, cùng một class (`bg-surface`, `text-default`, `bg-danger`…) tự ra giá trị dark, nên không có class riêng cho IDE. Input dùng `bg-input border-input focus:border-focused`; tooltip dùng `bg-neutral-bold text-inverse`; backdrop modal dùng `backdrop:bg-blanket`.
 >
-> Màu theo trạng thái (`TraceStatus`, `TraceOutcome`, mode) lấy từ `TONE_CLASSES` / `TRACE_STATUS_TONE` trong `@/lib` (`lib/tones.ts`), không tự viết bảng map riêng. Theme light/dark đổi qua `data-color-mode` (`useColorMode`). Các bảng bên dưới mô tả token cũ (`tokens/legacy.css`), sẽ bị xóa khi migrate xong.
+> Màu theo trạng thái (`TraceStatus`, `TraceOutcome`, mode) lấy từ `TONE_CLASSES` / `TRACE_STATUS_TONE` trong `@/lib` (`lib/tones.ts`), không tự viết bảng map riêng. Theme đổi qua nút Sáng / Tối / Theo hệ thống trên toolbar (`ColorModeSwitch` + `useColorMode`, đặt `data-color-mode` trên `<html>`, mặc định theo hệ điều hành). Các bảng bên dưới mô tả token cũ (`tokens/legacy.css`), sẽ bị xóa khi migrate xong.
 
 ## 1. Nguyên tắc: hai bề mặt
 

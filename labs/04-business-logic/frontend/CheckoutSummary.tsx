@@ -25,7 +25,7 @@ export function CheckoutSummary({ result, products }: CheckoutSummaryProps): JSX
     return (
       <ResultNotice
         tone="neutral"
-        icon={<CircleX className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />}
+        icon={<CircleX className="h-4 w-4 shrink-0 text-subtlest" aria-hidden="true" />}
       >
         {result.error ?? 'Thanh toán không thành công.'}
       </ResultNotice>
@@ -36,16 +36,16 @@ export function CheckoutSummary({ result, products }: CheckoutSummaryProps): JSX
   return (
     <article
       aria-label="Kết quả thanh toán"
-      className={`flex flex-col gap-2 rounded-lg border p-3 text-xs ${note ? 'border-danger-300 bg-danger-50/40' : 'border-safe-200 bg-safe-50/40'}`}
+      className={`flex flex-col gap-2 rounded-large border p-3 text-xs ${note ? 'border-danger-subtle bg-danger' : 'border-success-subtle bg-success'}`}
     >
-      <p className="flex items-center gap-1.5 font-semibold text-slate-900">
-        <CircleCheck className="h-4 w-4 shrink-0 text-safe-600" aria-hidden="true" />
+      <p className="flex items-center gap-1.5 font-semibold text-default">
+        <CircleCheck className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
         <span>
           Đặt hàng thành công: đơn #{result.orderId}, tổng {formatMoney(total)}
         </span>
       </p>
       {note && <ResultNotice tone="danger">{note}</ResultNotice>}
-      <ul className="flex flex-col gap-1 border-t border-slate-200 pt-2 text-slate-700">
+      <ul className="flex flex-col gap-1 border-t border-default pt-2 text-subtle">
         {result.lines.map((line, index) => (
           <li
             key={`${String(index)}-${String(line.productId)}`}
@@ -59,7 +59,7 @@ export function CheckoutSummary({ result, products }: CheckoutSummaryProps): JSX
         ))}
       </ul>
       {result.balance !== null && (
-        <p className="text-slate-500">Số dư còn lại: {formatMoney(result.balance)}</p>
+        <p className="text-subtlest">Số dư còn lại: {formatMoney(result.balance)}</p>
       )}
     </article>
   );
