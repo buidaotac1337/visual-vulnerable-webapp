@@ -22,7 +22,7 @@ Dự án VVWA hướng tới mô hình sinh viên tự clone và chạy local b�
 1. Quản lý Python bằng **`uv` workspace** tại root (`pyproject.toml`, `uv.lock`, `.python-version = 3.12.14`) với workspace member `core/backend`.
 2. Pin chính xác phiên bản (`==`) cho tất cả Python runtime & dev dependencies trong `pyproject.toml`.
 3. Frontend quản lý bằng **`pnpm`** với `save-exact=true`, `engine-strict=true` và commit `pnpm-lock.yaml`.
-4. Pin chính xác tag cho toàn bộ Docker base image (`python:3.12.14-slim`, `ghcr.io/astral-sh/uv:0.13.1`, `node:22.21.1-alpine`, `postgres:16.11-alpine`) và GitHub Actions.
+4. Pin chính xác tag cho toàn bộ Docker base image (`python:3.12.14-slim`, `ghcr.io/astral-sh/uv:0.13.1`, `node:22.21.1-alpine`, `postgres:16.11-alpine`) và GitHub Actions. *(Tag Node được thay bằng `node:26.13.1-alpine` theo [ADR-0011](0011-node-26-runtime.md).)*
 
 ## Consequences
 

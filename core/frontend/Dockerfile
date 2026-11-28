@@ -1,10 +1,11 @@
 # syntax=docker/dockerfile:1.10
-FROM node:22.21.1-alpine AS base
+FROM node:26.13.1-alpine AS base
 
-ENV PNPM_HOME="/pnpm" \
-    PATH="${PNPM_HOME}:${PATH}"
+ENV PNPM_HOME="/pnpm"
+ENV PATH="${PNPM_HOME}:${PATH}"
 
-RUN corepack enable && corepack prepare pnpm@10.12.1 --activate
+# Node 25+ no longer bundles corepack (ADR-0011): install the pinned pnpm with npm.
+RUN npm install -g pnpm@10.12.1
 
 WORKDIR /app/core/frontend
 

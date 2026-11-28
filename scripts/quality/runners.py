@@ -12,7 +12,7 @@ from scripts.quality.classifier import GateName
 from scripts.quality.config import CheckResult, load_quality_config
 from scripts.quality.git_helpers import current_git_branch
 
-PINNED_NODE_IMAGE = "node:22.21.1-alpine"
+PINNED_NODE_IMAGE = "node:26.13.1-alpine"
 PINNED_PNPM_VERSION = "10.12.1"
 
 
@@ -127,7 +127,7 @@ def _run_frontend_gate(repo_root: Path) -> bool:
 
     labs_dir = repo_root / "labs"
     script = (
-        f"corepack enable && corepack prepare pnpm@{PINNED_PNPM_VERSION} --activate && "
+        f"npm install -g pnpm@{PINNED_PNPM_VERSION} && "
         "pnpm install --frozen-lockfile --store-dir /pnpm/store && pnpm lint && "
         "pnpm format:check && pnpm typecheck && pnpm test && "
         "pnpm exec vite build --outDir /tmp/vvwa-dist"

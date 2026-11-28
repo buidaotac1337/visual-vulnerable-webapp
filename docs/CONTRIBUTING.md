@@ -8,7 +8,7 @@ Quy trình phát triển VVWA: môi trường dev, quy ước nhánh và commit,
 | :--- | :--- | :---: |
 | `uv` | Python `3.12.14` (pin trong `.python-version`) | ✓ |
 | Docker Desktop | Compose v2 | ✓ (chạy stack, gate `infra`, fallback cho gate `frontend`) |
-| Node.js + `pnpm` | `22.21.1` (`core/frontend/.nvmrc`) + `10.12.1` | Khuyến nghị (gate `frontend` chạy nhanh hơn khi có sẵn) |
+| Node.js + `pnpm` | `26.13.1` (`core/frontend/.nvmrc`) + `10.12.1` | Khuyến nghị (gate `frontend` chạy nhanh hơn khi có sẵn) |
 
 ```bash
 # Cài môi trường Python và dev tooling từ uv.lock
@@ -58,7 +58,7 @@ uv run python scripts/gates.py --auto
 | `hygiene` | Luôn chạy | Tên nhánh (và tiêu đề PR trên CI) |
 | `docs` | `docs/**`, `*.md`, `LICENSE`, `scripts/**`, `pyproject.toml` | Link tương đối trong Markdown, đặt tên và đăng ký ADR |
 | `backend` | `core/backend/**`, `labs/*/backend/**`, `labs/*/meta.json`, `scripts/**`, `pyproject.toml`, `uv.lock`, `.python-version` | Giới hạn dòng, barrel, `ruff check`, `ruff format --check`, `mypy --strict`, `pytest` |
-| `frontend` | `core/frontend/**`, `labs/*/frontend/**`, `scripts/**`, `pyproject.toml` | Giới hạn dòng, barrel, `pnpm lint`, `format:check`, `typecheck`, `test`, `build` (dùng Docker `node:22.21.1-alpine` nếu máy không có `pnpm`) |
+| `frontend` | `core/frontend/**`, `labs/*/frontend/**`, `scripts/**`, `pyproject.toml` | Giới hạn dòng, barrel, `pnpm lint`, `format:check`, `typecheck`, `test`, `build` (dùng Docker `node:26.13.1-alpine` nếu máy không có `pnpm`) |
 | `infra` | `docker-compose.yml`, `**/Dockerfile`, `.dockerignore`, `core/postgres/**`, `.github/**`, `.pre-commit-config.yaml`, `.env.example`, `scripts/**` | `init.sql`/`seed.sql` không rỗng, `docker compose config` |
 
 Chạy đích danh:
