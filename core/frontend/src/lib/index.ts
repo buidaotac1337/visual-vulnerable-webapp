@@ -20,6 +20,7 @@ export {
 } from './compareTrace';
 export { parseUnifiedDiff } from './diffParser';
 export {
+  statusToneClasses,
   TONE_CLASSES,
   toneClasses,
   TRACE_OUTCOME_TONE,

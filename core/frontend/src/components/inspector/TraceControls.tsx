@@ -13,9 +13,9 @@ import { TraceStepPills } from './TraceStepPills';
 export type { TraceControlsProps };
 
 const STEP_BTN_CLASS =
-  'inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-600 bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-200 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40';
+  'inline-flex cursor-pointer items-center gap-1 rounded-medium border border-default bg-neutral px-2.5 py-1 text-xs font-medium text-default hover:bg-neutral-hovered disabled:cursor-not-allowed disabled:opacity-40';
 const KEYCAP_CLASS =
-  'rounded border border-slate-600 bg-slate-800 px-1.5 py-0.5 text-xs text-slate-200';
+  'rounded-small border border-default bg-neutral px-1.5 py-0.5 text-xs text-default';
 
 /**
  * Render trace playback progress bar, Prev / Play-Pause-Replay / Next controls,
@@ -32,17 +32,17 @@ export function TraceControls(props: TraceControlsProps): JSX.Element {
   const PlayIcon = playState.Icon;
 
   return (
-    <div className="flex shrink-0 flex-col border-t border-slate-700 bg-[var(--bg-ide-header)]">
+    <div className="flex shrink-0 flex-col border-t border-default bg-surface-sunken">
       <div
         role="progressbar"
         aria-label="Tiến độ phát trace"
         aria-valuemin={0}
         aria-valuemax={totalSteps}
         aria-valuenow={ctrl.currentStep}
-        className="h-1 w-full bg-slate-800"
+        className="h-1 w-full bg-neutral"
       >
         <div
-          className="h-full bg-brand-400 transition-[width] duration-200"
+          className="h-full bg-brand-bold transition-[width] duration-200"
           style={{ width: `${String(ctrl.progressPercent)}%` }}
         />
       </div>
@@ -67,7 +67,7 @@ export function TraceControls(props: TraceControlsProps): JSX.Element {
                 type="button"
                 disabled={!ctrl.hasTrace}
                 onClick={ctrl.onTogglePlayPause}
-                className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-brand-500/60 bg-brand-600/20 px-2.5 py-1 text-xs font-semibold text-brand-200 hover:bg-brand-600/35 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex cursor-pointer items-center gap-1 rounded-medium border border-brand bg-brand-subtlest-hovered px-2.5 py-1 text-xs font-semibold text-brand hover:bg-brand-subtlest-hovered disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <PlayIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>{playState.label}</span>
@@ -86,7 +86,7 @@ export function TraceControls(props: TraceControlsProps): JSX.Element {
               </button>
             </Tooltip>
 
-            <span className="ml-1 text-xs font-medium text-slate-400">
+            <span className="ml-1 text-xs font-medium text-subtle">
               {ctrl.hasTrace
                 ? `Bước ${ctrl.currentStep} / ${totalSteps}`
                 : 'Chưa có trace thực thi'}
@@ -98,7 +98,7 @@ export function TraceControls(props: TraceControlsProps): JSX.Element {
 
         {ctrl.hasTrace && ctrl.steps.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="hidden items-center gap-1 text-xs text-slate-400 sm:inline-flex">
+            <span className="hidden items-center gap-1 text-xs text-subtle sm:inline-flex">
               <kbd className={KEYCAP_CLASS}>←</kbd>
               <kbd className={KEYCAP_CLASS}>→</kbd>
               <span>bước ·</span>
@@ -114,10 +114,10 @@ export function TraceControls(props: TraceControlsProps): JSX.Element {
         )}
 
         {safetyPattern && (
-          <div className="flex items-start gap-2 rounded-lg border border-safe-500/30 bg-safe-950/40 px-3 py-2 text-xs text-safe-200">
-            <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-safe-400" aria-hidden="true" />
+          <div className="flex items-start gap-2 rounded-large border border-success-subtle bg-success px-3 py-2 text-xs text-success-bolder">
+            <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" aria-hidden="true" />
             <p className="leading-relaxed">
-              <strong className="font-semibold text-safe-300">Safety Pattern: </strong>
+              <strong className="font-semibold text-success">Safety Pattern: </strong>
               {safetyPattern}
             </p>
           </div>

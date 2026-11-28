@@ -39,10 +39,10 @@ function JourneyRow({
   const hopLabel = formatHopRoute(prevStep, step);
   const stepNum = String(step.step).padStart(2, '0');
   const heading = `Bước ${String(step.step)} · ${hopLabel} — ${step.title}`;
-  const dotClass = isActive || isSeen ? SOLID_DOT_CLASSES[step.status] : 'bg-slate-300';
+  const dotClass = isActive || isSeen ? SOLID_DOT_CLASSES[step.status] : 'bg-neutral-pressed';
   const rowClass = isActive
     ? JOURNEY_ACTIVE_CLASSES[step.status]
-    : 'border-transparent border-l-transparent hover:bg-slate-100';
+    : 'border-transparent border-l-transparent hover:bg-neutral-subtle-hovered';
 
   return (
     <li>
@@ -50,12 +50,9 @@ function JourneyRow({
         type="button"
         aria-current={isActive ? 'step' : undefined}
         onClick={() => onSelectStep(index)}
-        className={`grid w-full cursor-pointer grid-cols-[42px_minmax(0,1fr)] items-start gap-2 rounded-lg border border-l-[3px] px-2 py-1.5 text-left transition-colors ${rowClass}`}
+        className={`grid w-full cursor-pointer grid-cols-[42px_minmax(0,1fr)] items-start gap-2 rounded-large border border-l-[3px] px-2 py-1.5 text-left transition-colors ${rowClass}`}
       >
-        <span
-          className="flex items-center gap-1.5 pt-0.5 text-[11px] font-semibold text-slate-500"
-          style={{ fontFamily: 'var(--font-mono)' }}
-        >
+        <span className="flex items-center gap-1.5 pt-0.5 text-micro font-semibold text-subtlest font-mono">
           <span>{stepNum}</span>
           <span
             className={`h-[7px] w-[7px] shrink-0 rounded-full ${dotClass}`}
@@ -65,15 +62,10 @@ function JourneyRow({
 
         <span className="flex min-w-0 flex-col gap-0.5">
           <span className="flex flex-wrap items-center gap-1.5">
-            <span
-              className="text-[11px] font-semibold text-slate-700"
-              style={{ fontFamily: 'var(--font-mono)' }}
-            >
-              {hopLabel}
-            </span>
+            <span className="text-micro font-semibold text-subtle font-mono">{hopLabel}</span>
             <span
               className={`text-xs ${
-                isActive || isSeen ? 'font-semibold text-slate-900' : 'font-medium text-slate-500'
+                isActive || isSeen ? 'font-semibold text-default' : 'font-medium text-subtlest'
               }`}
             >
               {step.title}
@@ -88,10 +80,7 @@ function JourneyRow({
               }
             }}
             onMouseLeave={onScheduleClose}
-            className={`block truncate text-[11.5px] ${
-              isActive ? 'text-slate-900' : 'text-slate-600'
-            }`}
-            style={{ fontFamily: 'var(--font-mono)' }}
+            className={`block truncate text-body-small ${isActive ? 'text-default' : 'text-subtle'} font-mono`}
           >
             {step.detail}
           </span>
@@ -118,19 +107,19 @@ export function PipelineJourneyList({
   onScheduleClose,
 }: PipelineJourneyListProps): JSX.Element {
   return (
-    <div className="border-t border-slate-200">
+    <div className="border-t border-default">
       <button
         type="button"
         aria-expanded={isOpen}
         onClick={onToggle}
-        className="flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900"
+        className="flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-xs font-semibold text-subtle transition-colors hover:bg-neutral-subtle-hovered hover:text-default"
       >
         <span>Hành trình dữ liệu đầy đủ ({String(trace.length)} bước)</span>
-        <span className="font-medium text-brand-600">{isOpen ? 'Ẩn bớt' : 'Mở rộng'}</span>
+        <span className="font-medium text-brand">{isOpen ? 'Ẩn bớt' : 'Mở rộng'}</span>
       </button>
 
       {isOpen && (
-        <div className="border-t border-slate-200 bg-slate-50/50 px-3.5 py-2.5">
+        <div className="border-t border-default bg-surface-sunken px-3.5 py-2.5">
           <ol className="m-0 flex list-none flex-col gap-0.5 p-0">
             {trace.map((step, index) => (
               <JourneyRow

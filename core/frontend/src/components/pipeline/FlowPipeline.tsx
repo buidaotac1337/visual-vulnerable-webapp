@@ -49,7 +49,7 @@ function resolveHeaderPill(
   if (!activeStep) {
     return {
       label: 'Sẵn sàng',
-      className: 'border-slate-200 bg-slate-100 text-slate-600',
+      className: 'border-default bg-neutral text-subtle',
     };
   }
   const label =
@@ -72,11 +72,11 @@ function PipelineHeader({ pill, totalSteps, activeIndex }: PipelineHeaderProps):
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 pt-3 pb-2.5">
       <div className="flex items-center gap-2">
-        <h2 className="m-0 text-xs font-bold uppercase tracking-wider text-slate-500">
+        <h2 className="m-0 text-xs font-bold uppercase tracking-wider text-subtlest">
           Luồng thực thi trực quan
         </h2>
         <span
-          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold tracking-wide ${pill.className}`}
+          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-micro font-bold tracking-wide ${pill.className}`}
         >
           {pill.label}
         </span>
@@ -84,14 +84,11 @@ function PipelineHeader({ pill, totalSteps, activeIndex }: PipelineHeaderProps):
 
       <div className="flex items-center gap-2.5">
         {totalSteps > 0 && activeIndex >= 0 && (
-          <span
-            className="text-xs font-semibold text-slate-700"
-            style={{ fontFamily: 'var(--font-mono)' }}
-          >
+          <span className="text-xs font-semibold text-subtle font-mono">
             Bước {String(activeIndex + 1)} / {String(totalSteps)}
           </span>
         )}
-        <span className="vvwa-pipeline-hint text-xs text-slate-500">Rê mũi tên xem payload</span>
+        <span className="vvwa-pipeline-hint text-xs text-subtlest">Rê mũi tên xem payload</span>
       </div>
     </div>
   );
@@ -212,7 +209,7 @@ function FlowPipelineInner(props: FlowPipelineProps): JSX.Element {
   return (
     <section
       aria-label="Luồng thực thi trực quan"
-      className="vvwa-pipeline-card overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs"
+      className="vvwa-pipeline-card overflow-hidden rounded-xlarge border border-default bg-surface-raised shadow-raised"
     >
       <PipelineHeader pill={pill} totalSteps={trace.length} activeIndex={activeIndex} />
       <PipelineTrack

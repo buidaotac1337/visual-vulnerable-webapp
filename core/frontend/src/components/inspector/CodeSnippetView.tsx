@@ -1,8 +1,14 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import type { JSX } from 'react';
 import { AlertOctagon, AlertTriangle, Info, ShieldCheck } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-import { getCachedTokenLines, tokenizeCodeAsync, tokenizeCodeSyncFallback } from '@/lib';
+import {
+  getCachedTokenLines,
+  statusToneClasses,
+  tokenizeCodeAsync,
+  tokenizeCodeSyncFallback,
+} from '@/lib';
 import type { CodeToken, HighlightLanguage, TraceStatus, TraceStep } from '@/types';
 
 import { GlowingCodeLine } from './GlowingCodeLine';
@@ -20,28 +26,23 @@ interface UnmappedTheme {
   icon: JSX.Element;
 }
 
-const UNMAPPED_THEMES: Record<TraceStatus, UnmappedTheme> = {
-  danger: {
-    box: 'border-danger-500/60 bg-danger-950/80 text-danger-100',
-    heading: 'text-danger-300',
-    icon: <AlertOctagon className="h-4 w-4 shrink-0" aria-hidden="true" />,
-  },
-  warning: {
-    box: 'border-warning-500/60 bg-warning-950/80 text-warning-100',
-    heading: 'text-warning-300',
-    icon: <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />,
-  },
-  safe: {
-    box: 'border-safe-500/60 bg-safe-950/80 text-safe-100',
-    heading: 'text-safe-300',
-    icon: <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />,
-  },
-  info: {
-    box: 'border-info-500/60 bg-info-950/80 text-info-100',
-    heading: 'text-info-300',
-    icon: <Info className="h-4 w-4 shrink-0" aria-hidden="true" />,
-  },
+const UNMAPPED_ICONS: Record<TraceStatus, LucideIcon> = {
+  danger: AlertOctagon,
+  warning: AlertTriangle,
+  safe: ShieldCheck,
+  info: Info,
 };
+
+/** Callout colours for steps without a mapped line come from the status tone (ADR-0012). */
+function themeForUnmappedStep(status: TraceStatus): UnmappedTheme {
+  const classes = statusToneClasses(status);
+  const Icon = UNMAPPED_ICONS[status];
+  return {
+    box: `${classes.border} ${classes.bg} ${classes.textBolder}`,
+    heading: classes.text,
+    icon: <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />,
+  };
+}
 
 interface AsyncTokenState {
   key: string;
@@ -86,14 +87,16 @@ function CodeSnippetViewInner({
   }, [highlightedLine, activeStep?.step]);
 
   const unmappedTheme =
-    activeStep !== null && highlightedLine === null ? UNMAPPED_THEMES[activeStep.status] : null;
+    activeStep !== null && highlightedLine === null
+      ? themeForUnmappedStep(activeStep.status)
+      : null;
 
   return (
-    <div className="flex flex-col py-2" style={{ fontFamily: 'var(--font-mono)' }}>
+    <div className="flex flex-col py-2 font-mono">
       {unmappedTheme && activeStep && (
         <div
           role="status"
-          className={`vvwa-callout-animate mx-4 mb-3 rounded-lg border p-3 text-xs ${unmappedTheme.box}`}
+          className={`vvwa-callout-animate mx-4 mb-3 rounded-large border p-3 text-xs ${unmappedTheme.box}`}
         >
           <div className={`flex items-center gap-2 font-semibold ${unmappedTheme.heading}`}>
             {unmappedTheme.icon}
@@ -101,7 +104,7 @@ function CodeSnippetViewInner({
               Bước {activeStep.step}: {activeStep.title}
             </span>
           </div>
-          <p className="mt-1.5 whitespace-pre-wrap break-words rounded bg-slate-950/70 px-2.5 py-1.5 text-[12px]">
+          <p className="mt-1.5 whitespace-pre-wrap break-words rounded-small bg-surface px-2.5 py-1.5 text-body-small">
             {activeStep.detail}
           </p>
         </div>

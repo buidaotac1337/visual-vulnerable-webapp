@@ -14,7 +14,7 @@ Quy chuẩn giao diện của VVWA: bề mặt, màu ngữ nghĩa, typography, c
 > | Đổ bóng / bo góc | `shadow-raised`, `shadow-overlay`, `rounded-large`, `rounded-xlarge` | `--vv-shadow-*`, `--radius-*` |
 > | Cỡ chữ | `text-heading-small`, `text-body`, `text-body-small`, `text-micro` (11px, nhãn/badge dày đặc), `text-code` | `--text-*` |
 >
-> Hai token mở rộng VVWA (không có trong Atlassian): `text-micro` và `border-brand-subtle` (viền mềm của card tô màu brand). Input dùng `bg-input border-input focus:border-focused`; tooltip dùng `bg-neutral-bold text-inverse`; backdrop modal dùng `backdrop:bg-blanket`.
+> Token mở rộng VVWA (không có trong Atlassian): `text-micro`, `border-brand-subtle` (viền mềm của card tô màu brand), `leading-code` (nhịp 22px của dòng code) và `ring-*-subtle` (ring nhấn mềm). Inspector, code-focus banner và `PipelinePopover` là phạm vi `data-color-mode="dark"` cố định: bên trong chúng, cùng một class (`bg-surface`, `text-default`, `bg-danger`…) tự ra giá trị dark, nên không có class riêng cho IDE. Input dùng `bg-input border-input focus:border-focused`; tooltip dùng `bg-neutral-bold text-inverse`; backdrop modal dùng `backdrop:bg-blanket`.
 >
 > Màu theo trạng thái (`TraceStatus`, `TraceOutcome`, mode) lấy từ `TONE_CLASSES` / `TRACE_STATUS_TONE` trong `@/lib` (`lib/tones.ts`), không tự viết bảng map riêng. Theme light/dark đổi qua `data-color-mode` (`useColorMode`). Các bảng bên dưới mô tả token cũ (`tokens/legacy.css`), sẽ bị xóa khi migrate xong.
 

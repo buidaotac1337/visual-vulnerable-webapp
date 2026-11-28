@@ -43,7 +43,7 @@ function resolveNodeSurfaceClass(node: PipelineNodeModel, isSelfLoop: boolean): 
     return NODE_COMPLETED_CLASSES[node.status];
   }
   // No opacity: idle nodes must stay readable (WCAG AA); dashed border marks idle state.
-  return 'border-dashed border-slate-300 bg-white';
+  return 'border-dashed border-default bg-surface-raised';
 }
 
 function resolveSubtitle(node: PipelineNodeModel, blockedBeforeDb: boolean): string {
@@ -75,7 +75,7 @@ export function PipelineNodeCard({
   onScheduleClose,
 }: PipelineNodeCardProps): JSX.Element {
   const subtitle = resolveSubtitle(node, blockedBeforeDb);
-  const iconTint = node.visualState === 'idle' ? 'text-slate-500' : NODE_ICON_CLASSES[node.status];
+  const iconTint = node.visualState === 'idle' ? 'text-subtlest' : NODE_ICON_CLASSES[node.status];
   const activeStepStatus = trace[activeIndex]?.status ?? node.status;
 
   return (
@@ -84,12 +84,12 @@ export function PipelineNodeCard({
       disabled={!node.hasSteps}
       aria-label={node.label}
       onClick={() => onSelectLayer(node.layer)}
-      className={`vvwa-node-btn relative flex min-w-0 cursor-pointer flex-col justify-between gap-1.5 rounded-[10px] border-[1.5px] px-2.5 py-2.5 text-left transition-colors duration-150 hover:enabled:border-brand-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:cursor-default ${resolveNodeSurfaceClass(node, isSelfLoop)}`}
+      className={`vvwa-node-btn relative flex min-w-0 cursor-pointer flex-col justify-between gap-1.5 rounded-[10px] border-[1.5px] px-2.5 py-2.5 text-left transition-colors duration-150 hover:enabled:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focused disabled:cursor-default ${resolveNodeSurfaceClass(node, isSelfLoop)}`}
     >
       <div className="flex items-center justify-between gap-1.5">
         <span className="flex min-w-0 items-center gap-1.5">
           {renderLayerIcon(node.layer, iconTint)}
-          <span className="truncate text-xs font-bold text-slate-900">
+          <span className="truncate text-xs font-bold text-default">
             <span className="vvwa-label-wide">{node.label}</span>
             <span className="vvwa-label-narrow" aria-hidden="true">
               {node.narrowLabel}
@@ -113,25 +113,25 @@ export function PipelineNodeCard({
         }}
         onMouseLeave={onScheduleClose}
         className={`min-h-[18px] truncate text-xs ${
-          node.visualState === 'idle' ? 'text-slate-500' : 'text-slate-700'
+          node.visualState === 'idle' ? 'text-subtlest' : 'text-subtle'
         }`}
       >
         {subtitle}
       </div>
 
-      <div className="flex items-center justify-between gap-1.5 text-[11px] text-slate-500">
+      <div className="flex items-center justify-between gap-1.5 text-micro text-subtlest">
         <span>{String(node.stepCount)} bước</span>
         <span className="inline-flex items-center gap-[3px]" aria-hidden="true">
           {node.stepIndices.map((stepIdx) => {
             const step = trace[stepIdx];
             const isSeen = stepIdx <= activeIndex;
             const isCurr = stepIdx === activeIndex;
-            const dotTone = isSeen && step ? SOLID_DOT_CLASSES[step.status] : 'bg-slate-300';
+            const dotTone = isSeen && step ? SOLID_DOT_CLASSES[step.status] : 'bg-neutral-pressed';
             return (
               <span
                 key={stepIdx}
                 className={`h-1.5 w-1.5 rounded-full ${dotTone} ${
-                  isCurr ? 'scale-125 ring-2 ring-slate-900/15' : ''
+                  isCurr ? 'scale-125 ring-2 ring-default' : ''
                 }`}
               />
             );

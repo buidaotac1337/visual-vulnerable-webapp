@@ -53,16 +53,16 @@ export function CopyPathButton({
       type="button"
       onClick={() => void handleCopy()}
       aria-label={ariaLabel ?? `${label}: ${path}`}
-      className={`inline-flex shrink-0 cursor-pointer items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] font-medium transition-colors ${
+      className={`inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-small border px-1.5 py-0.5 text-micro font-medium transition-colors ${
         copied
-          ? 'border-safe-500/50 bg-safe-950/60 text-safe-200'
-          : 'border-slate-700 bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white'
+          ? 'border-success-subtle bg-success text-success-bolder'
+          : 'border-default bg-neutral text-subtle hover:bg-neutral-hovered hover:text-default'
       }`}
     >
       {copied ? (
-        <Check className="h-3 w-3 text-safe-400" aria-hidden="true" />
+        <Check className="h-3 w-3 text-success" aria-hidden="true" />
       ) : (
-        <Copy className="h-3 w-3 text-slate-400" aria-hidden="true" />
+        <Copy className="h-3 w-3 text-subtle" aria-hidden="true" />
       )}
       <span>{copied ? 'Đã chép' : label}</span>
     </button>

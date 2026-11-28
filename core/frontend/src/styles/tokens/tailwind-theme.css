@@ -134,6 +134,14 @@
   --divide-color-bold: var(--vv-border-bold);
 
   /* Focus and emphasis rings / outlines */
+  --ring-color-default: var(--vv-border);
+  --ring-color-bold: var(--vv-border-bold);
+  --ring-color-brand-subtle: var(--vv-border-brand-subtle);
+  --ring-color-danger-subtle: var(--vv-border-danger-subtle);
+  --ring-color-warning-subtle: var(--vv-border-warning-subtle);
+  --ring-color-success-subtle: var(--vv-border-success-subtle);
+  --ring-color-information-subtle: var(--vv-border-information-subtle);
+  --ring-color-discovery-subtle: var(--vv-border-discovery-subtle);
   --ring-color-focused: var(--vv-border-focused);
   --outline-color-focused: var(--vv-border-focused);
   --ring-color-brand: var(--vv-border-brand);
@@ -195,6 +203,8 @@
   /* Code in the Inspector: 13px / 22px. */
   --text-code: 0.8125rem;
   --text-code--line-height: 1.375rem;
+  /* Line rhythm of code rows that mix sizes (line number + code). */
+  --leading-code: 1.375rem;
 
   --radius-xsmall: 0.125rem;
   --radius-small: 0.25rem;

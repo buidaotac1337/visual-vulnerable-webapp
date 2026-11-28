@@ -65,8 +65,8 @@ export function TraceSpeedSwitch({ speed, onChange }: TraceSpeedSwitchProps): JS
   };
 
   return (
-    <div className="inline-flex items-center gap-0.5 rounded-lg border border-slate-700 bg-slate-900/70 p-0.5">
-      <span className="px-1.5 text-xs font-medium text-slate-400">Tốc độ</span>
+    <div className="inline-flex items-center gap-0.5 rounded-large border border-default bg-surface p-0.5">
+      <span className="px-1.5 text-xs font-medium text-subtle">Tốc độ</span>
       <div
         role="radiogroup"
         aria-label="Tốc độ phát trace"
@@ -87,10 +87,10 @@ export function TraceSpeedSwitch({ speed, onChange }: TraceSpeedSwitchProps): JS
                 aria-checked={isActive}
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => onChange(id)}
-                className={`cursor-pointer rounded-md px-2 py-0.5 text-xs transition-colors duration-150 ${
+                className={`cursor-pointer rounded-medium px-2 py-0.5 text-xs transition-colors duration-150 ${
                   isActive
-                    ? 'bg-slate-100 font-semibold text-slate-900 shadow-xs'
-                    : 'font-medium text-slate-300 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-neutral-bold font-semibold text-inverse shadow-raised'
+                    : 'font-medium text-subtle hover:bg-neutral-hovered hover:text-default'
                 }`}
               >
                 {label.text}

@@ -28,11 +28,10 @@ interface LaneButtonProps {
 
 function renderLaneLabel(lane: PipelineLaneModel): JSX.Element {
   const activeClass =
-    lane.state === 'active' ? LANE_LABEL_ACTIVE_CLASSES[lane.tone] : 'font-medium text-slate-500';
+    lane.state === 'active' ? LANE_LABEL_ACTIVE_CLASSES[lane.tone] : 'font-medium text-subtlest';
   return (
     <span
-      className={`vvwa-wire-label whitespace-nowrap text-[10.5px] leading-tight ${activeClass}`}
-      style={{ fontFamily: 'var(--font-mono)' }}
+      className={`vvwa-wire-label whitespace-nowrap text-micro leading-tight ${activeClass} font-mono`}
     >
       <span className="vvwa-label-wide">{lane.label}</span>
       <span className="vvwa-label-narrow" aria-hidden="true">
@@ -45,8 +44,8 @@ function renderLaneLabel(lane: PipelineLaneModel): JSX.Element {
 function renderBlockedRail(lane: PipelineLaneModel): JSX.Element {
   return (
     <div className="relative flex h-[11px] w-full items-center">
-      <div className="h-0 w-full border-t-[1.5px] border-dashed border-safe-500" />
-      <span className="vvwa-wire-gate absolute top-1/2 left-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 whitespace-nowrap rounded-full border border-safe-200 bg-safe-50 px-1.5 text-[10.5px] font-semibold text-safe-700">
+      <div className="h-0 w-full border-t-[1.5px] border-dashed border-success" />
+      <span className="vvwa-wire-gate absolute top-1/2 left-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 whitespace-nowrap rounded-full border border-success-subtle bg-success px-1.5 text-micro font-semibold text-success">
         <ShieldCheck className="h-[11px] w-[11px] shrink-0" aria-hidden="true" />
         <span className="vvwa-label-wide">{lane.gateLabel ?? 'Chặn DB'}</span>
         <span className="vvwa-label-narrow" aria-hidden="true">
@@ -65,9 +64,9 @@ function resolveRailClasses(lane: PipelineLaneModel): { lineClass: string; arrow
     };
   }
   if (lane.state === 'passed') {
-    return { lineClass: 'bg-slate-300', arrowClass: 'text-slate-500' };
+    return { lineClass: 'bg-neutral-pressed', arrowClass: 'text-subtlest' };
   }
-  return { lineClass: 'bg-slate-200', arrowClass: 'text-slate-300' };
+  return { lineClass: 'bg-neutral-hovered', arrowClass: 'text-disabled' };
 }
 
 function renderLaneRail(lane: PipelineLaneModel): JSX.Element {
@@ -93,7 +92,7 @@ function renderLaneRail(lane: PipelineLaneModel): JSX.Element {
       )}
       <span
         aria-hidden="true"
-        className={`absolute text-[10px] leading-none ${isReverse ? '-left-px' : '-right-px'} ${arrowClass}`}
+        className={`absolute text-micro leading-none ${isReverse ? '-left-px' : '-right-px'} ${arrowClass}`}
       >
         {isReverse ? '◂' : '▸'}
       </span>
@@ -123,7 +122,7 @@ function LaneButton({
       onMouseLeave={onLeaveWire}
       onBlur={(event) => onBlurWire(event.relatedTarget)}
       onClick={(event) => onClickWire(event.currentTarget, lane.key)}
-      className={`vvwa-wire-lane flex w-full min-w-0 cursor-pointer flex-col items-center gap-0.5 rounded-md border border-transparent px-[3px] py-[2px] transition-colors hover:border-slate-200 hover:bg-slate-100 focus-visible:border-brand-500 focus-visible:bg-slate-100 focus-visible:outline-none ${
+      className={`vvwa-wire-lane flex w-full min-w-0 cursor-pointer flex-col items-center gap-0.5 rounded-medium border border-transparent px-[3px] py-[2px] transition-colors hover:border-default hover:bg-neutral-subtle-hovered focus-visible:border-brand focus-visible:bg-neutral focus-visible:outline-none ${
         lane.state === 'muted' ? 'opacity-45' : ''
       }`}
     >
