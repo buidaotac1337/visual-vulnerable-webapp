@@ -41,7 +41,7 @@ export function ToolbarLabNav({
         disabled={labs.length === 0}
         value={selectedLabId}
         onChange={(event) => onSelectLab(event.target.value)}
-        className="min-w-0 max-w-[190px] truncate rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-sm font-medium text-slate-800 focus:border-brand-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 xl:max-w-[240px] 2xl:max-w-xs"
+        className="min-w-40 max-w-[190px] truncate rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-sm font-medium text-slate-800 focus:border-brand-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 xl:max-w-[240px] 2xl:max-w-xs"
       >
         {labs.length === 0 ? (
           <option value="">Chưa có bài lab trong labs/</option>

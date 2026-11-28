@@ -58,7 +58,7 @@ function targetIndexForKey(key: string, current: number, length: number): number
 }
 
 /**
- * Render the 3-mode desktop workspace layout switcher (`Song song`, `Tập trung code`,
+ * Render the 3-mode desktop workspace layout switcher (`Chia đôi`, `Tập trung code`,
  * `Sandbox nổi`) as an accessible WAI-ARIA radiogroup hidden below the `lg` breakpoint.
  *
  * @param props - Active layout mode and change callback.
@@ -110,7 +110,7 @@ export function LayoutModeSwitch({ mode, onChange }: LayoutModeSwitchProps): JSX
               }`}
             >
               <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              <span className="hidden 2xl:inline">{label}</span>
+              <span className="hidden min-[112.5rem]:inline">{label}</span>
             </button>
           </Tooltip>
         );

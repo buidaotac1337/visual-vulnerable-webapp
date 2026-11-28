@@ -134,16 +134,19 @@ Mỗi package Python trong `core/backend/app` và `scripts/quality` có `__init_
 | [`hooks/useLabActor.ts`](../core/frontend/src/hooks/useLabActor.ts) | Persona đang chọn theo từng lab |
 | [`hooks/useTracePlayback.ts`](../core/frontend/src/hooks/useTracePlayback.ts) | Máy trạng thái phát lại trace (600 ms/bước), lùi/tiến, nhảy theo tầng |
 | [`hooks/useLabVerify.ts`](../core/frontend/src/hooks/useLabVerify.ts) | Test My Fix: chạy song song test backend và frontend, gộp kết quả |
+| [`hooks/useCompareRun.ts`](../core/frontend/src/hooks/useCompareRun.ts) | Chế độ Song song: gom các lời gọi của một lần bấm thành lượt, chạy Reset DB → `secure` → Reset DB → `vulnerable`, dựng trace hai phía ([ADR-0010](adr/0010-song-song-compare-mode.md)) |
+| [`hooks/useModeOutcomes.ts`](../core/frontend/src/hooks/useModeOutcomes.ts) | Kết quả gần nhất của từng mode theo lab (chấm màu trên `ModeSwitch`) |
 | [`hooks/useWorkspaceLayout.ts`](../core/frontend/src/hooks/useWorkspaceLayout.ts) | Trạng thái và `localStorage` cho 3 chế độ bố cục (`split` / `code-focus` / `floating`), tỷ lệ chia `30%–70%`, thu gọn thẻ nổi |
 | [`hooks/useLabMaintenance.ts`](../core/frontend/src/hooks/useLabMaintenance.ts) | Reset DB, tải snippet |
 | [`lib/api.ts`](../core/frontend/src/lib/api.ts) | Client REST có kiểu cho mọi endpoint |
 | [`lib/labRegistry.ts`](../core/frontend/src/lib/labRegistry.ts) | Phát hiện `LabView.tsx` và cặp sink qua `import.meta.glob`, lazy-load theo `lab.id` |
 | [`lib/traceEngine.ts`](../core/frontend/src/lib/traceEngine.ts) | Ghép trace, tính trạng thái node pipeline, ánh xạ bước trace → tab và dòng code |
+| [`lib/compareTrace.ts`](../core/frontend/src/lib/compareTrace.ts) | Căn trace hai phía theo `layer:tag` (LCS), ánh xạ hàng ↔ bước, đổi endpoint của bước frontend sang `secure` |
 | [`lib/frontendVerifier.ts`](../core/frontend/src/lib/frontendVerifier.ts) | Render sink vào document trơ và chấm |
 | [`lib/domProbe.ts`](../core/frontend/src/lib/domProbe.ts) | Quét DOM tìm `script`, `on*`, `srcdoc`, URL `javascript:` |
 | [`lib/expectMatcher.ts`](../core/frontend/src/lib/expectMatcher.ts) | Bản TypeScript của matcher, cùng ngữ nghĩa với backend |
 | [`lib/highlighter.ts`](../core/frontend/src/lib/highlighter.ts) | Shiki (`python`, `tsx`, `sql`) render thành token React, không dùng `innerHTML` |
-| `components/` | `layout/` (`TopControlBar`, `ModeSwitch`, `LayoutModeSwitch`, `LabWorkspace`, `SplitDivider`), `sandbox/` (`SandboxPane`, `ActorSwitcher`, `PayloadChipBar`, `EmptyLabFallback`), `pipeline/` (`FlowPipeline`), `inspector/` (`CodeInspector`, `InspectorHeader`, `CodeSnippetView`, `GlowingCodeLine`, `TraceControls`, `UnifiedDiffView`), `verify/` (`VerifyModal`), `ui/` (`AddressBar`, `LabCard`, `PrimaryButton`, `ResultNotice`, `SubTabBar`, `TextField`, `Tooltip`) |
+| `components/` | `layout/` (`TopControlBar`, `ModeSwitch`, `LayoutModeSwitch`, `LabWorkspace`, `SplitDivider`), `sandbox/` (`SandboxPane`, `ActorSwitcher`, `PayloadChipBar`, `EmptyLabFallback`), `pipeline/` (`FlowPipeline`), `inspector/` (`CodeInspector`, `InspectorHeader`, `CodeSnippetView`, `CompareCodeView`, `CompareTraceTable`, `InspectorDiffTab`, `GlowingCodeLine`, `TraceControls`, `UnifiedDiffView`), `verify/` (`VerifyModal`), `ui/` (`AddressBar`, `LabCard`, `PrimaryButton`, `ResultNotice`, `SubTabBar`, `TextField`, `Tooltip`) |
 
 ## 6. Lược đồ dữ liệu MiniShop
 

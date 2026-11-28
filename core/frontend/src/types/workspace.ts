@@ -3,6 +3,7 @@ import type {
   LabMetadata,
   LabMode,
   TraceLayer,
+  TraceOutcome,
   TraceStatus,
   TraceStep,
 } from './api';
@@ -165,6 +166,38 @@ export interface CodeToken {
 
 /** Supported syntax highlighting languages for CodeSnippetView. */
 export type HighlightLanguage = 'python' | 'tsx' | 'sql';
+
+/** Workspace execution view: a single lab mode, or `compare` (Song song) running both. */
+export type WorkspaceMode = LabMode | 'compare';
+
+/** Last execution outcome seen per lab mode, shown as a dot on each ModeSwitch segment. */
+export type ModeOutcomes = Partial<Record<LabMode, TraceOutcome>>;
+
+/** Result of one side (vulnerable or secure) of a Song song compare run. */
+export interface CompareSideResult {
+  response: LabExecutionResponse;
+  /** Merged frontend + backend trace of this side, numbered from 1. */
+  trace: readonly TraceStep[];
+}
+
+/** One stage row aligning a vulnerable step with its secure counterpart by layer and tag. */
+export interface CompareRow {
+  layer: TraceLayer;
+  tag: string;
+  vulnerable: TraceStep | null;
+  secure: TraceStep | null;
+}
+
+/** Complete Song song run: both sides executed from the same seed state with one payload. */
+export interface CompareRunResult {
+  labId: string;
+  actor: string | null;
+  action: string;
+  body: LabPayload;
+  vulnerable: CompareSideResult;
+  secure: CompareSideResult;
+  rows: readonly CompareRow[];
+}
 
 /** Brief status banner notification displayed in the workspace chrome. */
 export interface WorkspaceNotice {

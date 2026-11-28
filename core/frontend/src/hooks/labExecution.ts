@@ -5,12 +5,14 @@ import type {
   LabMetadata,
   LabMode,
   LabPayload,
+  WorkspaceMode,
 } from '@/types';
 
 /** Identity of the workspace context a request was issued from (stale-response guard). */
 export interface ActiveRequestContext {
   labId: string | null;
-  mode: LabMode;
+  /** Workspace view on screen; single-mode responses only apply while it equals their mode. */
+  view: WorkspaceMode;
   actor: string | null;
 }
 
@@ -53,7 +55,7 @@ export function getErrorMessage(error: unknown, fallback: string): string {
  * @returns True when the response may update the UI.
  */
 export function isSameContext(ctx: ActiveRequestContext, req: ExecutionRequest): boolean {
-  return ctx.labId === req.labId && ctx.mode === req.mode && ctx.actor === req.actor;
+  return ctx.labId === req.labId && ctx.view === req.mode && ctx.actor === req.actor;
 }
 
 /**

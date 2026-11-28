@@ -11,8 +11,15 @@ export {
   triggerBlobDownload,
   verifyLab,
 } from './api';
+export {
+  alignCompareTraces,
+  buildCompareRowTrace,
+  retargetStepDrafts,
+  rowIndexForSideStep,
+  sideIndexAtRow,
+} from './compareTrace';
 export { parseUnifiedDiff } from './diffParser';
-export { modeTip, testMyFixTip, UI_LABELS } from './uiLabels';
+export { modeTip, testMyFixTip, TRACE_OUTCOME_LABELS, UI_LABELS } from './uiLabels';
 export type { UiLabel, UiLabelKey } from './uiLabels';
 export {
   getFrontendSinkFile,

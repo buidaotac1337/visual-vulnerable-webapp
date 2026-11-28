@@ -151,7 +151,7 @@ jobs:
       - name: Setup Node.js (pinned)
         uses: actions/setup-node@v7.1.0
         with:
-          node-version: "22.21.1"
+          node-version: "26.13.1"
           cache: "pnpm"
           cache-dependency-path: "core/frontend/pnpm-lock.yaml"
 

@@ -77,18 +77,23 @@ Mọi nhãn của workspace (nút topbar, công tắc mode, nút phát/dừng/t�
 
 ### `ModeSwitch` & `LayoutModeSwitch`
 
-Segmented control hai nửa cho chế độ chạy lab (`ModeSwitch`):
+Segmented control ba nút cho chế độ chạy lab (`ModeSwitch`, [ADR-0010](adr/0010-song-song-compare-mode.md)):
 
-| Nửa | Khi active |
+| Nút | Khi active |
 | :--- | :--- |
 | Vulnerable | Nền `danger-50`, viền `danger-500`, chữ `danger-700` |
 | Secure | Nền `safe-50`, viền `safe-500`, chữ `safe-700` |
+| Song song | Nền `brand-50`, viền `brand-500`, chữ `brand-700` |
 
-`LayoutModeSwitch` (`role="radiogroup"`, ẩn dưới `lg`, icon gọn tại `lg`–`xl` và kèm nhãn từ `2xl`) chuyển giữa ba bố cục desktop dùng vai trò `brand` khi active (`bg-brand-50`, `border-brand-500`, `text-brand-700`): `Song song` (`split`), `Tập trung code` (`code-focus`) và `Sandbox nổi` (`floating`). Hai bề mặt giữ nguyên cây React khi đổi chế độ để không mất trạng thái form đang nhập.
+Nút Vulnerable và Secure có thêm một chấm `h-1.5 w-1.5` cho kết quả gần nhất của mode đó trong lab đang mở: `danger-500` (bị khai thác), `safe-500` (đã chặn), `slate-400` (bình thường), `warning-500` (lỗi). Nhãn đọc cho trình đọc màn hình nằm trong `sr-only`. Tên tiếng Việt của outcome lấy từ `TRACE_OUTCOME_LABELS` (`@/lib`).
+
+Ở chế độ Song song, tab Backend của Inspector hiển thị `CompareCodeView`. Trên cùng là badge outcome của hai phía. Kế đến là `CompareTraceTable`, bảng các hàng căn theo `layer:tag`, có cột `danger-300` / `safe-300` và hàng đang phát đánh dấu bằng `aria-current="step"`. Dưới cùng là `vulnerable.py` và `secure.py`, xếp hai cột từ container `@3xl` trở lên.
+
+`LayoutModeSwitch` (`role="radiogroup"`, ẩn dưới `lg`, icon gọn tại `lg`–`xl` và kèm nhãn từ `2xl`) chuyển giữa ba bố cục desktop dùng vai trò `brand` khi active (`bg-brand-50`, `border-brand-500`, `text-brand-700`): `Chia đôi` (`split`), `Tập trung code` (`code-focus`) và `Sandbox nổi` (`floating`). Hai bề mặt giữ nguyên cây React khi đổi chế độ để không mất trạng thái form đang nhập.
 
 ### `SplitDivider`
 
-Thanh kéo dọc (`w-1.5`, `role="separator"`, `aria-orientation="vertical"`) chỉ hiển thị ở chế độ `Song song` từ `lg` trở lên:
+Thanh kéo dọc (`w-1.5`, `role="separator"`, `aria-orientation="vertical"`) chỉ hiển thị ở chế độ `Chia đôi` từ `lg` trở lên:
 
 * Kéo chuột/chạm hoặc nhấn `ArrowLeft` / `ArrowRight` (`±5%`) để chỉnh tỷ lệ cột Sandbox trong khoảng `30%`–`70%` (lưu `vvwa.splitPercent`).
 * Nháy đúp hoặc nhấn `Home` / `End` để đặt lại về `50%`.
@@ -152,4 +157,4 @@ Import qua barrel `@/components` (hoặc `../ui` bên trong `core/frontend/src/c
 | Bo góc badge / chip | `9999px` (`rounded-full`) |
 | Chiều cao topbar | `56px` (`h-14`) |
 
-Từ breakpoint `lg` trở lên, khung app cao đúng một màn hình (`h-screen`) với ba chế độ bố cục lưu trong `localStorage` (`vvwa.layoutMode`, `vvwa.splitPercent`): **Song song** (mặc định, hai cột cuộn độc lập với `SplitDivider` chỉnh `30%`–`70%`), **Tập trung code** (ẩn cột Sandbox để Inspector chiếm toàn chiều rộng kèm nút pill **Về Song song**), và **Sandbox nổi** (Inspector toàn màn hình, Sandbox thành thẻ nổi góc trên phải dưới thanh tab Inspector `rounded-xl shadow-2xl` có thể thu gọn/mở rộng để không che code hay điều khiển trace). Dưới `lg`, hai bề mặt luôn xếp chồng thành một cột.
+Từ breakpoint `lg` trở lên, khung app cao đúng một màn hình (`h-screen`) với ba chế độ bố cục lưu trong `localStorage` (`vvwa.layoutMode`, `vvwa.splitPercent`): **Chia đôi** (mặc định, hai cột cuộn độc lập với `SplitDivider` chỉnh `30%`–`70%`), **Tập trung code** (ẩn cột Sandbox để Inspector chiếm toàn chiều rộng kèm nút pill **Về Chia đôi**), và **Sandbox nổi** (Inspector toàn màn hình, Sandbox thành thẻ nổi góc trên phải dưới thanh tab Inspector `rounded-xl shadow-2xl` có thể thu gọn/mở rộng để không che code hay điều khiển trace). Dưới `lg`, hai bề mặt luôn xếp chồng thành một cột.

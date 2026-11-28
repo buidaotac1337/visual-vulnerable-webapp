@@ -8,7 +8,7 @@ Hướng dẫn chạy VVWA trên máy local, cấu hình cổng và biến môi 
 | :--- | :--- | :--- |
 | Docker Desktop / Docker Engine | Có Docker Compose v2 | Bắt buộc để chạy sản phẩm |
 | Git | Bất kỳ | Clone repository |
-| `uv`, Node.js `22.21.1`, `pnpm` `10.12.1` | Tùy chọn | Chỉ cần khi phát triển, xem [Đóng góp](CONTRIBUTING.md) |
+| `uv`, Node.js `26.13.1`, `pnpm` `10.12.1` | Tùy chọn | Chỉ cần khi phát triển, xem [Đóng góp](CONTRIBUTING.md) |
 
 Không cần cài Python, Node.js hay PostgreSQL trên máy để chạy sản phẩm.
 

@@ -29,3 +29,5 @@ Thư mục này lưu giữ các **Quyết định Kiến trúc (ADR)** quan tr�
 | [0007](0007-file-upload-sandbox-isolation.md) | Cách ly Sandbox Ghi File & Giới hạn Jail cho Lab 07 File Upload | Accepted | 2026-11-22 |
 | [0008](0008-db-transactions-and-concurrent-verify-tests.md) | Giao dịch Cơ sở dữ liệu (`db.transaction()`) & Kiểm thử Đồng thời / Nhiều bước trong `verifyTests` | Accepted | 2026-11-22 |
 | [0009](0009-ssrf-http-client-and-internal-target.md) | Thư viện HTTP Client (`httpx`), Internal Demo Target & Phòng thủ SSRF cho Lab 09 | Accepted | 2026-11-22 |
+| [0010](0010-song-song-compare-mode.md) | Chế độ Song song: chạy cùng payload trên Vulnerable và Secure | Accepted | 2026-11-28 |
+| [0011](0011-node-26-runtime.md) | Nâng Node.js frontend lên 26.13.1 và cài pnpm bằng npm | Accepted | 2026-11-28 |

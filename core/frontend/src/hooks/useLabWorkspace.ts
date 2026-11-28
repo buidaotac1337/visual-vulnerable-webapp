@@ -1,19 +1,16 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { resolveFrontendFile } from '@/lib';
+import { buildCompareRowTrace, resolveFrontendFile } from '@/lib';
 import type {
   ExecuteActionOptions,
-  HealthResponse,
   InspectorTab,
   LabExecutionResponse,
-  LabMetadata,
   LabMode,
   LabPayload,
-  LabSourceResponse,
   LastExecutionRequest,
   SamplePayload,
   TraceLayer,
-  VerifyLabResponse,
+  WorkspaceMode,
   WorkspaceNotice,
 } from '@/types';
 
@@ -25,61 +22,15 @@ import {
   runExecutionRequest,
 } from './labExecution';
 import type { ActiveRequestContext, ExecutionRequest } from './labExecution';
+import type { LabWorkspaceController } from './labWorkspaceController';
+import { useCompareRun } from './useCompareRun';
 import { useLabActor } from './useLabActor';
 import { useLabCatalog } from './useLabCatalog';
 import { useLabMaintenance } from './useLabMaintenance';
 import { useLabSourceSync } from './useLabSourceSync';
 import { useLabVerify } from './useLabVerify';
+import { useModeOutcomes } from './useModeOutcomes';
 import { useTracePlayback } from './useTracePlayback';
-import type { TracePlaybackController } from './useTracePlayback';
-
-/** Complete reactive state and command handlers driving the VVWA workspace. */
-export interface LabWorkspaceController {
-  health: HealthResponse | null;
-  apiError: string | null;
-  labs: readonly LabMetadata[];
-  isLoadingLabs: boolean;
-  selectedLab: LabMetadata | null;
-  mode: LabMode;
-  /** Personas declared by the lab and the active one (ADR-0005). */
-  actors: readonly string[];
-  actor: string | null;
-  activeTab: InspectorTab;
-  source: LabSourceResponse | null;
-  sourceError: string | null;
-  isRefreshingSource: boolean;
-  payload: LabPayload;
-  inputFlashSeq: number;
-  dbResetSeq: number;
-  isExecuting: boolean;
-  isResettingDb: boolean;
-  isVerifying: boolean;
-  isDownloading: boolean;
-  lastRequest: LastExecutionRequest | null;
-  lastResponse: LabExecutionResponse | null;
-  verifyResult: VerifyLabResponse | null;
-  verifyError: string | null;
-  isVerifyModalOpen: boolean;
-  notice: WorkspaceNotice | null;
-  playback: TracePlaybackController;
-  selectLab: (labId: string) => void;
-  changeMode: (nextMode: LabMode) => void;
-  changeActor: (name: string) => void;
-  setActiveTab: (tab: InspectorTab) => void;
-  selectPipelineLayer: (layer: TraceLayer) => void;
-  updatePayload: (next: LabPayload) => void;
-  applySamplePayload: (sample: SamplePayload) => void;
-  refreshSource: () => Promise<void>;
-  executeAction: (
-    action: string,
-    overridePayload?: LabPayload,
-    options?: ExecuteActionOptions,
-  ) => Promise<LabExecutionResponse | null>;
-  handleResetDb: () => Promise<void>;
-  handleVerify: () => Promise<void>;
-  closeVerifyModal: () => void;
-  handleDownloadSnippet: () => Promise<void>;
-}
 
 /**
  * Orchestrate lab selection, mode toggling (preserving input), live source refresh,
@@ -90,7 +41,8 @@ export interface LabWorkspaceController {
 export function useLabWorkspace(): LabWorkspaceController {
   const { health, apiError, labs, isLoadingLabs, selectedLabId, setSelectedLabId } =
     useLabCatalog();
-  const [mode, setMode] = useState<LabMode>('vulnerable');
+  const [viewMode, setViewMode] = useState<WorkspaceMode>('vulnerable');
+  const mode: LabMode = viewMode === 'compare' ? 'vulnerable' : viewMode;
   const [activeTab, setActiveTab] = useState<InspectorTab>('backend');
   const [payloadsByLab, setPayloadsByLab] = useState<Record<string, LabPayload>>({});
   const [inputFlashSeq, setInputFlashSeq] = useState<number>(0);
@@ -102,9 +54,25 @@ export function useLabWorkspace(): LabWorkspaceController {
 
   const selectedLab = labs.find((item) => item.id === selectedLabId) ?? null;
   const { actors, actor, setActor } = useLabActor(selectedLab);
-  const activeCtxRef = useRef<ActiveRequestContext>({ labId: selectedLabId, mode, actor });
-  activeCtxRef.current = { labId: selectedLabId, mode, actor };
+  const activeCtxRef = useRef<ActiveRequestContext>({
+    labId: selectedLabId,
+    view: viewMode,
+    actor,
+  });
+  activeCtxRef.current = { labId: selectedLabId, view: viewMode, actor };
   const inFlightRef = useRef<number>(0);
+  const { modeOutcomes, recordOutcomes } = useModeOutcomes(selectedLabId);
+
+  const trackInFlight = useCallback(async <T>(task: () => Promise<T>): Promise<T> => {
+    inFlightRef.current += 1;
+    setIsExecuting(true);
+    try {
+      return await task();
+    } finally {
+      inFlightRef.current = Math.max(0, inFlightRef.current - 1);
+      setIsExecuting(inFlightRef.current > 0);
+    }
+  }, []);
 
   const playback = useTracePlayback();
   const { clearTrace, jumpToLayer, startTrace } = playback;
@@ -114,6 +82,29 @@ export function useLabWorkspace(): LabWorkspaceController {
   const verify = useLabVerify({ selectedLab, activeCtxRef, refreshSource, setDbResetSeq });
   const { resetVerifyState } = verify;
 
+  const compare = useCompareRun({
+    isCurrent: (labId, runActor) => {
+      const ctx = activeCtxRef.current;
+      return ctx.view === 'compare' && ctx.labId === labId && ctx.actor === runActor;
+    },
+    omitSecureRenderSteps: source?.frontend_vulnerable != null,
+    refreshSource,
+    setDbResetSeq,
+    trackInFlight,
+    onComplete: (result) => {
+      const { labId, actor: runActor, action, body } = result;
+      setLastRequest({ labId, mode: 'vulnerable', actor: runActor, action, body });
+      setLastResponse(result.vulnerable.response);
+      startTrace(buildCompareRowTrace(result.rows));
+      recordOutcomes(result.labId, {
+        vulnerable: result.vulnerable.response.meta.outcome,
+        secure: result.secure.response.meta.outcome,
+      });
+    },
+    onError: (message) => setNotice({ tone: 'danger', message }),
+  });
+  const { clearCompare, enqueueCompareCall } = compare;
+
   const payload = useMemo<LabPayload>(
     () => (selectedLab ? (payloadsByLab[selectedLab.id] ?? defaultPayloadForLab(selectedLab)) : {}),
     [selectedLab, payloadsByLab],
@@ -121,28 +112,31 @@ export function useLabWorkspace(): LabWorkspaceController {
   const payloadRef = useRef<LabPayload>(payload);
   payloadRef.current = payload;
 
+  /** Drop the last run (request, response, notice, trace, Song song result) from screen. */
+  const clearRun = useCallback((): void => {
+    setLastRequest(null);
+    setLastResponse(null);
+    setNotice(null);
+    clearTrace();
+    clearCompare();
+  }, [clearTrace, clearCompare]);
+
   const selectLab = useCallback(
     (labId: string): void => {
       setSelectedLabId(labId);
       setActiveTab('backend');
-      setLastRequest(null);
-      setLastResponse(null);
-      setNotice(null);
       resetVerifyState();
-      clearTrace();
+      clearRun();
     },
-    [setSelectedLabId, resetVerifyState, clearTrace],
+    [setSelectedLabId, resetVerifyState, clearRun],
   );
 
   const changeMode = useCallback(
-    (nextMode: LabMode): void => {
-      setMode(nextMode);
-      setLastRequest(null);
-      setLastResponse(null);
-      setNotice(null);
-      clearTrace();
+    (nextMode: WorkspaceMode): void => {
+      setViewMode(nextMode);
+      clearRun();
     },
-    [clearTrace],
+    [clearRun],
   );
 
   const changeActor = useCallback(
@@ -151,12 +145,9 @@ export function useLabWorkspace(): LabWorkspaceController {
         return;
       }
       setActor(name);
-      setLastRequest(null);
-      setLastResponse(null);
-      setNotice(null);
-      clearTrace();
+      clearRun();
     },
-    [actor, actors, setActor, clearTrace],
+    [actor, actors, setActor, clearRun],
   );
 
   const selectPipelineLayer = useCallback(
@@ -200,38 +191,44 @@ export function useLabWorkspace(): LabWorkspaceController {
       if (!selectedLabId) {
         return null;
       }
-      const req: ExecutionRequest = {
-        labId: selectedLabId,
-        mode,
-        actor,
-        action,
-        body: overridePayload ?? payloadRef.current,
-      };
+      const body = overridePayload ?? payloadRef.current;
       const silent = options?.silent === true;
-      inFlightRef.current += 1;
-      setIsExecuting(true);
       if (!silent) {
         setNotice(null);
       }
-      try {
-        const execResp = await runExecutionRequest(req, silent, refreshSource);
-        if (!silent && isSameContext(activeCtxRef.current, req)) {
-          setLastRequest(req);
-          setLastResponse(execResp);
-          startTrace(buildMergedTrace(execResp, options));
-        }
-        return execResp;
-      } catch (error: unknown) {
-        if (!silent && isSameContext(activeCtxRef.current, req)) {
-          setNotice({ tone: 'danger', message: getErrorMessage(error, 'Lỗi thực thi bài lab.') });
-        }
-        return null;
-      } finally {
-        inFlightRef.current = Math.max(0, inFlightRef.current - 1);
-        setIsExecuting(inFlightRef.current > 0);
+      if (viewMode === 'compare') {
+        return enqueueCompareCall({ labId: selectedLabId, actor, action, body, options });
       }
+      const req: ExecutionRequest = { labId: selectedLabId, mode, actor, action, body };
+      return trackInFlight(async () => {
+        try {
+          const execResp = await runExecutionRequest(req, silent, refreshSource);
+          if (!silent && isSameContext(activeCtxRef.current, req)) {
+            setLastRequest(req);
+            setLastResponse(execResp);
+            startTrace(buildMergedTrace(execResp, options));
+            recordOutcomes(req.labId, { [req.mode]: execResp.meta.outcome });
+          }
+          return execResp;
+        } catch (error: unknown) {
+          if (!silent && isSameContext(activeCtxRef.current, req)) {
+            setNotice({ tone: 'danger', message: getErrorMessage(error, 'Lỗi thực thi bài lab.') });
+          }
+          return null;
+        }
+      });
     },
-    [selectedLabId, mode, actor, refreshSource, startTrace],
+    [
+      selectedLabId,
+      viewMode,
+      mode,
+      actor,
+      refreshSource,
+      startTrace,
+      trackInFlight,
+      enqueueCompareCall,
+      recordOutcomes,
+    ],
   );
 
   return {
@@ -241,6 +238,9 @@ export function useLabWorkspace(): LabWorkspaceController {
     isLoadingLabs,
     selectedLab,
     mode,
+    viewMode,
+    modeOutcomes,
+    compareResult: compare.compareResult,
     actors,
     actor,
     activeTab,

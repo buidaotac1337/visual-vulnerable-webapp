@@ -21,7 +21,7 @@ Tài liệu thiết kế ban đầu (`01-architecture.md`, `04-lab-authoring-and
 
 1. Sử dụng **TypeScript strict mode** (`strict: true`, `noUncheckedIndexedAccess: true`) cho toàn bộ mã nguồn trong `core/frontend/` và `labs/*/frontend/` (`.ts`, `.tsx`).
 2. Áp dụng ESLint v9 Flat Config kèm `@typescript-eslint` (`explicit-function-return-type`, `no-explicit-any`), `eslint-plugin-jsdoc` và `no-restricted-imports` để ép barrel imports.
-3. Sử dụng Vitest làm unit test runner cho Frontend và cung cấp cơ chế chạy hybrid (native `pnpm` nếu host có Node, tự động fallback Docker `node:22.21.1-alpine` nếu chưa cài Node).
+3. Sử dụng Vitest làm unit test runner cho Frontend và cung cấp cơ chế chạy hybrid (native `pnpm` nếu host có Node, tự động fallback Docker `node:22.21.1-alpine` nếu chưa cài Node). *(Tag Node được thay bằng `node:26.13.1-alpine` theo [ADR-0011](0011-node-26-runtime.md).)*
 
 ## Consequences
 

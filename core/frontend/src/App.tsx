@@ -15,7 +15,35 @@ import {
   useWorkspaceLayout,
 } from '@/hooks';
 import type { LabWorkspaceController, LearningProgressController } from '@/hooks';
-import { computePipelineNodes, isFrontendVerifyTest } from '@/lib';
+import {
+  computePipelineNodes,
+  isFrontendVerifyTest,
+  rowIndexForSideStep,
+  sideIndexAtRow,
+} from '@/lib';
+import type { TraceStep } from '@/types';
+
+interface PipelineView {
+  trace: readonly TraceStep[];
+  activeIndex: number;
+  onSelectStep: (index: number) => void;
+}
+
+/** In Song song, FlowPipeline follows the vulnerable side the sandbox renders (ADR-0010). */
+function usePipelineView(ws: LabWorkspaceController): PipelineView {
+  const { trace, activeIndex, jumpToStep } = ws.playback;
+  const compare = ws.viewMode === 'compare' ? ws.compareResult : null;
+  return useMemo<PipelineView>(() => {
+    if (!compare) {
+      return { trace, activeIndex, onSelectStep: jumpToStep };
+    }
+    return {
+      trace: compare.vulnerable.trace,
+      activeIndex: sideIndexAtRow(compare.rows, activeIndex, 'vulnerable'),
+      onSelectStep: (index) => jumpToStep(rowIndexForSideStep(compare.rows, 'vulnerable', index)),
+    };
+  }, [compare, trace, activeIndex, jumpToStep]);
+}
 
 function useProgressMilestoneSync(
   ws: LabWorkspaceController,
@@ -40,6 +68,12 @@ function useProgressMilestoneSync(
       markViewedDiff(ws.selectedLab.id);
     }
   }, [ws.activeTab, ws.selectedLab, markViewedDiff]);
+
+  useEffect(() => {
+    if (ws.compareResult) {
+      markComparedSecure(ws.compareResult.labId);
+    }
+  }, [ws.compareResult, markComparedSecure]);
 
   useEffect(() => {
     if (ws.verifyResult?.passed) {
@@ -99,10 +133,11 @@ export function App(): JSX.Element {
     onTogglePlayPause: ws.playback.togglePlayPause,
   });
 
-  const { trace, activeIndex, status } = ws.playback;
+  const pipeline = usePipelineView(ws);
+  const { status } = ws.playback;
   const pipelineNodes = useMemo(
-    () => computePipelineNodes(trace, activeIndex, status !== 'idle'),
-    [trace, activeIndex, status],
+    () => computePipelineNodes(pipeline.trace, pipeline.activeIndex, status !== 'idle'),
+    [pipeline.trace, pipeline.activeIndex, status],
   );
   const hasFrontendTests = ws.selectedLab?.verifyTests.some(isFrontendVerifyTest) ?? false;
   const passedLabsCount = useMemo(() => progress.countPassedLabs(ws.labs), [progress, ws.labs]);
@@ -117,7 +152,8 @@ export function App(): JSX.Element {
         apiError={ws.apiError}
         labs={ws.labs}
         selectedLab={ws.selectedLab}
-        mode={ws.mode}
+        mode={ws.viewMode}
+        modeOutcomes={ws.modeOutcomes}
         layoutMode={layout.layoutMode}
         passedLabsCount={passedLabsCount}
         isResettingDb={ws.isResettingDb}
@@ -148,6 +184,7 @@ export function App(): JSX.Element {
             isLoadingLabs={ws.isLoadingLabs}
             lab={ws.selectedLab}
             mode={ws.mode}
+            isCompare={ws.viewMode === 'compare'}
             activeTab={ws.activeTab}
             hasFrontendSink={hasFrontendTests}
             actors={ws.actors}
@@ -159,8 +196,8 @@ export function App(): JSX.Element {
             lastRequest={ws.lastRequest}
             lastResponse={ws.lastResponse}
             pipelineNodes={pipelineNodes}
-            trace={ws.playback.trace}
-            activeTraceIndex={ws.playback.activeIndex}
+            trace={pipeline.trace}
+            activeTraceIndex={pipeline.activeIndex}
             playbackStatus={ws.playback.status}
             playbackSpeed={ws.playback.speed}
             showWelcomeBanner={!progress.onboardingDismissed && ws.selectedLab !== null}
@@ -170,7 +207,7 @@ export function App(): JSX.Element {
             onSelectSamplePayload={ws.applySamplePayload}
             onExecute={ws.executeAction}
             onSelectPipelineLayer={ws.selectPipelineLayer}
-            onSelectPipelineStep={ws.playback.jumpToStep}
+            onSelectPipelineStep={pipeline.onSelectStep}
             onDismissWelcome={progress.dismissOnboarding}
             onOpenCatalog={openCatalog}
             onOpenGlossary={openGlossary}
@@ -201,6 +238,8 @@ export function App(): JSX.Element {
             onNextStep={ws.playback.nextStep}
             onChangeSpeed={ws.playback.setSpeed}
             onJumpToStep={ws.playback.jumpToStep}
+            isCompare={ws.viewMode === 'compare'}
+            compareResult={ws.compareResult}
           />
         }
       />

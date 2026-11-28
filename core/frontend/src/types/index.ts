@@ -23,6 +23,9 @@ export type {
 } from './api';
 export type {
   CodeToken,
+  CompareRow,
+  CompareRunResult,
+  CompareSideResult,
   DiffRow,
   DiffRowKind,
   ExecuteActionOptions,
@@ -32,6 +35,7 @@ export type {
   LabPayload,
   LabViewProps,
   LastExecutionRequest,
+  ModeOutcomes,
   PipelineLaneModel,
   PipelineLaneState,
   PipelineNodeModel,
@@ -47,5 +51,6 @@ export type {
   TracePlaybackSpeed,
   TraceStepDraft,
   WorkspaceLayoutMode,
+  WorkspaceMode,
   WorkspaceNotice,
 } from './workspace';
