@@ -63,7 +63,7 @@ export function InspectorHeader({
   const activeFileLabel = resolveFileLabel(activeTab, mode, frontendFileLabel, hasFrontendDiff);
 
   return (
-    <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-700 bg-[var(--bg-ide-header)] px-3 py-2">
+    <div className="flex shrink-0 items-center justify-between gap-2 border-b border-default bg-surface-sunken px-3 py-2">
       <div role="tablist" aria-label="Chế độ xem mã nguồn" className="flex items-center gap-1">
         {TAB_ITEMS.map((item) => {
           const isSelected = activeTab === item.id;
@@ -80,10 +80,10 @@ export function InspectorHeader({
                 aria-selected={isSelected}
                 disabled={isDisabled}
                 onClick={() => onSelectTab(item.id)}
-                className={`cursor-pointer whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                className={`cursor-pointer whitespace-nowrap rounded-medium px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                   isSelected
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                    ? 'bg-surface text-default shadow-raised'
+                    : 'text-subtle hover:bg-neutral-hovered hover:text-default'
                 }`}
               >
                 {item.label}
@@ -94,12 +94,7 @@ export function InspectorHeader({
       </div>
 
       <div className="flex items-center gap-2">
-        <span
-          className="hidden text-xs text-slate-400 sm:inline"
-          style={{ fontFamily: 'var(--font-mono)' }}
-        >
-          {activeFileLabel}
-        </span>
+        <span className="hidden text-xs text-subtle sm:inline font-mono">{activeFileLabel}</span>
         {fullFilePath && <CopyPathButton path={fullFilePath} />}
         <Tooltip tip={UI_LABELS.refreshSource.tip} align="end">
           <button
@@ -107,7 +102,7 @@ export function InspectorHeader({
             onClick={onRefreshSource}
             disabled={!canRefresh || isRefreshing}
             aria-label={UI_LABELS.refreshSource.text}
-            className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex cursor-pointer items-center gap-1 rounded-medium border border-default bg-neutral px-2 py-1 text-xs text-subtle hover:bg-neutral-hovered disabled:cursor-not-allowed disabled:opacity-40"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`}

@@ -24,11 +24,11 @@ export function InspectorDiffTab({
   }
   return (
     <div>
-      <h3 className="px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+      <h3 className="px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-subtle">
         Backend: vulnerable.py ↔ secure.py
       </h3>
       <UnifiedDiffView diff={source.diff} editFilePath={backendEditPath} />
-      <h3 className="border-t border-slate-700 px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+      <h3 className="border-t border-default px-3 pt-3 text-xs font-semibold uppercase tracking-wide text-subtle">
         Frontend: vulnerable.tsx ↔ secure.tsx
       </h3>
       <UnifiedDiffView

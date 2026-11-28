@@ -10,10 +10,10 @@ export interface TraceLegendBarProps {
 }
 
 const LEGEND_ITEMS: readonly { label: string; dotClass: string }[] = [
-  { label: 'Thông tin', dotClass: 'bg-info-400' },
-  { label: 'Cảnh báo', dotClass: 'bg-warning-400' },
-  { label: 'Lỗ hổng', dotClass: 'bg-danger-400' },
-  { label: 'Đã chặn', dotClass: 'bg-safe-400' },
+  { label: 'Thông tin', dotClass: 'bg-information-bold' },
+  { label: 'Cảnh báo', dotClass: 'bg-warning-bold' },
+  { label: 'Lỗ hổng', dotClass: 'bg-danger-bold' },
+  { label: 'Đã chặn', dotClass: 'bg-success-bold' },
 ];
 
 /**
@@ -35,10 +35,10 @@ export function TraceLegendBar({
   return (
     <div
       data-mode={mode}
-      className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-slate-700/80 bg-[var(--bg-ide-header)]/60 px-3 py-1.5 text-[11px] text-slate-300"
+      className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-default bg-surface-sunken/60 px-3 py-1.5 text-micro text-subtle"
     >
       <div className="flex flex-wrap items-center gap-3">
-        <span className="font-medium text-slate-400">Màu trace:</span>
+        <span className="font-medium text-subtle">Màu trace:</span>
         {LEGEND_ITEMS.map((item) => (
           <span key={item.label} className="inline-flex items-center gap-1.5">
             <span className={`h-2 w-2 rounded-full ${item.dotClass}`} aria-hidden="true" />
@@ -47,7 +47,7 @@ export function TraceLegendBar({
         ))}
       </div>
       {!hasTrace && (
-        <span className="text-slate-400">
+        <span className="text-subtle">
           Mẹo: chọn 1 Payload mẫu bên trái rồi bấm gửi — dòng code đang chạy sẽ tự sáng lên tại đây.
         </span>
       )}

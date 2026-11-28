@@ -1,3 +1,5 @@
+import { statusToneClasses } from '@/lib';
+import type { ToneClasses } from '@/lib';
 import type { TraceStatus } from '@/types';
 
 /** Short uppercase Vietnamese security status labels used in FlowPipeline badges. */
@@ -8,98 +10,48 @@ export const PIPELINE_STATUS_LABELS: Record<TraceStatus, string> = {
   danger: 'KHAI THÁC',
 };
 
+const STATUSES: readonly TraceStatus[] = ['info', 'safe', 'warning', 'danger'];
+
+/** Build a per-status class map from the status tone (lib/tones.ts is the SSOT, ADR-0012). */
+function byStatus(pick: (tone: ToneClasses) => string): Record<TraceStatus, string> {
+  const entries = STATUSES.map((status) => [status, pick(statusToneClasses(status))] as const);
+  return Object.fromEntries(entries) as Record<TraceStatus, string>;
+}
+
 /** Pill badge styling per semantic trace status. */
-export const STATUS_PILL_CLASSES: Record<TraceStatus, string> = {
-  info: 'border-info-200 bg-info-50 text-info-700',
-  safe: 'border-safe-200 bg-safe-50 text-safe-700',
-  warning: 'border-warning-200 bg-warning-50 text-warning-800',
-  danger: 'border-danger-200 bg-danger-50 text-danger-700',
-};
+export const STATUS_PILL_CLASSES = byStatus((t) => `${t.borderSubtle} ${t.bg} ${t.text}`);
 
-/** Solid dot indicator styling per semantic trace status. */
-export const SOLID_DOT_CLASSES: Record<TraceStatus, string> = {
-  info: 'bg-info-500',
-  safe: 'bg-safe-500',
-  warning: 'bg-warning-500',
-  danger: 'bg-danger-500',
-};
+/** Solid dot indicator per semantic trace status (pipeline and popover headers). */
+export const SOLID_DOT_CLASSES = byStatus((t) => t.bgBold);
 
-/** High-contrast dot styling on dark slate popover headers. */
-export const POPOVER_DOT_CLASSES: Record<TraceStatus, string> = {
-  info: 'bg-info-400',
-  safe: 'bg-safe-400',
-  warning: 'bg-warning-400',
-  danger: 'bg-danger-400',
-};
+/** Dot styling in the (always dark) popover header; same tone, resolved in its dark scope. */
+export const POPOVER_DOT_CLASSES = SOLID_DOT_CLASSES;
 
 /** Node icon accent tint once a node has been visited. */
-export const NODE_ICON_CLASSES: Record<TraceStatus, string> = {
-  info: 'text-info-600',
-  safe: 'text-safe-600',
-  warning: 'text-warning-600',
-  danger: 'text-danger-600',
-};
+export const NODE_ICON_CLASSES = byStatus((t) => t.icon);
 
-/** Active node border, fill, and subtle ring styling. */
-export const NODE_ACTIVE_CLASSES: Record<TraceStatus, string> = {
-  info: 'border-solid border-info-500 bg-info-50 ring-3 ring-info-500/15',
-  safe: 'border-solid border-safe-500 bg-safe-50 ring-3 ring-safe-500/15',
-  warning: 'border-solid border-warning-500 bg-warning-50 ring-3 ring-warning-500/15',
-  danger: 'border-solid border-danger-500 bg-danger-50 ring-3 ring-danger-500/15',
-};
+/** Active node border, fill, and soft ring. */
+export const NODE_ACTIVE_CLASSES = byStatus(
+  (t) => `border-solid ${t.border} ${t.bg} ring-3 ${t.ringSubtle}`,
+);
 
-/** Completed node border and soft tint styling. */
-export const NODE_COMPLETED_CLASSES: Record<TraceStatus, string> = {
-  info: 'border-solid border-info-200 bg-info-50/40',
-  safe: 'border-solid border-safe-200 bg-safe-50/40',
-  warning: 'border-solid border-warning-200 bg-warning-50/40',
-  danger: 'border-solid border-danger-200 bg-danger-50/40',
-};
+/** Completed node border and soft tint. */
+export const NODE_COMPLETED_CLASSES = byStatus((t) => `border-solid ${t.borderSubtle} ${t.bg}`);
 
-/** Active directional wire label colors. */
-export const LANE_LABEL_ACTIVE_CLASSES: Record<TraceStatus, string> = {
-  info: 'font-bold text-info-700',
-  safe: 'font-bold text-safe-700',
-  warning: 'font-bold text-warning-800',
-  danger: 'font-bold text-danger-700',
-};
+/** Active directional wire label colours. */
+export const LANE_LABEL_ACTIVE_CLASSES = byStatus((t) => `font-bold ${t.text}`);
 
-/** Active directional wire rail colors. */
-export const LANE_LINE_ACTIVE_CLASSES: Record<TraceStatus, string> = {
-  info: 'bg-info-200',
-  safe: 'bg-safe-200',
-  warning: 'bg-warning-200',
-  danger: 'bg-danger-200',
-};
+/** Active directional wire rail colours. */
+export const LANE_LINE_ACTIVE_CLASSES = byStatus((t) => t.bgSubtler);
 
-/** Active directional wire arrowhead colors. */
-export const LANE_ARROW_ACTIVE_CLASSES: Record<TraceStatus, string> = {
-  info: 'text-info-600',
-  safe: 'text-safe-600',
-  warning: 'text-warning-600',
-  danger: 'text-danger-600',
-};
+/** Active directional wire arrowhead colours. */
+export const LANE_ARROW_ACTIVE_CLASSES = byStatus((t) => t.icon);
 
-/** Active traveling packet dot styling per semantic trace status. */
-export const PACKET_DOT_ACTIVE_CLASSES: Record<TraceStatus, string> = {
-  info: 'bg-info-600 ring-3 ring-info-500/25',
-  safe: 'bg-safe-600 ring-3 ring-safe-500/25',
-  warning: 'bg-warning-600 ring-3 ring-warning-500/25',
-  danger: 'bg-danger-600 ring-3 ring-danger-500/25',
-};
+/** Active travelling packet dot per semantic trace status. */
+export const PACKET_DOT_ACTIVE_CLASSES = byStatus((t) => `${t.bgBold} ring-3 ${t.ringSubtle}`);
 
-/** Live data packet strip container tinting per active step status. */
-export const PACKET_STRIP_CLASSES: Record<TraceStatus, string> = {
-  info: 'border-info-200 bg-info-50/40',
-  safe: 'border-safe-200 bg-safe-50/45',
-  warning: 'border-warning-200 bg-warning-50/45',
-  danger: 'border-danger-200 bg-danger-50/45',
-};
+/** Live data packet strip container tint per active step status. */
+export const PACKET_STRIP_CLASSES = byStatus((t) => `${t.borderSubtle} ${t.bg}`);
 
-/** Active Full Data Journey timeline row accenting. */
-export const JOURNEY_ACTIVE_CLASSES: Record<TraceStatus, string> = {
-  info: 'border-info-200 border-l-info-500 bg-info-50',
-  safe: 'border-safe-200 border-l-safe-500 bg-safe-50',
-  warning: 'border-warning-200 border-l-warning-500 bg-warning-50',
-  danger: 'border-danger-200 border-l-danger-500 bg-danger-50',
-};
+/** Active Full Data Journey timeline row accent. */
+export const JOURNEY_ACTIVE_CLASSES = byStatus((t) => `${t.borderSubtle} ${t.borderLeft} ${t.bg}`);

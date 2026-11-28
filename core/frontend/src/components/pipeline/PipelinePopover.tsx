@@ -91,7 +91,7 @@ function WirePopoverBody({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-2.5 text-[11.5px] font-semibold text-slate-300">
+      <div className="flex items-center justify-between gap-2.5 text-body-small font-semibold text-subtle">
         <span className="inline-flex min-w-0 items-center gap-1.5">
           <span
             className={`h-1.5 w-1.5 shrink-0 rounded-full ${POPOVER_DOT_CLASSES[payload.status]}`}
@@ -102,7 +102,7 @@ function WirePopoverBody({
         <div
           role="radiogroup"
           aria-label="Chế độ xem gói tin mũi tên"
-          className="inline-flex shrink-0 items-center gap-0.5 rounded-md border border-slate-700 bg-slate-800 p-0.5"
+          className="inline-flex shrink-0 items-center gap-0.5 rounded-medium border border-default bg-neutral p-0.5"
         >
           <button
             type="button"
@@ -112,10 +112,10 @@ function WirePopoverBody({
               event.stopPropagation();
               onChangeMode('compact');
             }}
-            className={`cursor-pointer rounded px-1.5 py-0.5 text-[11px] transition-colors ${
+            className={`cursor-pointer rounded-small px-1.5 py-0.5 text-micro transition-colors ${
               !isFull
-                ? 'bg-slate-100 font-semibold text-slate-900'
-                : 'font-medium text-slate-400 hover:text-slate-50'
+                ? 'bg-neutral-bold font-semibold text-inverse'
+                : 'font-medium text-subtle hover:text-default'
             }`}
           >
             Thu gọn
@@ -128,10 +128,10 @@ function WirePopoverBody({
               event.stopPropagation();
               onChangeMode('full');
             }}
-            className={`cursor-pointer rounded px-1.5 py-0.5 text-[11px] transition-colors ${
+            className={`cursor-pointer rounded-small px-1.5 py-0.5 text-micro transition-colors ${
               isFull
-                ? 'bg-slate-100 font-semibold text-slate-900'
-                : 'font-medium text-slate-400 hover:text-slate-50'
+                ? 'bg-neutral-bold font-semibold text-inverse'
+                : 'font-medium text-subtle hover:text-default'
             }`}
           >
             Đầy đủ
@@ -139,14 +139,11 @@ function WirePopoverBody({
         </div>
       </div>
 
-      <p
-        className="m-0 max-h-72 overflow-y-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-slate-50"
-        style={{ fontFamily: 'var(--font-mono)' }}
-      >
+      <p className="m-0 max-h-72 overflow-y-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-default font-mono">
         {bodyText}
       </p>
 
-      <div className="text-[11px] text-slate-400">
+      <div className="text-micro text-subtle">
         {formatWireFootNote(payload.stepIndex, activeIndex)}
       </div>
     </>
@@ -210,13 +207,15 @@ export function PipelinePopover({
   return createPortal(
     <div
       ref={popoverRef}
+      // Packet code reads like the Inspector: the popover is always a dark surface (ADR-0012).
+      data-color-mode="dark"
       role={isWire ? 'dialog' : 'tooltip'}
       aria-label={isWire ? wirePayloads[target.wireKey].label : target.heading}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onBlur={(event) => onFocusOut(event.relatedTarget)}
       style={{ left: `${String(coords.left)}px`, top: `${String(coords.top)}px` }}
-      className={`pointer-events-auto fixed z-[60] flex flex-col gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-slate-100 shadow-2xl ${widthClass}`}
+      className={`pointer-events-auto fixed z-[60] flex flex-col gap-1.5 rounded-large border border-default bg-surface px-3 py-2.5 text-default shadow-overlay ${widthClass}`}
     >
       {isWire ? (
         <WirePopoverBody
@@ -227,10 +226,11 @@ export function PipelinePopover({
         />
       ) : (
         <>
-          <div className="text-[11.5px] font-semibold text-slate-300">{target.heading}</div>
+          <div className="text-body-small font-semibold text-subtle">{target.heading}</div>
           <p
-            className="m-0 max-h-64 overflow-y-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-slate-50"
-            style={target.isCode ? { fontFamily: 'var(--font-mono)' } : undefined}
+            className={`m-0 max-h-64 overflow-y-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-default ${
+              target.isCode ? 'font-mono' : ''
+            }`}
           >
             {target.body}
           </p>

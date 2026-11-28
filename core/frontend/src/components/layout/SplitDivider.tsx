@@ -120,7 +120,9 @@ export function SplitDivider({
       <span
         aria-hidden="true"
         className={`h-8 w-0.5 rounded-full transition-colors ${
-          isDragging ? 'bg-white' : 'bg-slate-400 group-hover:bg-white group-focus-visible:bg-white'
+          isDragging
+            ? 'bg-surface'
+            : 'bg-neutral-pressed group-hover:bg-surface group-focus-visible:bg-surface'
         }`}
       />
     </div>

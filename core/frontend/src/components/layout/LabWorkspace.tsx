@@ -156,13 +156,16 @@ function FloatingSandboxHeader({
 
 function CodeFocusBanner({ onRestoreSplit }: { onRestoreSplit: () => void }): JSX.Element {
   return (
-    <div className="hidden shrink-0 items-center justify-between gap-2 border-b border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 lg:flex">
+    <div
+      data-color-mode="dark"
+      className="hidden shrink-0 items-center justify-between gap-2 border-b border-default bg-surface-sunken px-3 py-1.5 text-xs text-subtle lg:flex"
+    >
       <span>Chế độ Tập trung code — MiniShop Sandbox đang ẩn.</span>
       <Tooltip tip={UI_LABELS.layoutRestoreSplit.tip} align="end">
         <button
           type="button"
           onClick={onRestoreSplit}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-600 bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-100 hover:border-brand-400 hover:text-white"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-bold bg-neutral px-2.5 py-0.5 text-xs font-medium text-default hover:border-brand"
         >
           <Columns2 className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
           <span>{UI_LABELS.layoutRestoreSplit.text}</span>
@@ -231,7 +234,8 @@ export function LabWorkspace(props: LabWorkspaceProps): JSX.Element {
       <section
         key="inspector"
         aria-label="Code & Trace Inspector"
-        className="vvwa-ide-scroll flex min-h-0 flex-col overflow-hidden border-t border-slate-700 bg-[var(--bg-ide)] text-slate-100 lg:border-t-0"
+        data-color-mode="dark"
+        className="vvwa-ide-scroll flex min-h-0 flex-col overflow-hidden border-t border-default bg-surface text-default lg:border-t-0"
       >
         {opts.layoutMode === 'code-focus' ? (
           <CodeFocusBanner onRestoreSplit={() => opts.onChangeLayoutMode('split')} />

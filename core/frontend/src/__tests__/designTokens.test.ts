@@ -31,11 +31,15 @@ const NAMESPACE_BY_UTILITY: Record<string, string> = {
   text: '--text-color-',
   bg: '--background-color-',
   border: '--border-color-',
+  ring: '--ring-color-',
 };
 
 /** Theme variable a token utility class resolves through, e.g. bg-danger → --background-color-danger. */
 function themeVariableFor(className: string): string {
-  const withoutVariant = className.slice(className.lastIndexOf(':') + 1);
+  const withoutVariant = className
+    .slice(className.lastIndexOf(':') + 1)
+    // Side borders (border-l-danger) share the --border-color-* namespace.
+    .replace(/^border-[trblxy]-/, 'border-');
   const [utility = '', ...rest] = withoutVariant.split('-');
   const namespace = NAMESPACE_BY_UTILITY[utility];
   if (!namespace) {

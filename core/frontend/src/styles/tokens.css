@@ -21,9 +21,9 @@
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
-  background-color: var(--bg-sandbox);
-  color: var(--text-primary);
+  font-family: var(--vv-font-family-body);
+  background-color: var(--vv-surface-sunken);
+  color: var(--vv-text);
 }
 
 @keyframes vvwa-callout-slide {
@@ -39,13 +39,13 @@ body {
 
 @keyframes vvwa-input-flash {
   0% {
-    box-shadow: var(--flash-brand-start);
+    box-shadow: var(--vv-flash-brand-start);
   }
   50% {
-    box-shadow: var(--flash-brand-mid);
+    box-shadow: var(--vv-flash-brand-mid);
   }
   100% {
-    box-shadow: var(--flash-brand-end);
+    box-shadow: var(--vv-flash-brand-end);
   }
 }
 
@@ -59,9 +59,9 @@ body {
 
 .vvwa-ide-scroll {
   scrollbar-width: thin;
-  scrollbar-color: var(--border-ide) transparent;
+  scrollbar-color: var(--vv-border-bold) transparent;
 }
 
 dialog::backdrop {
-  background-color: rgba(15, 23, 42, 0.65);
+  background-color: var(--vv-blanket);
 }

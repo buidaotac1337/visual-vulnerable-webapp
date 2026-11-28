@@ -33,6 +33,10 @@ export interface ToneClasses {
   border: string;
   /** Soft border around a `bg` tinted box. */
   borderSubtle: string;
+  /** Left accent bar colour (pair with a `border-l-*` width). */
+  borderLeft: string;
+  /** Soft emphasis ring (pair with a `ring-*` width). */
+  ringSubtle: string;
   /** Icon colour (lucide icons use currentColor). */
   icon: string;
 }
@@ -49,6 +53,8 @@ export const TONE_CLASSES: Readonly<Record<Tone, ToneClasses>> = {
     onBold: 'text-inverse',
     border: 'border-default',
     borderSubtle: 'border-default',
+    borderLeft: 'border-l-bold',
+    ringSubtle: 'ring-default',
     icon: 'text-icon-subtle',
   },
   brand: {
@@ -61,6 +67,8 @@ export const TONE_CLASSES: Readonly<Record<Tone, ToneClasses>> = {
     onBold: 'text-inverse',
     border: 'border-brand',
     borderSubtle: 'border-brand-subtle',
+    borderLeft: 'border-l-brand',
+    ringSubtle: 'ring-brand-subtle',
     icon: 'text-icon-brand',
   },
   information: {
@@ -73,6 +81,8 @@ export const TONE_CLASSES: Readonly<Record<Tone, ToneClasses>> = {
     onBold: 'text-inverse',
     border: 'border-information',
     borderSubtle: 'border-information-subtle',
+    borderLeft: 'border-l-information',
+    ringSubtle: 'ring-information-subtle',
     icon: 'text-icon-information',
   },
   success: {
@@ -85,6 +95,8 @@ export const TONE_CLASSES: Readonly<Record<Tone, ToneClasses>> = {
     onBold: 'text-inverse',
     border: 'border-success',
     borderSubtle: 'border-success-subtle',
+    borderLeft: 'border-l-success',
+    ringSubtle: 'ring-success-subtle',
     icon: 'text-icon-success',
   },
   warning: {
@@ -97,6 +109,8 @@ export const TONE_CLASSES: Readonly<Record<Tone, ToneClasses>> = {
     onBold: 'text-warning-inverse',
     border: 'border-warning',
     borderSubtle: 'border-warning-subtle',
+    borderLeft: 'border-l-warning',
+    ringSubtle: 'ring-warning-subtle',
     icon: 'text-icon-warning',
   },
   danger: {
@@ -109,6 +123,8 @@ export const TONE_CLASSES: Readonly<Record<Tone, ToneClasses>> = {
     onBold: 'text-inverse',
     border: 'border-danger',
     borderSubtle: 'border-danger-subtle',
+    borderLeft: 'border-l-danger',
+    ringSubtle: 'ring-danger-subtle',
     icon: 'text-icon-danger',
   },
   discovery: {
@@ -121,6 +137,8 @@ export const TONE_CLASSES: Readonly<Record<Tone, ToneClasses>> = {
     onBold: 'text-inverse',
     border: 'border-discovery',
     borderSubtle: 'border-discovery-subtle',
+    borderLeft: 'border-l-discovery',
+    ringSubtle: 'ring-discovery-subtle',
     icon: 'text-icon-discovery',
   },
 };
@@ -156,4 +174,14 @@ export const WORKSPACE_MODE_TONE: Readonly<Record<WorkspaceMode, Tone>> = {
  */
 export function toneClasses(tone: Tone): ToneClasses {
   return TONE_CLASSES[tone];
+}
+
+/**
+ * Return the token-backed utility classes for a trace step status.
+ *
+ * @param status - Trace step status from the API (`safe` maps to the success role).
+ * @returns Literal class names of the status tone.
+ */
+export function statusToneClasses(status: TraceStatus): ToneClasses {
+  return TONE_CLASSES[TRACE_STATUS_TONE[status]];
 }

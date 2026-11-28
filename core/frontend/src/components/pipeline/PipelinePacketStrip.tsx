@@ -60,20 +60,17 @@ export function PipelinePacketStrip({
   return (
     <div
       aria-live="polite"
-      className={`mx-3.5 mb-2.5 flex flex-col gap-1.5 rounded-lg border px-2.5 py-2 transition-colors ${PACKET_STRIP_CLASSES[step.status]}`}
+      className={`mx-3.5 mb-2.5 flex flex-col gap-1.5 rounded-large border px-2.5 py-2 transition-colors ${PACKET_STRIP_CLASSES[step.status]}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="inline-flex min-w-0 items-center gap-1.5 text-xs font-semibold text-slate-900">
-          <span
-            className="shrink-0 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[11px] font-semibold text-slate-700"
-            style={{ fontFamily: 'var(--font-mono)' }}
-          >
+        <span className="inline-flex min-w-0 items-center gap-1.5 text-xs font-semibold text-default">
+          <span className="shrink-0 rounded-small border border-default bg-surface-raised px-1.5 py-0.5 text-micro font-semibold text-subtle font-mono">
             {hopRoute}
           </span>
           <span className="truncate">{step.title}</span>
         </span>
         <span
-          className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[11px] font-bold tracking-wide ${STATUS_PILL_CLASSES[step.status]}`}
+          className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-micro font-bold tracking-wide ${STATUS_PILL_CLASSES[step.status]}`}
         >
           {PIPELINE_STATUS_LABELS[step.status]}
         </span>
@@ -85,23 +82,22 @@ export function PipelinePacketStrip({
         onFocus={(event) => openFullDetail(event.currentTarget)}
         onMouseLeave={onScheduleClose}
         onBlur={onScheduleClose}
-        className={`flex min-w-0 items-center gap-2 rounded-md border border-slate-200 bg-white px-2 py-1.5 ${
+        className={`flex min-w-0 items-center gap-2 rounded-medium border border-default bg-surface-raised px-2 py-1.5 ${
           isTruncated
-            ? 'cursor-help hover:border-brand-500 focus-visible:border-brand-500 focus-visible:outline-none'
+            ? 'cursor-help hover:border-brand focus-visible:border-brand focus-visible:outline-none'
             : ''
         }`}
       >
         <p
           ref={textRef}
-          className="m-0 min-w-0 flex-1 truncate text-xs leading-snug text-slate-900"
-          style={{ fontFamily: 'var(--font-mono)' }}
+          className="m-0 min-w-0 flex-1 truncate text-xs leading-snug text-default font-mono"
         >
           {step.detail}
         </p>
         {isTruncated && (
           <span
             aria-hidden="true"
-            className="shrink-0 rounded border border-brand-200 bg-brand-50 px-1.5 py-0.5 text-[11px] font-medium leading-none text-brand-600"
+            className="shrink-0 rounded-small border border-brand-subtle bg-brand-subtlest px-1.5 py-0.5 text-micro font-medium leading-none text-brand"
           >
             Rê xem đủ
           </span>

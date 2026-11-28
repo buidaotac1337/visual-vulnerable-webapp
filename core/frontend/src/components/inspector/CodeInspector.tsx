@@ -130,14 +130,14 @@ function renderInspectorBody(
 ): JSX.Element {
   if (sourceError) {
     return (
-      <div className="m-4 rounded-lg border border-danger-500/40 bg-danger-950/50 p-4 text-xs text-danger-200">
+      <div className="m-4 rounded-large border border-danger-subtle bg-danger p-4 text-xs text-danger-bolder">
         {sourceError}
       </div>
     );
   }
   if (!source) {
     return (
-      <p className="p-6 text-sm text-slate-300">
+      <p className="p-6 text-sm text-subtle">
         Chọn một bài lab để xem mã nguồn. Khi bạn gửi request, dòng code của từng bước trace sẽ sáng
         lên tại đây.
       </p>
@@ -166,7 +166,7 @@ function TabSwitchNote({ note }: { note: string | null }): JSX.Element {
       role="status"
       className={
         note
-          ? 'shrink-0 border-b border-slate-700 bg-brand-950/60 px-3 py-1 text-xs text-brand-200'
+          ? 'shrink-0 border-b border-default bg-brand-subtlest px-3 py-1 text-xs text-brand'
           : 'sr-only'
       }
     >

@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
 
+import { statusToneClasses } from '@/lib';
 import type { TraceStatus, TraceStep } from '@/types';
 
 import { Tooltip } from '../ui';
@@ -11,12 +12,11 @@ export interface TraceStepPillsProps {
   onJumpToStep: (index: number) => void;
 }
 
-const PILL_STATUS_STYLES: Record<TraceStatus, { dot: string; border: string }> = {
-  info: { dot: 'bg-info-400', border: 'border-info-500/45' },
-  warning: { dot: 'bg-warning-400', border: 'border-warning-500/50' },
-  danger: { dot: 'bg-danger-400', border: 'border-danger-500/50' },
-  safe: { dot: 'bg-safe-400', border: 'border-safe-500/50' },
-};
+/** Pill dot and border colours come from the status tone (lib/tones.ts, ADR-0012). */
+function pillStatusStyle(status: TraceStatus): { dot: string; border: string } {
+  const classes = statusToneClasses(status);
+  return { dot: classes.bgBold, border: classes.borderSubtle };
+}
 
 /**
  * Render clickable step-number scrubber pills with semantic status dots so students
@@ -38,7 +38,7 @@ export function TraceStepPills({
     <div role="group" aria-label="Các bước trace" className="flex flex-wrap items-center gap-1">
       {steps.map((step, index) => {
         const isActive = index === activeIndex;
-        const style = PILL_STATUS_STYLES[step.status];
+        const style = pillStatusStyle(step.status);
         const label = `Bước ${String(step.step)}: ${step.title}`;
         return (
           <Tooltip
@@ -52,10 +52,10 @@ export function TraceStepPills({
               aria-current={isActive ? 'step' : undefined}
               aria-label={label}
               onClick={() => onJumpToStep(index)}
-              className={`inline-flex cursor-pointer items-center gap-1 rounded-md border px-2 py-0.5 text-xs transition-colors duration-150 ${
+              className={`inline-flex cursor-pointer items-center gap-1 rounded-medium border px-2 py-0.5 text-xs transition-colors duration-150 ${
                 isActive
-                  ? 'border-slate-200 bg-slate-100 font-semibold text-slate-900'
-                  : `${style.border} bg-slate-900/70 font-medium text-slate-300 hover:bg-slate-800 hover:text-white`
+                  ? 'border-bold bg-neutral-bold font-semibold text-inverse'
+                  : `${style.border} bg-surface font-medium text-subtle hover:bg-neutral-hovered hover:text-default`
               }`}
             >
               <span

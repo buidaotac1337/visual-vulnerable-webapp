@@ -16,10 +16,10 @@ interface UnifiedDiffViewProps {
 }
 
 const ROW_STYLES: Record<DiffRowKind, { row: string; prefix: string }> = {
-  hunk: { row: 'bg-slate-800/80 text-brand-300 font-semibold', prefix: '' },
-  context: { row: 'text-slate-300', prefix: ' ' },
-  add: { row: 'bg-safe-500/15 text-safe-200', prefix: '+' },
-  remove: { row: 'bg-danger-500/15 text-danger-200', prefix: '-' },
+  hunk: { row: 'bg-neutral text-brand font-semibold', prefix: '' },
+  context: { row: 'text-subtle', prefix: ' ' },
+  add: { row: 'bg-success-subtler text-success-bolder', prefix: '+' },
+  remove: { row: 'bg-danger-subtler text-danger-bolder', prefix: '-' },
 };
 
 /**
@@ -37,8 +37,8 @@ function UnifiedDiffViewInner({
 
   if (rows.length === 0) {
     return (
-      <div className="m-4 flex items-center gap-2 rounded-lg border border-safe-500/40 bg-safe-950/50 p-4 text-xs text-safe-200">
-        <CheckCircle2 className="h-4 w-4 shrink-0 text-safe-400" aria-hidden="true" />
+      <div className="m-4 flex items-center gap-2 rounded-large border border-success-subtle bg-success p-4 text-xs text-success-bolder">
+        <CheckCircle2 className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
         <span>
           Không có khác biệt — mã nguồn {fileLabels[0]} hiện khớp với bản mẫu {fileLabels[1]}.
         </span>
@@ -48,43 +48,40 @@ function UnifiedDiffViewInner({
 
   return (
     <div className="py-2">
-      <div className="mx-3 mb-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-700/80 bg-slate-900/80 px-3 py-2 text-[11px] text-slate-300">
+      <div className="mx-3 mb-2 flex flex-wrap items-center justify-between gap-2 rounded-large border border-default bg-surface px-3 py-2 text-micro text-subtle">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-slate-200">Hướng dẫn đọc Diff:</span>
+          <span className="font-semibold text-default">Hướng dẫn đọc Diff:</span>
           <span className="inline-flex items-center gap-1">
-            <code className="rounded bg-danger-500/20 px-1 text-danger-200">-</code>
+            <code className="rounded-small bg-danger-subtler px-1 text-danger-bolder">-</code>
             <span>Dòng lỗi cần bỏ/sửa</span>
           </span>
-          <span aria-hidden="true" className="text-slate-500">
+          <span aria-hidden="true" className="text-subtlest">
             ·
           </span>
           <span className="inline-flex items-center gap-1">
-            <code className="rounded bg-safe-500/20 px-1 text-safe-200">+</code>
+            <code className="rounded-small bg-success-subtler px-1 text-success-bolder">+</code>
             <span>Dòng an toàn nên thay bằng</span>
           </span>
         </div>
         {editFilePath && (
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-slate-400">Mở sửa:</span>
-            <code
-              className="rounded bg-slate-950 px-1.5 py-0.5 text-slate-200"
-              style={{ fontFamily: 'var(--font-mono)' }}
-            >
+            <span className="text-subtle">Mở sửa:</span>
+            <code className="rounded-small bg-surface px-1.5 py-0.5 text-default font-mono">
               {editFilePath}
             </code>
             <CopyPathButton path={editFilePath} label="Sao chép" />
           </div>
         )}
       </div>
-      <div className="text-[13px] leading-[22px]" style={{ fontFamily: 'var(--font-mono)' }}>
+      <div className="text-code font-mono">
         {rows.map((row, idx) => {
           const style = ROW_STYLES[row.kind];
           return (
             <div key={idx} className={`flex px-3 py-0.5 ${style.row}`}>
-              <span className="w-9 shrink-0 select-none text-right text-xs text-slate-400">
+              <span className="w-9 shrink-0 select-none text-right text-xs text-subtle">
                 {row.oldLine ?? ''}
               </span>
-              <span className="mr-3 w-9 shrink-0 select-none text-right text-xs text-slate-400">
+              <span className="mr-3 w-9 shrink-0 select-none text-right text-xs text-subtle">
                 {row.newLine ?? ''}
               </span>
               <span className="mr-1.5 w-3 shrink-0 select-none">{style.prefix}</span>
