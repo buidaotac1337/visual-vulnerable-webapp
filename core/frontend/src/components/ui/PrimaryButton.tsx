@@ -20,7 +20,7 @@ export interface PrimaryButtonProps {
 }
 
 const BASE_BUTTON_CLASS =
-  'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-large bg-brand-bold px-4 py-2 text-xs font-semibold text-inverse hover:bg-brand-bold-hovered disabled:cursor-not-allowed disabled:opacity-50';
 
 /**
  * Standard brand-coloured primary action button for MiniShop forms and sandboxes.

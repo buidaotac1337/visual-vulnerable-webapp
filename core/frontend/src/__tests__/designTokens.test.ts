@@ -35,7 +35,8 @@ const NAMESPACE_BY_UTILITY: Record<string, string> = {
 
 /** Theme variable a token utility class resolves through, e.g. bg-danger → --background-color-danger. */
 function themeVariableFor(className: string): string {
-  const [utility = '', ...rest] = className.split('-');
+  const withoutVariant = className.slice(className.lastIndexOf(':') + 1);
+  const [utility = '', ...rest] = withoutVariant.split('-');
   const namespace = NAMESPACE_BY_UTILITY[utility];
   if (!namespace) {
     throw new Error(`Unexpected utility in tone map: ${className}`);

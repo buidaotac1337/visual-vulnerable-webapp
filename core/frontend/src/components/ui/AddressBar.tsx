@@ -73,8 +73,7 @@ export function AddressBar({
     <form onSubmit={handleSubmit} className="flex items-center gap-2">
       <label
         htmlFor={id}
-        className="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-500 focus-within:border-brand-500"
-        style={{ fontFamily: 'var(--font-mono)' }}
+        className="flex min-w-0 flex-1 items-center gap-1.5 rounded-large border border-input bg-surface-sunken px-3 py-2 text-xs text-subtlest focus-within:border-focused font-mono"
       >
         <Globe className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
         <span className="shrink-0">{prefix}</span>
@@ -90,7 +89,7 @@ export function AddressBar({
           spellCheck={false}
           onChange={(event) => onChange(event.target.value)}
           className={[
-            'bg-transparent text-slate-900 focus:outline-none',
+            'bg-transparent text-default focus:outline-none',
             inputClassName ?? 'min-w-0 flex-1',
             flashClass,
           ]

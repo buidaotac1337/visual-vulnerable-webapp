@@ -78,7 +78,8 @@ describe('TextField', () => {
     const inputBefore = screen.getByLabelText('Tên đăng nhập') as HTMLInputElement;
     expect(inputBefore).toHaveAttribute('autocomplete', 'off');
     expect(inputBefore).toHaveAttribute('spellcheck', 'false');
-    expect(inputBefore.style.fontFamily).toContain('var(--font-mono)');
+    expect(inputBefore).toHaveClass('font-mono');
+    expect(inputBefore.style.fontFamily).toBe('');
     expect(inputBefore).not.toHaveClass('vvwa-input-flash');
 
     fireEvent.change(inputBefore, { target: { value: 'alice' } });

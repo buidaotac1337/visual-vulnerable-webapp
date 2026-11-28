@@ -97,10 +97,10 @@ export function SubTabBar<T extends string>({
             aria-controls={item.controlsId}
             onClick={() => onChange(item.id)}
             onKeyDown={(event) => handleKeyDown(event, index)}
-            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium ${
+            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-large px-2.5 py-1 text-xs font-medium ${
               isActive
-                ? 'bg-brand-600 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-brand-bold text-inverse'
+                : 'bg-neutral text-subtle hover:bg-neutral-hovered'
             }`}
           >
             {item.icon ? (

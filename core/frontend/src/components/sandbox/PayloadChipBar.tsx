@@ -13,14 +13,14 @@ interface PayloadChipBarProps {
 
 const CHIP_STYLE: Record<PayloadIntent, { idle: string; picked: string; iconClass: string }> = {
   attack: {
-    idle: 'border-dashed border-danger-300 bg-danger-50/40 text-danger-800 hover:border-danger-500 hover:bg-danger-100',
-    picked: 'border-solid border-danger-500 bg-danger-100 text-danger-900',
-    iconClass: 'text-danger-600',
+    idle: 'border-dashed border-danger-subtle bg-danger text-danger-bolder hover:border-danger hover:bg-danger-subtler',
+    picked: 'border-solid border-danger bg-danger-subtler text-danger-bolder',
+    iconClass: 'text-danger',
   },
   normal: {
-    idle: 'border-dashed border-safe-300 bg-safe-50/40 text-safe-800 hover:border-safe-500 hover:bg-safe-100',
-    picked: 'border-solid border-safe-500 bg-safe-100 text-safe-900',
-    iconClass: 'text-safe-600',
+    idle: 'border-dashed border-success-subtle bg-success text-success-bolder hover:border-success hover:bg-success-subtler',
+    picked: 'border-solid border-success bg-success-subtler text-success-bolder',
+    iconClass: 'text-success',
   },
 };
 
@@ -43,20 +43,20 @@ function PayloadChipBarInner({ payloads, onSelect }: PayloadChipBarProps): JSX.E
 
   return (
     // relative: keeps the always-mounted sr-only live region inside this card.
-    <div className="relative rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-slate-600">
+    <div className="relative rounded-xlarge border border-default bg-surface-raised p-3.5 shadow-raised">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-subtle">
         <div className="flex items-center gap-1.5">
-          <Sparkles className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
+          <Sparkles className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
           <span>{UI_LABELS.payloads.text}</span>
         </div>
 
-        <div className="flex items-center gap-3 text-[11px] font-medium text-slate-500">
+        <div className="flex items-center gap-3 text-micro font-medium text-subtlest">
           <span className="inline-flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-danger-500" aria-hidden="true" />
+            <span className="h-2 w-2 rounded-full bg-danger-bold" aria-hidden="true" />
             Thử tấn công
           </span>
           <span className="inline-flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-safe-500" aria-hidden="true" />
+            <span className="h-2 w-2 rounded-full bg-success-bold" aria-hidden="true" />
             Luồng hợp lệ
           </span>
         </div>
@@ -94,7 +94,7 @@ function PayloadChipBarInner({ payloads, onSelect }: PayloadChipBarProps): JSX.E
               )}
               <span>{sample.label}</span>
               {sample.actor ? (
-                <span className="rounded-full bg-white/80 px-1.5 text-xs text-slate-700">
+                <span className="rounded-full bg-surface-raised px-1.5 text-xs text-subtle">
                   vai {sample.actor}
                 </span>
               ) : null}
@@ -104,11 +104,11 @@ function PayloadChipBarInner({ payloads, onSelect }: PayloadChipBarProps): JSX.E
       </div>
 
       {/* Always mounted, so screen readers announce the first description too. */}
-      <p aria-live="polite" className={description ? 'mt-2 text-xs text-slate-600' : 'sr-only'}>
+      <p aria-live="polite" className={description ? 'mt-2 text-xs text-subtle' : 'sr-only'}>
         {description ?? ''}
       </p>
       {description ? (
-        <p className="mt-1 text-[11px] text-slate-500">
+        <p className="mt-1 text-micro text-subtlest">
           Đã điền vào biểu mẫu — hãy bấm nút gửi ở trên để xem kết quả.
         </p>
       ) : null}

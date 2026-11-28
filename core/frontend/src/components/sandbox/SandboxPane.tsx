@@ -86,11 +86,9 @@ class LabViewErrorBoundary extends Component<{ children: ReactNode }, BoundarySt
   public override render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-xs text-danger-700">
+        <div className="rounded-xlarge border border-danger-subtle bg-danger p-4 text-xs text-danger">
           <p className="font-semibold">Lỗi hiển thị LabView.tsx:</p>
-          <p className="mt-1" style={{ fontFamily: 'var(--font-mono)' }}>
-            {this.state.message}
-          </p>
+          <p className="mt-1 font-mono">{this.state.message}</p>
         </div>
       );
     }
@@ -123,7 +121,7 @@ function renderLabViewSlot(props: SandboxPaneProps): JSX.Element {
     <LabViewErrorBoundary key={lab.id}>
       <Suspense
         fallback={
-          <div className="rounded-xl border border-slate-200 bg-white p-6 text-xs text-slate-500">
+          <div className="rounded-xlarge border border-default bg-surface-raised p-6 text-xs text-subtlest">
             Đang nạp giao diện MiniShop cho {lab.id}...
           </div>
         }
@@ -141,17 +139,17 @@ function renderBeginnerGuidance(props: SandboxPaneProps): JSX.Element | null {
   }
   return (
     <>
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+      <div className="rounded-xlarge border border-default bg-surface-raised p-4 shadow-raised">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-base font-semibold text-slate-900">{lab.title}</h1>
-          <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700">
+          <h1 className="text-base font-semibold text-default">{lab.title}</h1>
+          <span className="rounded-full bg-brand-subtlest px-2.5 py-0.5 text-xs font-medium text-brand">
             {lab.category}
           </span>
-          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+          <span className="rounded-full bg-neutral px-2.5 py-0.5 text-xs font-medium text-subtle">
             {lab.difficulty}
           </span>
         </div>
-        <p className="mt-1.5 text-sm text-slate-600">{lab.summary}</p>
+        <p className="mt-1.5 text-sm text-subtle">{lab.summary}</p>
       </div>
 
       {onOpenGlossary && (
@@ -182,7 +180,7 @@ function renderCompareNote({ lab, isCompare }: SandboxPaneProps): JSX.Element | 
   return (
     <p
       role="note"
-      className="rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs text-brand-800"
+      className="rounded-large border border-brand-subtle bg-brand-subtlest px-3 py-2 text-xs text-brand"
     >
       {UI_LABELS.compareSandboxNote.text}
     </p>
