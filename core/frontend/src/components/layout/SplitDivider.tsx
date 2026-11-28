@@ -113,8 +113,8 @@ export function SplitDivider({
       onPointerDown={handlePointerDown}
       onDoubleClick={onResetSplit}
       onKeyDown={handleKeyDown}
-      className={`group hidden w-1.5 shrink-0 cursor-col-resize select-none items-center justify-center transition-colors focus-visible:bg-brand-500 focus-visible:outline-none lg:flex ${
-        isDragging ? 'bg-brand-500' : 'bg-slate-200 hover:bg-brand-400'
+      className={`group hidden w-1.5 shrink-0 cursor-col-resize select-none items-center justify-center transition-colors focus-visible:bg-brand-bold focus-visible:outline-none lg:flex ${
+        isDragging ? 'bg-brand-bold' : 'bg-neutral-hovered hover:bg-brand-bold'
       }`}
     >
       <span

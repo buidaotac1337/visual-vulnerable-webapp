@@ -2,7 +2,14 @@ import type { JSX } from 'react';
 import { Bug, Columns2, ShieldCheck } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-import { modeTip, TRACE_OUTCOME_LABELS, UI_LABELS } from '@/lib';
+import {
+  modeTip,
+  toneClasses,
+  TRACE_OUTCOME_LABELS,
+  TRACE_OUTCOME_TONE,
+  UI_LABELS,
+  WORKSPACE_MODE_TONE,
+} from '@/lib';
 import type { ModeOutcomes, TraceOutcome, WorkspaceMode } from '@/types';
 
 import { Tooltip } from '../ui';
@@ -18,21 +25,19 @@ interface ModeSwitchProps {
 interface SegmentSpec {
   id: WorkspaceMode;
   icon: LucideIcon;
-  activeClass: string;
 }
 
 const SEGMENTS: readonly SegmentSpec[] = [
-  { id: 'vulnerable', icon: Bug, activeClass: 'border-danger-500 bg-danger-50 text-danger-700' },
-  { id: 'secure', icon: ShieldCheck, activeClass: 'border-safe-500 bg-safe-50 text-safe-700' },
-  { id: 'compare', icon: Columns2, activeClass: 'border-brand-500 bg-brand-50 text-brand-700' },
+  { id: 'vulnerable', icon: Bug },
+  { id: 'secure', icon: ShieldCheck },
+  { id: 'compare', icon: Columns2 },
 ];
 
-const OUTCOME_DOT_CLASS: Record<TraceOutcome, string> = {
-  exploited: 'bg-danger-500',
-  blocked: 'bg-safe-500',
-  normal: 'bg-slate-400',
-  error: 'bg-warning-500',
-};
+/** Active segment colours come from the mode's tone (lib/tones.ts, ADR-0012). */
+function activeClass(id: WorkspaceMode): string {
+  const tone = toneClasses(WORKSPACE_MODE_TONE[id]);
+  return `${tone.border} ${tone.bg} ${tone.text}`;
+}
 
 function segmentText(id: WorkspaceMode): string {
   return id === 'compare' ? UI_LABELS.compare.text : UI_LABELS[id].text;
@@ -51,7 +56,7 @@ function OutcomeDot({ outcome }: { outcome: TraceOutcome | undefined }): JSX.Ele
       <span
         data-testid="mode-outcome-dot"
         data-outcome={outcome}
-        className={`h-1.5 w-1.5 shrink-0 rounded-full ${OUTCOME_DOT_CLASS[outcome]}`}
+        className={`h-1.5 w-1.5 shrink-0 rounded-full ${toneClasses(TRACE_OUTCOME_TONE[outcome]).bgBold}`}
         aria-hidden="true"
       />
       <span className="sr-only">(lần chạy gần nhất: {TRACE_OUTCOME_LABELS[outcome]})</span>
@@ -76,9 +81,9 @@ export function ModeSwitch({
     <div
       role="radiogroup"
       aria-label="Chế độ thực thi bài lab"
-      className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-100 p-0.5"
+      className="inline-flex items-center rounded-large border border-default bg-neutral p-0.5"
     >
-      {SEGMENTS.map(({ id, icon: Icon, activeClass }) => {
+      {SEGMENTS.map(({ id, icon: Icon }) => {
         const isActive = mode === id;
         return (
           <Tooltip key={id} tip={segmentTip(id, hasFrontendSink)}>
@@ -87,10 +92,10 @@ export function ModeSwitch({
               role="radio"
               aria-checked={isActive}
               onClick={() => onChange(id)}
-              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold transition-colors duration-150 ${
+              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-medium border px-2.5 py-1 text-xs font-semibold transition-colors duration-150 ${
                 isActive
-                  ? `${activeClass} shadow-xs`
-                  : 'border-transparent bg-transparent text-slate-600 hover:text-slate-900'
+                  ? `${activeClass(id)} shadow-raised`
+                  : 'border-transparent bg-transparent text-subtle hover:text-default'
               }`}
             >
               <Icon className="h-3.5 w-3.5" aria-hidden="true" />

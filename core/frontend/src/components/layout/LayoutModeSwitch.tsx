@@ -87,7 +87,7 @@ export function LayoutModeSwitch({ mode, onChange }: LayoutModeSwitchProps): JSX
       role="radiogroup"
       aria-label="Bố cục workspace"
       onKeyDown={handleKeyDown}
-      className="hidden items-center rounded-lg border border-slate-200 bg-slate-100 p-0.5 lg:inline-flex"
+      className="hidden items-center rounded-large border border-default bg-neutral p-0.5 lg:inline-flex"
     >
       {LAYOUT_OPTIONS.map(({ id, label, tip, Icon }, index) => {
         const isActive = id === mode;
@@ -103,10 +103,10 @@ export function LayoutModeSwitch({ mode, onChange }: LayoutModeSwitchProps): JSX
               aria-label={label}
               tabIndex={isActive ? 0 : -1}
               onClick={() => onChange(id)}
-              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-semibold transition-colors duration-150 ${
+              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-medium border px-2 py-1 text-xs font-semibold transition-colors duration-150 ${
                 isActive
-                  ? 'border-brand-500 bg-brand-50 text-brand-700 shadow-xs'
-                  : 'border-transparent bg-transparent text-slate-600 hover:text-slate-900'
+                  ? 'border-brand bg-brand-subtlest text-brand shadow-raised'
+                  : 'border-transparent bg-transparent text-subtle hover:text-default'
               }`}
             >
               <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />

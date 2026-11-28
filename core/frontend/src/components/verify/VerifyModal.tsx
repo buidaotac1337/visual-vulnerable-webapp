@@ -61,11 +61,11 @@ export function VerifyModal(props: VerifyModalProps): JSX.Element | null {
         e.preventDefault();
         onClose();
       }}
-      className="m-auto w-full max-w-2xl rounded-xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl"
+      className="m-auto w-full max-w-2xl rounded-xlarge border border-default bg-surface-raised p-0 text-default shadow-overlay"
     >
-      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5">
+      <div className="flex items-center justify-between border-b border-default px-5 py-3.5">
         <div>
-          <h2 id="vvwa-verify-title" className="text-base font-semibold text-slate-900">
+          <h2 id="vvwa-verify-title" className="text-base font-semibold text-default">
             Test My Fix — {labTitle}
           </h2>
           <VerifySubtitle hasFrontendTests={hasFrontendTests} />
@@ -75,7 +75,7 @@ export function VerifyModal(props: VerifyModalProps): JSX.Element | null {
           type="button"
           onClick={onClose}
           aria-label="Đóng hộp thoại kiểm thử"
-          className="cursor-pointer rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+          className="cursor-pointer rounded-large p-1.5 text-subtlest hover:bg-neutral-subtle-hovered hover:text-default"
         >
           <X className="h-4 w-4" aria-hidden="true" />
         </button>

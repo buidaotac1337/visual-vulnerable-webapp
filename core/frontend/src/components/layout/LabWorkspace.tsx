@@ -24,9 +24,9 @@ interface LabWorkspaceProps {
 }
 
 const NOTICE_STYLES: Record<WorkspaceNotice['tone'], string> = {
-  info: 'border-info-200 bg-info-50 text-info-800',
-  safe: 'border-safe-200 bg-safe-50 text-safe-800',
-  danger: 'border-danger-200 bg-danger-50 text-danger-800',
+  info: 'border-information-subtle bg-information text-information-bolder',
+  safe: 'border-success-subtle bg-success text-success-bolder',
+  danger: 'border-danger-subtle bg-danger text-danger-bolder',
 };
 
 const NOOP = (): void => undefined;
@@ -66,7 +66,7 @@ function buildWorkspaceClasses(
   if (layoutMode === 'code-focus') {
     return {
       mainCols: 'lg:grid-cols-1',
-      sandboxSection: 'flex min-h-0 flex-col bg-[var(--bg-sandbox)] lg:hidden',
+      sandboxSection: 'flex min-h-0 flex-col bg-surface-sunken lg:hidden',
       sandboxBody: 'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5',
     };
   }
@@ -77,13 +77,13 @@ function buildWorkspaceClasses(
     const bodyLgClass = isFloatingCollapsed ? 'lg:hidden' : 'lg:p-4';
     return {
       mainCols: 'lg:grid-cols-1',
-      sandboxSection: `flex min-h-0 flex-col bg-[var(--bg-sandbox)] lg:absolute lg:top-14 lg:right-4 lg:z-30 lg:rounded-xl lg:border lg:border-slate-300 lg:shadow-2xl ${sizeClass}`,
+      sandboxSection: `flex min-h-0 flex-col bg-surface-sunken lg:absolute lg:top-14 lg:right-4 lg:z-30 lg:rounded-xlarge lg:border lg:border-default lg:shadow-overlay ${sizeClass}`,
       sandboxBody: `flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto rounded-b-[11px] p-5 ${bodyLgClass}`,
     };
   }
   return {
     mainCols: 'lg:grid-cols-[minmax(0,var(--vvwa-split))_6px_minmax(0,1fr)]',
-    sandboxSection: 'flex min-h-0 flex-col bg-[var(--bg-sandbox)]',
+    sandboxSection: 'flex min-h-0 flex-col bg-surface-sunken',
     sandboxBody: 'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-5',
   };
 }
@@ -101,12 +101,12 @@ function FloatingSandboxHeader({
 }: FloatingSandboxHeaderProps): JSX.Element {
   return (
     <div
-      className={`hidden shrink-0 items-center justify-between gap-3 bg-white px-3.5 py-2 lg:flex ${
-        isCollapsed ? 'rounded-[11px]' : 'rounded-t-[11px] border-b border-slate-200'
+      className={`hidden shrink-0 items-center justify-between gap-3 bg-surface-raised px-3.5 py-2 lg:flex ${
+        isCollapsed ? 'rounded-[11px]' : 'rounded-t-[11px] border-b border-default'
       }`}
     >
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-900">
-        <PanelLeft className="h-4 w-4 shrink-0 text-brand-600" aria-hidden="true" />
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-default">
+        <PanelLeft className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
         <span>MiniShop Sandbox</span>
       </div>
 
@@ -123,7 +123,7 @@ function FloatingSandboxHeader({
             type="button"
             aria-expanded={!isCollapsed}
             onClick={onToggleCollapsed}
-            className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+            className="inline-flex cursor-pointer items-center gap-1 rounded-medium border border-default bg-surface-sunken px-2 py-1 text-xs font-medium text-subtle hover:bg-neutral-subtle-hovered"
           >
             {isCollapsed ? (
               <>
@@ -143,7 +143,7 @@ function FloatingSandboxHeader({
           <button
             type="button"
             onClick={onDockSplit}
-            className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-brand-200 bg-brand-50 px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-100"
+            className="inline-flex cursor-pointer items-center gap-1 rounded-medium border border-brand-subtle bg-brand-subtlest px-2 py-1 text-xs font-medium text-brand hover:bg-brand-subtlest-hovered"
           >
             <Columns2 className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{UI_LABELS.layoutRestoreSplit.text}</span>
@@ -164,7 +164,7 @@ function CodeFocusBanner({ onRestoreSplit }: { onRestoreSplit: () => void }): JS
           onClick={onRestoreSplit}
           className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-600 bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-100 hover:border-brand-400 hover:text-white"
         >
-          <Columns2 className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" />
+          <Columns2 className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
           <span>{UI_LABELS.layoutRestoreSplit.text}</span>
         </button>
       </Tooltip>
@@ -184,7 +184,7 @@ export function LabWorkspace(props: LabWorkspaceProps): JSX.Element {
   const { mode, notice, leftPane, rightPane } = props;
   const opts = normalizeLayoutOptions(props);
   const mainRef = useRef<HTMLElement | null>(null);
-  const modeBorder = mode === 'secure' ? 'border-t-safe-500' : 'border-t-danger-500';
+  const modeBorder = mode === 'secure' ? 'border-t-success' : 'border-t-danger';
   const classes = buildWorkspaceClasses(opts.layoutMode, opts.isFloatingCollapsed);
   const splitStyle =
     opts.layoutMode === 'split'
@@ -209,7 +209,7 @@ export function LabWorkspace(props: LabWorkspaceProps): JSX.Element {
           {notice && (
             <div
               role="status"
-              className={`rounded-lg border px-3 py-2 text-xs font-medium ${NOTICE_STYLES[notice.tone]}`}
+              className={`rounded-large border px-3 py-2 text-xs font-medium ${NOTICE_STYLES[notice.tone]}`}
             >
               {notice.message}
             </div>

@@ -84,7 +84,7 @@ export function Tooltip({
         <span
           role="tooltip"
           id={id}
-          className={`block rounded-md border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-left text-xs font-normal leading-snug text-white shadow-lg ${open ? '' : 'hidden'}`}
+          className={`block rounded-medium border border-transparent bg-neutral-bold px-2.5 py-1.5 text-left text-xs font-normal leading-snug text-inverse shadow-overlay ${open ? '' : 'hidden'}`}
         >
           {tip}
         </span>

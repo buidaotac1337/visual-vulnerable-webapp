@@ -25,9 +25,9 @@ const CATEGORY_TABS: ReadonlyArray<{ id: FilterOption; label: string }> = [
 ];
 
 const CATEGORY_BADGE: Record<GlossaryCategory, { label: string; className: string }> = {
-  workspace: { label: 'Giao diện VVWA', className: 'bg-sky-100 text-sky-800' },
-  vulnerability: { label: 'Lỗ hổng', className: 'bg-danger-50 text-danger-700' },
-  defense: { label: 'Cách phòng vệ', className: 'bg-safe-50 text-safe-700' },
+  workspace: { label: 'Giao diện VVWA', className: 'bg-accent-blue-subtlest text-accent-blue' },
+  vulnerability: { label: 'Lỗ hổng', className: 'bg-danger text-danger' },
+  defense: { label: 'Cách phòng vệ', className: 'bg-success text-success' },
 };
 
 function GlossaryItemCard({
@@ -42,17 +42,17 @@ function GlossaryItemCard({
     <li
       data-term-id={entry.id}
       data-highlighted={highlighted ? 'true' : undefined}
-      className={`rounded-xl border p-3 transition ${
+      className={`rounded-xlarge border p-3 transition ${
         highlighted
-          ? 'border-brand-500 bg-brand-50/70 ring-2 ring-brand-200'
-          : 'border-slate-200 bg-white'
+          ? 'border-brand bg-brand-subtlest ring-2 ring-focused'
+          : 'border-default bg-surface-raised'
       }`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-slate-900">{entry.term}</h3>
+          <h3 className="text-sm font-semibold text-default">{entry.term}</h3>
           {highlighted ? (
-            <span className="rounded-full bg-brand-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+            <span className="rounded-full bg-brand-bold px-2 py-0.5 text-micro font-semibold text-inverse">
               Đang xem
             </span>
           ) : null}
@@ -61,13 +61,13 @@ function GlossaryItemCard({
           {badge.label}
         </span>
       </div>
-      <p className="mt-1.5 text-xs leading-relaxed text-slate-800">{entry.shortMeaning}</p>
-      <p className="mt-1.5 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs leading-relaxed text-slate-600">
-        <span className="font-semibold text-slate-800">Ví dụ đời thường: </span>
+      <p className="mt-1.5 text-xs leading-relaxed text-default">{entry.shortMeaning}</p>
+      <p className="mt-1.5 rounded-large bg-surface-sunken px-2.5 py-1.5 text-xs leading-relaxed text-subtle">
+        <span className="font-semibold text-default">Ví dụ đời thường: </span>
         {entry.analogy}
       </p>
       {entry.tip ? (
-        <p className="mt-1.5 text-xs text-brand-700">
+        <p className="mt-1.5 text-xs text-brand">
           <span className="font-semibold">Mẹo: </span>
           {entry.tip}
         </p>
@@ -130,16 +130,16 @@ export function GlossaryModal({
           onClose();
         }
       }}
-      className="m-auto w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/60"
+      className="m-auto w-full max-w-2xl rounded-xxlarge border border-default bg-surface-raised p-0 text-default shadow-overlay backdrop:bg-blanket"
     >
-      <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
+      <div className="flex items-start justify-between gap-3 border-b border-default px-5 py-4">
         <div className="flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-brand-600" aria-hidden="true" />
+          <BookOpen className="h-5 w-5 text-brand" aria-hidden="true" />
           <div>
-            <h2 id="vvwa-glossary-title" className="text-base font-semibold text-slate-900">
+            <h2 id="vvwa-glossary-title" className="text-base font-semibold text-default">
               Từ điển Bảo mật &amp; Giao diện VVWA
             </h2>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-subtle">
               Giải thích ngắn gọn bằng ví dụ đời thường cho người mới bắt đầu.
             </p>
           </div>
@@ -148,16 +148,16 @@ export function GlossaryModal({
           type="button"
           onClick={onClose}
           aria-label="Đóng từ điển"
-          className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          className="rounded-large p-1.5 text-subtlest transition hover:bg-neutral-subtle-hovered hover:text-default"
         >
           <X className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 
-      <div className="space-y-3 border-b border-slate-200 bg-slate-50/70 px-5 py-3">
+      <div className="space-y-3 border-b border-default bg-surface-sunken px-5 py-3">
         <div className="relative">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtlest"
             aria-hidden="true"
           />
           <input
@@ -166,7 +166,7 @@ export function GlossaryModal({
             onChange={(event) => setQuery(event.target.value)}
             aria-label="Tìm thuật ngữ bảo mật"
             placeholder="Tìm thuật ngữ (vd: SQL, payload, IDOR, trace)..."
-            className="w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="w-full rounded-large border border-input bg-input py-1.5 pl-9 pr-3 text-sm text-default placeholder:text-subtlest focus:border-focused focus:outline-none focus:ring-2 focus:ring-focused"
           />
         </div>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="Lọc theo danh mục">
@@ -180,8 +180,8 @@ export function GlossaryModal({
                 onClick={() => setCategory(tab.id)}
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                   active
-                    ? 'border-brand-600 bg-brand-600 text-white'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-brand-300 hover:text-brand-700'
+                    ? 'border-brand bg-brand-bold text-inverse'
+                    : 'border-default bg-surface-raised text-subtle hover:border-brand-subtle hover:text-brand'
                 }`}
               >
                 {tab.label}
@@ -193,8 +193,8 @@ export function GlossaryModal({
 
       <div className="max-h-[60vh] overflow-y-auto px-5 py-4">
         {entries.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
-            <p className="text-sm font-medium text-slate-700">
+          <div className="rounded-xlarge border border-dashed border-default bg-surface-sunken px-4 py-8 text-center">
+            <p className="text-sm font-medium text-subtle">
               Không tìm thấy thuật ngữ phù hợp với &ldquo;{query.trim()}&rdquo;.
             </p>
             <button
@@ -203,7 +203,7 @@ export function GlossaryModal({
                 setQuery('');
                 setCategory('all');
               }}
-              className="mt-2 rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-brand-400 hover:text-brand-700"
+              className="mt-2 rounded-large border border-default bg-surface-raised px-3 py-1 text-xs font-medium text-subtle transition hover:border-brand hover:text-brand"
             >
               Xóa bộ lọc
             </button>

@@ -29,16 +29,16 @@ export function LabCard({
   return (
     <div
       className={[
-        'flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs',
+        'flex flex-col gap-4 rounded-xlarge border border-default bg-surface-raised p-4 shadow-raised',
         className,
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-default pb-3">
+        <div className="flex items-center gap-2 text-sm font-semibold text-default">
           {icon ? (
-            <span className="inline-flex shrink-0 text-brand-600" aria-hidden="true">
+            <span className="inline-flex shrink-0 text-brand" aria-hidden="true">
               {icon}
             </span>
           ) : null}

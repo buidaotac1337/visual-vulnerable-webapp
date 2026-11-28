@@ -47,21 +47,21 @@ function countCompleted(progress: LabStepProgress): number {
 function StepRow({ step, index }: { step: StepItem; index: number }): JSX.Element {
   return (
     <li
-      className={`flex items-start justify-between gap-2.5 rounded-lg border px-3 py-2 text-xs ${
-        step.done ? 'border-safe-200 bg-safe-50/70' : 'border-slate-200 bg-slate-50/60'
+      className={`flex items-start justify-between gap-2.5 rounded-large border px-3 py-2 text-xs ${
+        step.done ? 'border-success-subtle bg-success' : 'border-default bg-surface-sunken'
       }`}
     >
       <div className="flex items-start gap-2">
         {step.done ? (
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-safe-600" aria-hidden="true" />
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
         ) : (
-          <Circle className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+          <Circle className="mt-0.5 h-4 w-4 shrink-0 text-subtlest" aria-hidden="true" />
         )}
         <div>
-          <p className={`font-semibold ${step.done ? 'text-safe-900' : 'text-slate-800'}`}>
+          <p className={`font-semibold ${step.done ? 'text-success-bolder' : 'text-default'}`}>
             {index + 1}. {step.title}
           </p>
-          <p className="mt-0.5 text-slate-600">{step.description}</p>
+          <p className="mt-0.5 text-subtle">{step.description}</p>
         </div>
       </div>
 
@@ -69,7 +69,7 @@ function StepRow({ step, index }: { step: StepItem; index: number }): JSX.Elemen
         <button
           type="button"
           onClick={step.onAction}
-          className="shrink-0 cursor-pointer rounded-md border border-brand-300 bg-white px-2.5 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
+          className="shrink-0 cursor-pointer rounded-medium border border-brand-subtle bg-surface-raised px-2.5 py-1 text-xs font-medium text-brand hover:bg-brand-subtlest"
         >
           {step.actionLabel}
         </button>
@@ -147,21 +147,21 @@ function LabStepperCardInner({
   return (
     <section
       aria-label={`Tiến độ 4 bước — ${labTitle}`}
-      className="rounded-xl border border-slate-200 bg-white shadow-xs"
+      className="rounded-xlarge border border-default bg-surface-raised shadow-raised"
     >
       <div className="flex items-center justify-between gap-3 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           {allDone ? (
-            <ShieldCheck className="h-4 w-4 shrink-0 text-safe-600" aria-hidden="true" />
+            <ShieldCheck className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
           ) : (
-            <GitCompare className="h-4 w-4 shrink-0 text-brand-600" aria-hidden="true" />
+            <GitCompare className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
           )}
-          <span className="truncate text-xs font-semibold text-slate-900">
+          <span className="truncate text-xs font-semibold text-default">
             Lộ trình thực hành: {labTitle}
           </span>
           <span
             className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
-              allDone ? 'bg-safe-100 text-safe-800' : 'bg-brand-50 text-brand-700'
+              allDone ? 'bg-success-subtler text-success-bolder' : 'bg-brand-subtlest text-brand'
             }`}
           >
             {completedCount} / 4 bước
@@ -173,7 +173,7 @@ function LabStepperCardInner({
           onClick={() => setIsExpanded((prev) => !prev)}
           aria-expanded={isExpanded}
           aria-label={isExpanded ? 'Thu gọn lộ trình 4 bước' : 'Mở rộng lộ trình 4 bước'}
-          className="cursor-pointer rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+          className="cursor-pointer rounded-large p-1 text-subtlest hover:bg-neutral-subtle-hovered hover:text-default"
         >
           {isExpanded ? (
             <ChevronUp className="h-4 w-4" aria-hidden="true" />
@@ -189,10 +189,10 @@ function LabStepperCardInner({
         aria-valuenow={completedCount}
         aria-valuemin={0}
         aria-valuemax={4}
-        className="h-1 w-full bg-slate-100"
+        className="h-1 w-full bg-neutral"
       >
         <div
-          className={`h-full transition-all duration-200 ${allDone ? 'bg-safe-500' : 'bg-brand-500'}`}
+          className={`h-full transition-all duration-200 ${allDone ? 'bg-success-bold' : 'bg-brand-bold'}`}
           style={{ width: `${String((completedCount / 4) * 100)}%` }}
         />
       </div>
@@ -200,8 +200,8 @@ function LabStepperCardInner({
       {isExpanded ? (
         <div className="space-y-2 p-3">
           {allDone ? (
-            <div className="flex items-center gap-2 rounded-lg border border-safe-200 bg-safe-50 px-3 py-2 text-xs font-medium text-safe-800">
-              <Sparkles className="h-4 w-4 shrink-0 text-safe-600" aria-hidden="true" />
+            <div className="flex items-center gap-2 rounded-large border border-success-subtle bg-success px-3 py-2 text-xs font-medium text-success-bolder">
+              <Sparkles className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
               <span>Chúc mừng! Bạn đã hoàn thành cả 4 bước của bài lab này.</span>
             </div>
           ) : null}

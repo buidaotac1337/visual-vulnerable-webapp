@@ -9,8 +9,9 @@ import {
   ShieldAlert,
   ShieldCheck,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-import { deriveOutcomeCoaching } from '@/lib';
+import { deriveOutcomeCoaching, toneClasses, TRACE_STATUS_TONE } from '@/lib';
 import type { CoachCtaKind, OutcomeCoaching } from '@/lib';
 import type { LabExecutionResponse, LabMode } from '@/types';
 
@@ -31,32 +32,24 @@ interface ToneStyle {
   icon: JSX.Element;
 }
 
-const TONE_STYLES: Record<OutcomeCoaching['tone'], ToneStyle> = {
-  danger: {
-    badge: 'bg-danger-100 text-danger-700',
-    box: 'border-danger-200 bg-danger-50/70 text-danger-900',
-    cta: 'bg-danger-600 text-white hover:bg-danger-700',
-    icon: <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-danger-600" aria-hidden="true" />,
-  },
-  safe: {
-    badge: 'bg-safe-100 text-safe-700',
-    box: 'border-safe-200 bg-safe-50/70 text-safe-900',
-    cta: 'bg-safe-600 text-white hover:bg-safe-700',
-    icon: <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-safe-600" aria-hidden="true" />,
-  },
-  info: {
-    badge: 'bg-slate-100 text-slate-700',
-    box: 'border-info-200 bg-info-50/60 text-info-900',
-    cta: 'bg-brand-600 text-white hover:bg-brand-700',
-    icon: <Info className="mt-0.5 h-4 w-4 shrink-0 text-info-600" aria-hidden="true" />,
-  },
-  warning: {
-    badge: 'bg-warning-100 text-warning-800',
-    box: 'border-warning-300 bg-warning-50/80 text-warning-900',
-    cta: 'bg-warning-600 text-white hover:bg-warning-700',
-    icon: <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning-600" aria-hidden="true" />,
-  },
+const TONE_ICONS: Record<OutcomeCoaching['tone'], LucideIcon> = {
+  danger: ShieldAlert,
+  safe: ShieldCheck,
+  info: Info,
+  warning: AlertTriangle,
 };
+
+/** Coach colours come from the trace-status tone (lib/tones.ts, ADR-0012). */
+function toneStyle(tone: OutcomeCoaching['tone']): ToneStyle {
+  const classes = toneClasses(TRACE_STATUS_TONE[tone]);
+  const Icon = TONE_ICONS[tone];
+  return {
+    badge: `${classes.bgSubtler} ${classes.text}`,
+    box: `${classes.borderSubtle} ${classes.bg} ${classes.textBolder}`,
+    cta: `${classes.bgBold} ${classes.onBold} ${classes.bgBoldHovered}`,
+    icon: <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${classes.icon}`} aria-hidden="true" />,
+  };
+}
 
 function resolveCtaHandler(
   ctaKind: CoachCtaKind | null,
@@ -94,7 +87,7 @@ function OutcomeCoachPanelInner({
 }: OutcomeCoachPanelProps): JSX.Element {
   const [isJsonOpen, setIsJsonOpen] = useState(true);
   const coaching = deriveOutcomeCoaching(mode, response.meta.outcome, hasFrontendSink);
-  const style = TONE_STYLES[coaching.tone];
+  const style = toneStyle(coaching.tone);
   const formattedJson = useMemo(() => JSON.stringify(response.data, null, 2), [response.data]);
   const ctaHandler = resolveCtaHandler(coaching.ctaKind, {
     onSwitchMode,
@@ -103,9 +96,9 @@ function OutcomeCoachPanelInner({
   });
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
+    <div className="rounded-xlarge border border-default bg-surface-raised p-3.5 shadow-raised">
       <div className="mb-2.5 flex items-center justify-between gap-2">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-subtlest">
           Phản hồi từ hệ thống
         </h2>
         <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${style.badge}`}>
@@ -113,7 +106,7 @@ function OutcomeCoachPanelInner({
         </span>
       </div>
 
-      <div className={`rounded-lg border p-3 text-xs ${style.box}`}>
+      <div className={`rounded-large border p-3 text-xs ${style.box}`}>
         <div className="flex items-start gap-2">
           {style.icon}
           <div className="min-w-0 flex-1">
@@ -123,7 +116,7 @@ function OutcomeCoachPanelInner({
               <button
                 type="button"
                 onClick={ctaHandler}
-                className={`mt-2.5 inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${style.cta}`}
+                className={`mt-2.5 inline-flex cursor-pointer items-center gap-1.5 rounded-large px-3 py-1.5 text-xs font-semibold transition-colors ${style.cta}`}
               >
                 <span>{coaching.ctaLabel}</span>
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -133,12 +126,12 @@ function OutcomeCoachPanelInner({
         </div>
       </div>
 
-      <div className="mt-2.5 border-t border-slate-100 pt-2">
+      <div className="mt-2.5 border-t border-default pt-2">
         <button
           type="button"
           aria-expanded={isJsonOpen}
           onClick={() => setIsJsonOpen((prev) => !prev)}
-          className="inline-flex cursor-pointer items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900"
+          className="inline-flex cursor-pointer items-center gap-1 text-xs font-medium text-subtle hover:text-default"
         >
           {isJsonOpen ? (
             <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
@@ -149,10 +142,7 @@ function OutcomeCoachPanelInner({
         </button>
 
         {isJsonOpen && (
-          <pre
-            className="mt-2 overflow-x-auto rounded-lg bg-slate-50 p-3 text-xs text-slate-800"
-            style={{ fontFamily: 'var(--font-mono)' }}
-          >
+          <pre className="mt-2 overflow-x-auto rounded-large bg-surface-sunken p-3 text-xs text-default font-mono">
             {formattedJson}
           </pre>
         )}

@@ -9,7 +9,13 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-import { isFrontendVerifyTest, testMyFixTip, UI_LABELS } from '@/lib';
+import {
+  isFrontendVerifyTest,
+  testMyFixTip,
+  toneClasses,
+  UI_LABELS,
+  WORKSPACE_MODE_TONE,
+} from '@/lib';
 import type {
   HealthResponse,
   LabMetadata,
@@ -47,17 +53,12 @@ interface TopControlBarProps {
 }
 
 const BRAND_ICONS = { vulnerable: ShieldAlert, secure: ShieldCheck, compare: Columns2 } as const;
-const BRAND_ICON_CLASS: Record<WorkspaceMode, string> = {
-  vulnerable: 'text-danger-500',
-  secure: 'text-safe-500',
-  compare: 'text-brand-500',
-};
 
 function renderApiBadge(health: HealthResponse | null, apiError: string | null): JSX.Element {
   if (health) {
     return (
       <span
-        className="hidden shrink-0 whitespace-nowrap rounded-full bg-safe-50 px-2.5 py-1 text-xs font-medium text-safe-700 2xl:inline-flex"
+        className="hidden shrink-0 whitespace-nowrap rounded-full bg-success px-2.5 py-1 text-xs font-medium text-success 2xl:inline-flex"
         title={`${health.service} (${health.environment})`}
       >
         API: {health.status.toUpperCase()} (v{health.version})
@@ -66,13 +67,13 @@ function renderApiBadge(health: HealthResponse | null, apiError: string | null):
   }
   if (apiError) {
     return (
-      <span className="shrink-0 whitespace-nowrap rounded-full bg-warning-50 px-2.5 py-1 text-xs font-medium text-warning-700">
+      <span className="shrink-0 whitespace-nowrap rounded-full bg-warning px-2.5 py-1 text-xs font-medium text-warning">
         {apiError}
       </span>
     );
   }
   return (
-    <span className="hidden shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 2xl:inline-flex">
+    <span className="hidden shrink-0 whitespace-nowrap rounded-full bg-neutral px-2.5 py-1 text-xs font-medium text-subtle 2xl:inline-flex">
       Connecting API...
     </span>
   );
@@ -134,10 +135,13 @@ function TopControlBarInner({
   const verifyTip = testMyFixTip(gradesFrontend);
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4">
+    <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-default bg-surface-raised px-4">
       <div className="flex min-w-0 items-center gap-2.5">
-        <div className="flex shrink-0 items-center gap-2 text-base font-semibold text-slate-900">
-          <BrandIcon className={`h-5 w-5 ${BRAND_ICON_CLASS[mode]}`} aria-hidden="true" />
+        <div className="flex shrink-0 items-center gap-2 text-base font-semibold text-default">
+          <BrandIcon
+            className={`h-5 w-5 ${toneClasses(WORKSPACE_MODE_TONE[mode]).icon}`}
+            aria-hidden="true"
+          />
           <span className="tracking-tight">
             VVWA<span className="hidden xl:inline"> · MiniShop</span>
           </span>
@@ -173,7 +177,7 @@ function TopControlBarInner({
             type="button"
             onClick={onResetDb}
             disabled={isResettingDb}
-            className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-large border border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-subtle hover:bg-neutral-subtle-hovered disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
             <span className="sr-only 2xl:not-sr-only">
@@ -191,7 +195,7 @@ function TopControlBarInner({
             type="button"
             onClick={onVerify}
             disabled={!hasLab || isVerifying}
-            className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-large bg-brand-bold px-3 py-1.5 text-xs font-semibold text-inverse hover:bg-brand-bold-hovered disabled:cursor-not-allowed disabled:opacity-50"
           >
             <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
             <StableLabel
@@ -208,7 +212,7 @@ function TopControlBarInner({
             onClick={onDownloadSnippet}
             disabled={!hasLab || isDownloading}
             aria-label={UI_LABELS.downloadSnippet.text}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-large border border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-subtle hover:bg-neutral-subtle-hovered disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" aria-hidden="true" />
             <span className="hidden 2xl:inline">{UI_LABELS.downloadSnippet.text}</span>

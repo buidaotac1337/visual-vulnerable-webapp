@@ -124,4 +124,7 @@
   --vv-shadow-overlay: var(--vv-raw-shadow-overlay-light);
   --vv-shadow-overflow: var(--vv-raw-shadow-overflow-light);
   --vv-blanket: var(--vv-palette-neutral-500a);
+
+  /* VVWA extension (no Atlassian equivalent): soft outline of brand-tinted cards. */
+  --vv-border-brand-subtle: var(--vv-palette-blue-300);
 }

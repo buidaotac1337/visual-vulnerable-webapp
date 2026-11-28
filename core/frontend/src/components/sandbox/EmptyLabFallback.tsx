@@ -58,7 +58,7 @@ function GenericRunnerView({
     <LabCard
       title={`MiniShop Generic Sandbox (${mode})`}
       headerRight={
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+        <span className="rounded-full bg-neutral px-2 py-0.5 text-xs font-medium text-subtle">
           Chưa có LabView.tsx
         </span>
       }
@@ -73,7 +73,7 @@ function GenericRunnerView({
         />
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-slate-700" htmlFor="vvwa-generic-payload">
+          <label className="text-xs font-medium text-subtle" htmlFor="vvwa-generic-payload">
             JSON Payload
           </label>
           <textarea
@@ -82,10 +82,9 @@ function GenericRunnerView({
             rows={5}
             value={rawJson}
             onChange={(event) => setRawJson(event.target.value)}
-            className={`rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-xs text-slate-900 focus:border-brand-500 focus:bg-white focus:outline-none ${
+            className={`rounded-large border border-input bg-surface-sunken p-2.5 text-xs text-default focus:border-focused focus:bg-input focus:outline-none ${
               inputFlashSeq > 0 ? 'vvwa-input-flash' : ''
-            }`}
-            style={{ fontFamily: 'var(--font-mono)' }}
+            } font-mono`}
           />
           {parseError && <ResultNotice tone="danger">{parseError}</ResultNotice>}
         </div>
@@ -117,28 +116,25 @@ export function EmptyLabFallback(props: EmptyLabFallbackProps): JSX.Element {
   }
 
   return (
-    <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-slate-300 bg-white p-6">
-      <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-        <FolderOpen className="h-5 w-5 text-brand-600" aria-hidden="true" />
+    <div className="flex flex-col items-start gap-3 rounded-xlarge border border-dashed border-default bg-surface-raised p-6">
+      <div className="flex items-center gap-2 text-sm font-semibold text-default">
+        <FolderOpen className="h-5 w-5 text-brand" aria-hidden="true" />
         <span>
           {props.isLoading
             ? 'Đang quét danh sách bài lab...'
             : 'MiniShop Sandbox sẵn sàng — chưa có bài lab trong labs/'}
         </span>
       </div>
-      <p className="text-sm leading-relaxed text-slate-600">
+      <p className="text-sm leading-relaxed text-subtle">
         Thêm thư mục bài học đầu tiên theo chuẩn{' '}
-        <code
-          className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-800"
-          style={{ fontFamily: 'var(--font-mono)' }}
-        >
+        <code className="rounded-small bg-neutral px-1.5 py-0.5 text-xs text-default font-mono">
           labs/&lt;id&gt;-&lt;slug&gt;/
         </code>{' '}
-        gồm <code style={{ fontFamily: 'var(--font-mono)' }}>meta.json</code>,{' '}
-        <code style={{ fontFamily: 'var(--font-mono)' }}>backend/vulnerable.py</code>,{' '}
-        <code style={{ fontFamily: 'var(--font-mono)' }}>backend/secure.py</code> và{' '}
-        <code style={{ fontFamily: 'var(--font-mono)' }}>frontend/LabView.tsx</code>. Hệ thống sẽ tự
-        động nhận diện và hiển thị ngay tại đây.
+        gồm <code className="font-mono">meta.json</code>,{' '}
+        <code className="font-mono">backend/vulnerable.py</code>,{' '}
+        <code className="font-mono">backend/secure.py</code> và{' '}
+        <code className="font-mono">frontend/LabView.tsx</code>. Hệ thống sẽ tự động nhận diện và
+        hiển thị ngay tại đây.
       </p>
     </div>
   );

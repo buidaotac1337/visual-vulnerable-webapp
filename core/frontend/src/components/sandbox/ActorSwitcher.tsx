@@ -70,9 +70,9 @@ export function ActorSwitcher({
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-      <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-        <UserRound className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
+    <div className="rounded-xlarge border border-default bg-surface-raised p-3.5 shadow-raised">
+      <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-subtle">
+        <UserRound className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
         <span id={labelId}>Đang đăng nhập với tư cách</span>
       </div>
       <div
@@ -97,8 +97,8 @@ export function ActorSwitcher({
               onClick={() => onChange(name)}
               className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                 isActive
-                  ? 'border-brand-600 bg-brand-600 text-white'
-                  : 'border-slate-300 bg-white text-slate-700 hover:border-brand-400'
+                  ? 'border-brand bg-brand-bold text-inverse'
+                  : 'border-default bg-surface-raised text-subtle hover:border-brand'
               }`}
             >
               {name}
@@ -106,10 +106,9 @@ export function ActorSwitcher({
           );
         })}
       </div>
-      <p className="mt-2 text-xs text-slate-500">
-        Phiên đăng nhập do engine cấp qua header{' '}
-        <code style={{ fontFamily: 'var(--font-mono)' }}>X-VVWA-Actor</code>, tách khỏi payload bạn
-        chỉnh sửa.
+      <p className="mt-2 text-xs text-subtlest">
+        Phiên đăng nhập do engine cấp qua header <code className="font-mono">X-VVWA-Actor</code>,
+        tách khỏi payload bạn chỉnh sửa.
       </p>
     </div>
   );

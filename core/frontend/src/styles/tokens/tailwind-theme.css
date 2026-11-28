@@ -116,6 +116,7 @@
   --border-color-input: var(--vv-border-input);
   --border-color-focused: var(--vv-border-focused);
   --border-color-brand: var(--vv-border-brand);
+  --border-color-brand-subtle: var(--vv-border-brand-subtle);
   --border-color-selected: var(--vv-border-selected);
   --border-color-disabled: var(--vv-border-disabled);
   --border-color-inverse: var(--vv-border-inverse);
@@ -188,7 +189,7 @@
   --text-body--line-height: 1.375rem;
   --text-body-small: 0.75rem;
   --text-body-small--line-height: 1.125rem;
-  /* VVWA extension: dense FlowPipeline wire labels only. */
+  /* VVWA extension: dense labels and badges (FlowPipeline wires, progress badges, chip hints). */
   --text-micro: 0.6875rem;
   --text-micro--line-height: 1rem;
   /* Code in the Inspector: 13px / 22px. */
